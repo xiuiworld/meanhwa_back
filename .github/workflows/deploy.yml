@@ -41,6 +41,7 @@ jobs:
             sudo docker rm meanhwa-server || true
             
             sudo docker run -d --name meanhwa-server -p 8080:8080 \
+              -e SPRING_PROFILES_ACTIVE="prod" \
               -e DB_URL="${{ secrets.DB_URL }}" \
               -e DB_USERNAME="${{ secrets.DB_USERNAME }}" \
               -e DB_PASSWORD="${{ secrets.DB_PASSWORD }}" \
