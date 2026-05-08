@@ -26,6 +26,9 @@ jobs:
       - name: Validate deployment secrets
         env:
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          AWS_S3_PUBLIC_BASE_URL: ${{ secrets.AWS_S3_PUBLIC_BASE_URL }}
         run: |
           if [ -z "$JWT_SECRET" ]; then
             echo "JWT_SECRET GitHub Actions secret is required for prod deployment."
@@ -33,6 +36,18 @@ jobs:
           fi
           if [ ${#JWT_SECRET} -lt 32 ]; then
             echo "JWT_SECRET must be at least 32 characters."
+            exit 1
+          fi
+          if [ -z "$AWS_S3_BUCKET" ]; then
+            echo "AWS_S3_BUCKET GitHub Actions secret is required for prod image uploads."
+            exit 1
+          fi
+          if [ -z "$AWS_REGION" ]; then
+            echo "AWS_REGION GitHub Actions secret is required for prod image uploads."
+            exit 1
+          fi
+          if [ -z "$AWS_S3_PUBLIC_BASE_URL" ]; then
+            echo "AWS_S3_PUBLIC_BASE_URL GitHub Actions secret is required for prod image URLs."
             exit 1
           fi
 
@@ -56,14 +71,20 @@ jobs:
           JWT_ACCESS_TOKEN_VALIDITY_MINUTES: ${{ secrets.JWT_ACCESS_TOKEN_VALIDITY_MINUTES }}
           JWT_REFRESH_TOKEN_VALIDITY_DAYS: ${{ secrets.JWT_REFRESH_TOKEN_VALIDITY_DAYS }}
           CORS_ALLOWED_ORIGINS: ${{ secrets.CORS_ALLOWED_ORIGINS }}
+          AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          AWS_S3_PUBLIC_BASE_URL: ${{ secrets.AWS_S3_PUBLIC_BASE_URL }}
         with:
           host: ${{ secrets.AWS_EC2_HOST }}
           username: ubuntu
           key: ${{ secrets.AWS_EC2_PEM_KEY }}
-          envs: DOCKERHUB_USERNAME,DB_URL,DB_USERNAME,DB_PASSWORD,JWT_SECRET,JWT_ACCESS_TOKEN_VALIDITY_MINUTES,JWT_REFRESH_TOKEN_VALIDITY_DAYS,CORS_ALLOWED_ORIGINS
-          script_stop: true
+          envs: DOCKERHUB_USERNAME,DB_URL,DB_USERNAME,DB_PASSWORD,JWT_SECRET,JWT_ACCESS_TOKEN_VALIDITY_MINUTES,JWT_REFRESH_TOKEN_VALIDITY_DAYS,CORS_ALLOWED_ORIGINS,AWS_S3_BUCKET,AWS_REGION,AWS_S3_PUBLIC_BASE_URL
           script: |
+            set -e
             test -n "$JWT_SECRET"
+            test -n "$AWS_S3_BUCKET"
+            test -n "$AWS_REGION"
+            test -n "$AWS_S3_PUBLIC_BASE_URL"
 
             sudo docker pull "$DOCKERHUB_USERNAME/meanhwa-back"
             sudo docker stop meanhwa-server || true
@@ -78,7 +99,20 @@ jobs:
               -e JWT_ACCESS_TOKEN_VALIDITY_MINUTES="${JWT_ACCESS_TOKEN_VALIDITY_MINUTES:-30}" \
               -e JWT_REFRESH_TOKEN_VALIDITY_DAYS="${JWT_REFRESH_TOKEN_VALIDITY_DAYS:-14}" \
               -e CORS_ALLOWED_ORIGINS="${CORS_ALLOWED_ORIGINS:-http://localhost:3000,http://localhost:5173}" \
+              -e AWS_S3_BUCKET="$AWS_S3_BUCKET" \
+              -e AWS_REGION="$AWS_REGION" \
+              -e AWS_S3_PUBLIC_BASE_URL="$AWS_S3_PUBLIC_BASE_URL" \
               "$DOCKERHUB_USERNAME/meanhwa-back"
 
-            sleep 15
-            curl -fsS http://localhost:8080/api/v1/flowers > /dev/null
+            for attempt in $(seq 1 12); do
+              if curl -fsS http://localhost:8080/api/v1/flowers > /dev/null; then
+                echo "Deployment health check passed."
+                exit 0
+              fi
+              echo "Health check attempt $attempt failed; retrying..."
+              sleep 5
+            done
+
+            sudo docker ps -a
+            sudo docker logs --tail=200 meanhwa-server
+            exit 1
