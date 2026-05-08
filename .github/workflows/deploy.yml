@@ -24,25 +24,34 @@ jobs:
         run: ./gradlew bootJar
 
       - name: Docker build & push
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
         run: |
-          docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_TOKEN }}
-          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/meanhwa-back .
-          docker push ${{ secrets.DOCKERHUB_USERNAME }}/meanhwa-back
+          echo "$DOCKERHUB_TOKEN" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
+          docker build -t "$DOCKERHUB_USERNAME/meanhwa-back" .
+          docker push "$DOCKERHUB_USERNAME/meanhwa-back"
 
       - name: Deploy to EC2 via SSH
         uses: appleboy/ssh-action@master
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DB_URL: ${{ secrets.DB_URL }}
+          DB_USERNAME: ${{ secrets.DB_USERNAME }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
         with:
           host: ${{ secrets.AWS_EC2_HOST }}
           username: ubuntu
           key: ${{ secrets.AWS_EC2_PEM_KEY }}
+          envs: DOCKERHUB_USERNAME,DB_URL,DB_USERNAME,DB_PASSWORD
           script: |
-            sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/meanhwa-back
+            sudo docker pull "$DOCKERHUB_USERNAME/meanhwa-back"
             sudo docker stop meanhwa-server || true
             sudo docker rm meanhwa-server || true
             
             sudo docker run -d --name meanhwa-server -p 8080:8080 \
               -e SPRING_PROFILES_ACTIVE="prod" \
-              -e DB_URL="${{ secrets.DB_URL }}" \
-              -e DB_USERNAME="${{ secrets.DB_USERNAME }}" \
-              -e DB_PASSWORD="${{ secrets.DB_PASSWORD }}" \
-              ${{ secrets.DOCKERHUB_USERNAME }}/meanhwa-back
+              -e DB_URL="$DB_URL" \
+              -e DB_USERNAME="$DB_USERNAME" \
+              -e DB_PASSWORD="$DB_PASSWORD" \
+              "$DOCKERHUB_USERNAME/meanhwa-back"
