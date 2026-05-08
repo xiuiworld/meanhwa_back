@@ -141,12 +141,14 @@ Response:
 }
 ```
 
-Frontend storage policy for now:
+Frontend token handling policy:
 
-- Store `accessToken` and `refreshToken` in the app auth store.
-- Attach only `accessToken` to API requests.
-- Use `refreshToken` only with `/api/v1/auth/refresh` and `/api/v1/auth/logout`.
-- On logout, call the backend logout endpoint, then clear both tokens locally.
+- Preferred frontend architecture is BFF with HttpOnly cookies.
+- Browser JavaScript should not need direct access to `accessToken` or `refreshToken`.
+- Frontend internal server routes may store tokens in HttpOnly cookies or server-side session state.
+- The BFF attaches only `accessToken` to backend API requests as `Authorization: Bearer {accessToken}`.
+- The BFF uses `refreshToken` only with `/api/v1/auth/refresh` and `/api/v1/auth/logout`.
+- On logout, call the backend logout endpoint, then clear frontend cookies/session state.
 - If an authenticated API returns `401 INVALID_TOKEN`, try refresh once. If refresh fails, clear tokens and show logged-out UI.
 - If an authenticated API returns `401 UNAUTHORIZED`, show login-required UI.
 
@@ -175,10 +177,10 @@ Response shape is the same as login:
 }
 ```
 
-Important frontend behavior:
+Important BFF behavior:
 
 - Refresh token rotation is enabled.
-- After refresh succeeds, replace both stored tokens with the new values.
+- After refresh succeeds, replace both stored cookie/session token values with the new values.
 - The old refresh token becomes invalid immediately.
 
 ### POST /api/v1/auth/logout
@@ -203,7 +205,7 @@ Response:
 Frontend behavior:
 
 - Call this endpoint when the user clicks logout.
-- Clear local auth state even if logout fails because the user explicitly chose to log out.
+- Clear frontend cookies/session state even if logout fails because the user explicitly chose to log out.
 
 ### GET /api/v1/users/me
 
@@ -233,9 +235,9 @@ Response:
 
 Frontend usage:
 
-- Use this endpoint on app boot when tokens exist.
+- Use this endpoint on app boot through the BFF when auth cookies/session state exist.
 - Use success to set global logged-in user state.
-- Use failure to clear stale tokens.
+- Use failure to clear stale frontend cookies/session state.
 
 ## Phase F5: Personalization APIs
 
@@ -374,8 +376,9 @@ Phase F4:
 - Use `POST /api/v1/auth/login/dev` for integration testing.
 - Keep public pages usable without auth.
 - Protect my page and personalization routes by checking global auth state.
-- Add a single API client interceptor that attaches `Authorization: Bearer {accessToken}` when an access token exists.
-- Add a response interceptor that handles one refresh attempt on `401 INVALID_TOKEN`.
+- Add a BFF-side API client/interceptor that attaches `Authorization: Bearer {accessToken}` when an access token exists.
+- Add a BFF-side response interceptor that handles one refresh attempt on `401 INVALID_TOKEN`.
+- Production frontend should not expose the temporary `dev` login UI or route because backend rejects `dev` login in the `prod` profile.
 
 Phase F5:
 

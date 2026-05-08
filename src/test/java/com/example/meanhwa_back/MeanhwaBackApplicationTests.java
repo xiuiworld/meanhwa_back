@@ -8,6 +8,9 @@ import com.example.meanhwa_back.flower.domain.Flower;
 import com.example.meanhwa_back.flower.domain.ManagementLevel;
 import com.example.meanhwa_back.flower.domain.PriceRange;
 import com.example.meanhwa_back.flower.repository.FlowerRepository;
+import com.example.meanhwa_back.log.domain.ActionLog;
+import com.example.meanhwa_back.log.domain.ActionType;
+import com.example.meanhwa_back.log.repository.ActionLogRepository;
 import com.jayway.jsonpath.JsonPath;
 
 import org.junit.jupiter.api.Test;
@@ -40,6 +43,9 @@ class MeanhwaBackApplicationTests {
     @Autowired
     private FlowerRepository flowerRepository;
 
+    @Autowired
+    private ActionLogRepository actionLogRepository;
+
     @Test
     void contextLoads() {
     }
@@ -58,6 +64,33 @@ class MeanhwaBackApplicationTests {
     }
 
     @Test
+    void keywordSearchRecordsDictionarySearchActionLog() throws Exception {
+        long beforeCount = actionLogRepository.countByActionType(ActionType.DICTIONARY_SEARCH);
+
+        mockMvc.perform(get("/api/v1/flowers")
+                        .param("keyword", "사랑")
+                        .param("page", "0")
+                        .param("size", "5"))
+                .andExpect(status().isOk());
+
+        List<ActionLog> logs = actionLogRepository.findByActionTypeOrderByIdDesc(ActionType.DICTIONARY_SEARCH);
+        org.assertj.core.api.Assertions.assertThat(logs).hasSize((int) beforeCount + 1);
+        org.assertj.core.api.Assertions.assertThat(logs.get(0).getUserId()).isNull();
+        org.assertj.core.api.Assertions.assertThat(logs.get(0).getActionData()).contains("\"keyword\":\"사랑\"");
+    }
+
+    @Test
+    void flowerListWithoutKeywordDoesNotRecordDictionarySearchActionLog() throws Exception {
+        long beforeCount = actionLogRepository.countByActionType(ActionType.DICTIONARY_SEARCH);
+
+        mockMvc.perform(get("/api/v1/flowers"))
+                .andExpect(status().isOk());
+
+        org.assertj.core.api.Assertions.assertThat(actionLogRepository.countByActionType(ActionType.DICTIONARY_SEARCH))
+                .isEqualTo(beforeCount);
+    }
+
+    @Test
     void getFlowerReturnsDetailWithTags() throws Exception {
         mockMvc.perform(get("/api/v1/flowers/{flowerId}", 1))
                 .andExpect(status().isOk())
@@ -66,6 +99,18 @@ class MeanhwaBackApplicationTests {
                 .andExpect(jsonPath("$.data.name").value("장미"))
                 .andExpect(jsonPath("$.data.isPetSafe").value(true))
                 .andExpect(jsonPath("$.data.tags", hasSize(greaterThan(0))));
+    }
+
+    @Test
+    void flowerDetailRecordsActionLog() throws Exception {
+        long beforeCount = actionLogRepository.countByActionType(ActionType.FLOWER_DETAIL_VIEW);
+
+        mockMvc.perform(get("/api/v1/flowers/{flowerId}", 1))
+                .andExpect(status().isOk());
+
+        List<ActionLog> logs = actionLogRepository.findByActionTypeOrderByIdDesc(ActionType.FLOWER_DETAIL_VIEW);
+        org.assertj.core.api.Assertions.assertThat(logs).hasSize((int) beforeCount + 1);
+        org.assertj.core.api.Assertions.assertThat(logs.get(0).getActionData()).contains("\"flowerId\":1");
     }
 
     @Test
@@ -99,6 +144,25 @@ class MeanhwaBackApplicationTests {
                 .andExpect(jsonPath("$.data.content[0].isPetSafe").value(true))
                 .andExpect(jsonPath("$.data.content[0].priceRange").value("MEDIUM"))
                 .andExpect(jsonPath("$.data.content[0].matchedTags", hasSize(2)));
+    }
+
+    @Test
+    void curationRecordsActionLog() throws Exception {
+        long beforeCount = actionLogRepository.countByActionType(ActionType.CURATION_START);
+
+        mockMvc.perform(get("/api/v1/curation")
+                        .param("tagIds", "5", "9")
+                        .param("isPetSafe", "true")
+                        .param("priceRange", "MEDIUM"))
+                .andExpect(status().isOk());
+
+        List<ActionLog> logs = actionLogRepository.findByActionTypeOrderByIdDesc(ActionType.CURATION_START);
+        org.assertj.core.api.Assertions.assertThat(logs).hasSize((int) beforeCount + 1);
+        org.assertj.core.api.Assertions.assertThat(logs.get(0).getUserId()).isNull();
+        org.assertj.core.api.Assertions.assertThat(logs.get(0).getActionData())
+                .contains("\"tagIds\":[5,9]")
+                .contains("\"priceRange\":\"MEDIUM\"")
+                .contains("\"resultFlowerIds\":[1]");
     }
 
     @Test
@@ -244,6 +308,20 @@ class MeanhwaBackApplicationTests {
     }
 
     @Test
+    void authenticatedCurationActionLogStoresUserId() throws Exception {
+        TokenPair tokenPair = login("log-user-1", "ROLE_USER");
+        Long userId = extractUserId(tokenPair.accessToken());
+
+        mockMvc.perform(get("/api/v1/curation")
+                        .header("Authorization", bearer(tokenPair.accessToken()))
+                        .param("tagIds", "5", "9"))
+                .andExpect(status().isOk());
+
+        List<ActionLog> logs = actionLogRepository.findByActionTypeOrderByIdDesc(ActionType.CURATION_START);
+        org.assertj.core.api.Assertions.assertThat(logs.get(0).getUserId()).isEqualTo(userId);
+    }
+
+    @Test
     void userRoleCannotAccessAdminApi() throws Exception {
         TokenPair tokenPair = login("admin-denied-user-1", "ROLE_USER");
 
@@ -349,6 +427,44 @@ class MeanhwaBackApplicationTests {
                 .andExpect(jsonPath("$.data[*].id", not(hasItem(flowers.get(0).getId().intValue()))));
     }
 
+    @Test
+    void curationResultClickRecordsActionLogForAnonymousAndAuthenticatedUsers() throws Exception {
+        long beforeCount = actionLogRepository.countByActionType(ActionType.CURATION_RESULT_CLICK);
+        String body = """
+                {
+                  "flowerId": 1,
+                  "tagIds": [5, 9],
+                  "rank": 1,
+                  "score": 10,
+                  "source": "curation"
+                }
+                """;
+
+        mockMvc.perform(post("/api/v1/action-logs/curation-result-click")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isOk());
+
+        List<ActionLog> anonymousLogs = actionLogRepository.findByActionTypeOrderByIdDesc(ActionType.CURATION_RESULT_CLICK);
+        org.assertj.core.api.Assertions.assertThat(anonymousLogs).hasSize((int) beforeCount + 1);
+        org.assertj.core.api.Assertions.assertThat(anonymousLogs.get(0).getUserId()).isNull();
+        org.assertj.core.api.Assertions.assertThat(anonymousLogs.get(0).getActionData())
+                .contains("\"flowerId\":1")
+                .contains("\"rank\":1");
+
+        TokenPair tokenPair = login("click-log-user-1", "ROLE_USER");
+        Long userId = extractUserId(tokenPair.accessToken());
+        mockMvc.perform(post("/api/v1/action-logs/curation-result-click")
+                        .header("Authorization", bearer(tokenPair.accessToken()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isOk());
+
+        List<ActionLog> authenticatedLogs = actionLogRepository.findByActionTypeOrderByIdDesc(ActionType.CURATION_RESULT_CLICK);
+        org.assertj.core.api.Assertions.assertThat(authenticatedLogs).hasSize((int) beforeCount + 2);
+        org.assertj.core.api.Assertions.assertThat(authenticatedLogs.get(0).getUserId()).isEqualTo(userId);
+    }
+
     private TokenPair login(String oauthId, String role) throws Exception {
         String response = mockMvc.perform(post("/api/v1/auth/login/dev")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -380,6 +496,12 @@ class MeanhwaBackApplicationTests {
 
     private String bearer(String accessToken) {
         return "Bearer " + accessToken;
+    }
+
+    private Long extractUserId(String accessToken) {
+        String[] parts = accessToken.split("\\.");
+        String payload = new String(java.util.Base64.getUrlDecoder().decode(parts[1]), StandardCharsets.UTF_8);
+        return Long.valueOf(JsonPath.read(payload, "$.sub"));
     }
 
     private record TokenPair(String accessToken, String refreshToken) {

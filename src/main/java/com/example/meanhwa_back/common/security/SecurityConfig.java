@@ -47,7 +47,12 @@ public class SecurityConfig {
                         .requestMatchers("/h2-console/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/flowers", "/api/v1/flowers/*").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/tags", "/api/v1/curation").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/v1/messages/generate", "/api/v1/auth/**").permitAll()
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/api/v1/messages/generate",
+                                "/api/v1/auth/**",
+                                "/api/v1/action-logs/curation-result-click"
+                        ).permitAll()
                         .requestMatchers("/api/v1/admin/**").hasAuthority(Role.ROLE_ADMIN.name())
                         .requestMatchers("/api/v1/users/**").authenticated()
                         .anyRequest().permitAll()

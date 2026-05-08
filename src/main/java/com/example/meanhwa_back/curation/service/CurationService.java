@@ -16,6 +16,8 @@ import com.example.meanhwa_back.flower.domain.PriceRange;
 import com.example.meanhwa_back.flower.dto.TagSummaryResponse;
 import com.example.meanhwa_back.flower.repository.FlowerRepository;
 import com.example.meanhwa_back.flower.repository.FlowerTagMappingRepository;
+import com.example.meanhwa_back.log.domain.ActionType;
+import com.example.meanhwa_back.log.service.ActionLogService;
 import com.example.meanhwa_back.tag.repository.TagRepository;
 
 import org.springframework.data.domain.Sort;
@@ -28,15 +30,18 @@ public class CurationService {
     private final FlowerRepository flowerRepository;
     private final FlowerTagMappingRepository mappingRepository;
     private final TagRepository tagRepository;
+    private final ActionLogService actionLogService;
 
     public CurationService(
             FlowerRepository flowerRepository,
             FlowerTagMappingRepository mappingRepository,
-            TagRepository tagRepository
+            TagRepository tagRepository,
+            ActionLogService actionLogService
     ) {
         this.flowerRepository = flowerRepository;
         this.mappingRepository = mappingRepository;
         this.tagRepository = tagRepository;
+        this.actionLogService = actionLogService;
     }
 
     public PageResponse<CurationFlowerResponse> curate(
@@ -54,7 +59,9 @@ public class CurationService {
                 ? scoreAllFlowers(isPetSafe, priceRange)
                 : scoreMatchedFlowers(normalizedTagIds, isPetSafe, priceRange);
 
-        return toPage(results, page, size);
+        PageResponse<CurationFlowerResponse> response = toPage(results, page, size);
+        recordCurationLog(normalizedTagIds, isPetSafe, priceRange, page, size, response);
+        return response;
     }
 
     private List<CurationFlowerResponse> scoreMatchedFlowers(
@@ -135,6 +142,29 @@ public class CurationService {
         return Comparator
                 .comparing(CurationFlowerResponse::score, Comparator.reverseOrder())
                 .thenComparing(CurationFlowerResponse::name);
+    }
+
+    private void recordCurationLog(
+            List<Long> tagIds,
+            Boolean isPetSafe,
+            PriceRange priceRange,
+            int page,
+            int size,
+            PageResponse<CurationFlowerResponse> response
+    ) {
+        Map<String, Object> payload = new LinkedHashMap<>();
+        payload.put("tagIds", tagIds);
+        payload.put("isPetSafe", isPetSafe);
+        payload.put("priceRange", priceRange == null ? null : priceRange.name());
+        payload.put("page", page);
+        payload.put("size", size);
+        payload.put("resultCount", response.content().size());
+        payload.put("totalElements", response.totalElements());
+        payload.put("resultFlowerIds", response.content()
+                .stream()
+                .map(CurationFlowerResponse::flowerId)
+                .toList());
+        actionLogService.record(ActionType.CURATION_START, payload);
     }
 
     private static class CurationAccumulator {
