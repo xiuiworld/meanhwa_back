@@ -23,6 +23,19 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew bootJar
 
+      - name: Validate deployment secrets
+        env:
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+        run: |
+          if [ -z "$JWT_SECRET" ]; then
+            echo "JWT_SECRET GitHub Actions secret is required for prod deployment."
+            exit 1
+          fi
+          if [ ${#JWT_SECRET} -lt 32 ]; then
+            echo "JWT_SECRET must be at least 32 characters."
+            exit 1
+          fi
+
       - name: Docker build & push
         env:
           DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
@@ -48,6 +61,7 @@ jobs:
           username: ubuntu
           key: ${{ secrets.AWS_EC2_PEM_KEY }}
           envs: DOCKERHUB_USERNAME,DB_URL,DB_USERNAME,DB_PASSWORD,JWT_SECRET,JWT_ACCESS_TOKEN_VALIDITY_MINUTES,JWT_REFRESH_TOKEN_VALIDITY_DAYS,CORS_ALLOWED_ORIGINS
+          script_stop: true
           script: |
             test -n "$JWT_SECRET"
 
@@ -65,3 +79,6 @@ jobs:
               -e JWT_REFRESH_TOKEN_VALIDITY_DAYS="${JWT_REFRESH_TOKEN_VALIDITY_DAYS:-14}" \
               -e CORS_ALLOWED_ORIGINS="${CORS_ALLOWED_ORIGINS:-http://localhost:3000,http://localhost:5173}" \
               "$DOCKERHUB_USERNAME/meanhwa-back"
+
+            sleep 15
+            curl -fsS http://localhost:8080/api/v1/flowers > /dev/null
