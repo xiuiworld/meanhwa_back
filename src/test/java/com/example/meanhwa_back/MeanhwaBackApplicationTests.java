@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -28,7 +29,9 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -332,6 +335,167 @@ class MeanhwaBackApplicationTests {
     }
 
     @Test
+    void adminFlowerCmsCreatesUpdatesMapsAndSoftDeletesFlower() throws Exception {
+        TokenPair admin = login("admin-flower-user-1", "ROLE_ADMIN");
+
+        String createdResponse = mockMvc.perform(post("/api/v1/admin/flowers")
+                        .header("Authorization", bearer(admin.accessToken()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(adminFlowerBody("관리자테스트꽃", "처음 의미", "LOW")))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.data.name").value("관리자테스트꽃"))
+                .andReturn()
+                .getResponse()
+                .getContentAsString(StandardCharsets.UTF_8);
+        Integer flowerId = JsonPath.read(createdResponse, "$.data.id");
+
+        mockMvc.perform(put("/api/v1/admin/flowers/{flowerId}", flowerId)
+                        .header("Authorization", bearer(admin.accessToken()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(adminFlowerBody("관리자테스트꽃수정", "수정 의미", "MEDIUM")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.name").value("관리자테스트꽃수정"))
+                .andExpect(jsonPath("$.data.priceRange").value("MEDIUM"));
+
+        mockMvc.perform(put("/api/v1/admin/flowers/{flowerId}/tags", flowerId)
+                        .header("Authorization", bearer(admin.accessToken()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "tags": [
+                                    {"tagId": 1, "weight": 5},
+                                    {"tagId": 10, "weight": 3}
+                                  ]
+                                }
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.tags", hasSize(2)));
+
+        mockMvc.perform(get("/api/v1/flowers/{flowerId}", flowerId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.name").value("관리자테스트꽃수정"));
+
+        mockMvc.perform(delete("/api/v1/admin/flowers/{flowerId}", flowerId)
+                        .header("Authorization", bearer(admin.accessToken())))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(get("/api/v1/flowers/{flowerId}", flowerId))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.errorCode").value("FLOWER_NOT_FOUND"));
+    }
+
+    @Test
+    void adminTagCmsRejectsDuplicateActiveTagAndSoftDeletesTag() throws Exception {
+        TokenPair admin = login("admin-tag-user-1", "ROLE_ADMIN");
+
+        mockMvc.perform(post("/api/v1/admin/tags")
+                        .header("Authorization", bearer(admin.accessToken()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "category": "EVENT",
+                                  "name": "생일"
+                                }
+                                """))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.errorCode").value("DUPLICATE_TAG"));
+
+        String createdResponse = mockMvc.perform(post("/api/v1/admin/tags")
+                        .header("Authorization", bearer(admin.accessToken()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "category": "EVENT",
+                                  "name": "관리자태그테스트"
+                                }
+                                """))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.data.name").value("관리자태그테스트"))
+                .andReturn()
+                .getResponse()
+                .getContentAsString(StandardCharsets.UTF_8);
+        Integer tagId = JsonPath.read(createdResponse, "$.data.id");
+
+        mockMvc.perform(put("/api/v1/admin/tags/{tagId}", tagId)
+                        .header("Authorization", bearer(admin.accessToken()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "category": "EMOTION",
+                                  "name": "관리자태그수정"
+                                }
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.category").value("EMOTION"))
+                .andExpect(jsonPath("$.data.name").value("관리자태그수정"));
+
+        mockMvc.perform(delete("/api/v1/admin/tags/{tagId}", tagId)
+                        .header("Authorization", bearer(admin.accessToken())))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(get("/api/v1/curation")
+                        .param("tagIds", tagId.toString()))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.errorCode").value("TAG_NOT_FOUND"));
+    }
+
+    @Test
+    void adminMappingRejectsDuplicateTagIds() throws Exception {
+        TokenPair admin = login("admin-mapping-user-1", "ROLE_ADMIN");
+
+        mockMvc.perform(put("/api/v1/admin/flowers/{flowerId}/tags", 1)
+                        .header("Authorization", bearer(admin.accessToken()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "tags": [
+                                    {"tagId": 1, "weight": 5},
+                                    {"tagId": 1, "weight": 3}
+                                  ]
+                                }
+                                """))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errorCode").value("INVALID_MAPPING"));
+    }
+
+    @Test
+    void adminImageUploadUsesFakeStorageInTestProfile() throws Exception {
+        TokenPair admin = login("admin-upload-user-1", "ROLE_ADMIN");
+        MockMultipartFile file = new MockMultipartFile(
+                "file",
+                "flower.png",
+                "image/png",
+                "fake-image".getBytes(StandardCharsets.UTF_8)
+        );
+
+        mockMvc.perform(multipart("/api/v1/admin/uploads/images")
+                        .file(file)
+                        .header("Authorization", bearer(admin.accessToken())))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.data.imageUrl", containsString("https://fake.meanhwa.local/uploads/flowers/")))
+                .andExpect(jsonPath("$.data.originalFilename").value("flower.png"))
+                .andExpect(jsonPath("$.data.contentType").value("image/png"))
+                .andExpect(jsonPath("$.data.size").value(10));
+    }
+
+    @Test
+    void adminImageUploadRejectsInvalidContentType() throws Exception {
+        TokenPair admin = login("admin-upload-user-2", "ROLE_ADMIN");
+        MockMultipartFile file = new MockMultipartFile(
+                "file",
+                "flower.txt",
+                "text/plain",
+                "not-image".getBytes(StandardCharsets.UTF_8)
+        );
+
+        mockMvc.perform(multipart("/api/v1/admin/uploads/images")
+                        .file(file)
+                        .header("Authorization", bearer(admin.accessToken())))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errorCode").value("INVALID_FILE_TYPE"));
+    }
+
+    @Test
     void userLikesAreIdempotentAndScopedByUser() throws Exception {
         TokenPair firstUser = login("like-user-1", "ROLE_USER");
         TokenPair secondUser = login("like-user-2", "ROLE_USER");
@@ -492,6 +656,20 @@ class MeanhwaBackApplicationTests {
                   "role": "%s"
                 }
                 """.formatted(oauthId, oauthId, role);
+    }
+
+    private String adminFlowerBody(String name, String coreMeaning, String priceRange) {
+        return """
+                {
+                  "name": "%s",
+                  "imageUrl": "https://cdn.meanhwa.example/admin-test.jpg",
+                  "coreMeaning": "%s",
+                  "managementLevel": "EASY",
+                  "managementInfo": "관리자 테스트 관리법",
+                  "isToxicToPets": false,
+                  "priceRange": "%s"
+                }
+                """.formatted(name, coreMeaning, priceRange);
     }
 
     private String bearer(String accessToken) {

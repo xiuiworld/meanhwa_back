@@ -36,6 +36,7 @@ public class UserLikeService {
         User user = authenticatedUserProvider.getCurrentUser();
         return userLikeRepository.findByUserIdOrderByCreatedAtDesc(user.getId())
                 .stream()
+                .filter(userLike -> !userLike.getFlower().isDeleted())
                 .map(userLike -> FlowerSummaryResponse.from(userLike.getFlower()))
                 .toList();
     }
@@ -43,7 +44,7 @@ public class UserLikeService {
     @Transactional
     public FlowerSummaryResponse addLike(Long flowerId) {
         User user = authenticatedUserProvider.getCurrentUser();
-        Flower flower = flowerRepository.findById(flowerId)
+        Flower flower = flowerRepository.findActiveById(flowerId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.FLOWER_NOT_FOUND));
         if (!userLikeRepository.existsByUserIdAndFlowerId(user.getId(), flowerId)) {
             userLikeRepository.save(new UserLike(user, flower));

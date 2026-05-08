@@ -1,0 +1,12 @@
+package com.example.meanhwa_back.admin.dto;
+
+import java.util.List;
+
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+
+public record FlowerTagMappingUpdateRequest(
+        @NotNull
+        List<@NotNull @Valid FlowerTagMappingItemRequest> tags
+) {
+}

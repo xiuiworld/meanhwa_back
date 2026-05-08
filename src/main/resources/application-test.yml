@@ -25,3 +25,6 @@ app:
     secret: test-jwt-secret-for-meanhwa-phase-three-tests-please-change
     access-token-validity-minutes: 30
     refresh-token-validity-days: 14
+  storage:
+    type: fake
+    fake-base-url: https://fake.meanhwa.local/uploads

@@ -23,3 +23,14 @@ app:
     secret: ${JWT_SECRET}
     access-token-validity-minutes: ${JWT_ACCESS_TOKEN_VALIDITY_MINUTES:30}
     refresh-token-validity-days: ${JWT_REFRESH_TOKEN_VALIDITY_DAYS:14}
+  storage:
+    type: s3
+    max-file-size-bytes: ${STORAGE_MAX_FILE_SIZE_BYTES:5242880}
+    allowed-content-types:
+      - image/jpeg
+      - image/png
+      - image/webp
+    s3:
+      bucket: ${AWS_S3_BUCKET}
+      region: ${AWS_REGION:ap-northeast-2}
+      public-base-url: ${AWS_S3_PUBLIC_BASE_URL}

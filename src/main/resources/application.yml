@@ -12,3 +12,10 @@ app:
     secret: default-dev-jwt-secret-for-meanhwa-local-and-test-only
     access-token-validity-minutes: 30
     refresh-token-validity-days: 14
+  storage:
+    type: fake
+    max-file-size-bytes: 5242880
+    allowed-content-types:
+      - image/jpeg
+      - image/png
+      - image/webp

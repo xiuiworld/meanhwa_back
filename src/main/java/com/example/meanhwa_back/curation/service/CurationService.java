@@ -92,7 +92,7 @@ public class CurationService {
     }
 
     private List<CurationFlowerResponse> scoreAllFlowers(Boolean isPetSafe, PriceRange priceRange) {
-        return flowerRepository.findAll(Sort.by(Sort.Direction.ASC, "name"))
+        return flowerRepository.findAllActive(Sort.by(Sort.Direction.ASC, "name"))
                 .stream()
                 .filter(flower -> matchesFilters(flower, isPetSafe, priceRange))
                 .map(flower -> CurationFlowerResponse.of(flower, 0, List.of()))
@@ -122,7 +122,7 @@ public class CurationService {
             return;
         }
 
-        long foundCount = tagRepository.countByIdIn(tagIds);
+        long foundCount = tagRepository.countActiveByIdIn(tagIds);
         if (foundCount != tagIds.size()) {
             throw new BusinessException(ErrorCode.TAG_NOT_FOUND);
         }

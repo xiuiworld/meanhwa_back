@@ -32,10 +32,10 @@ public class MessageService {
     }
 
     public MessageGenerateResponse generate(MessageGenerateRequest request) {
-        Flower flower = flowerRepository.findById(request.flowerId())
+        Flower flower = flowerRepository.findActiveById(request.flowerId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.FLOWER_NOT_FOUND));
         List<Long> selectedTagIds = normalizeTagIds(request.selectedTagIds());
-        List<Tag> selectedTags = tagRepository.findAllById(selectedTagIds);
+        List<Tag> selectedTags = tagRepository.findActiveByIdIn(selectedTagIds);
         if (selectedTags.size() != selectedTagIds.size()) {
             throw new BusinessException(ErrorCode.TAG_NOT_FOUND);
         }

@@ -1,5 +1,7 @@
 package com.example.meanhwa_back.tag.domain;
 
+import java.time.LocalDateTime;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -23,6 +25,8 @@ public class Tag {
     @Column(nullable = false, length = 50)
     private String name;
 
+    private LocalDateTime deletedAt;
+
     protected Tag() {
     }
 
@@ -41,5 +45,22 @@ public class Tag {
 
     public String getName() {
         return name;
+    }
+
+    public LocalDateTime getDeletedAt() {
+        return deletedAt;
+    }
+
+    public boolean isDeleted() {
+        return deletedAt != null;
+    }
+
+    public void update(TagCategory category, String name) {
+        this.category = category;
+        this.name = name;
+    }
+
+    public void softDelete() {
+        this.deletedAt = LocalDateTime.now();
     }
 }

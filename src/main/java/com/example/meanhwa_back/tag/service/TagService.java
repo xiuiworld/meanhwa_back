@@ -25,7 +25,7 @@ public class TagService {
     }
 
     public List<TagCategoryResponse> getTagsByCategory() {
-        Map<TagCategory, List<Tag>> tagsByCategory = tagRepository.findAll(Sort.by("category", "name"))
+        Map<TagCategory, List<Tag>> tagsByCategory = tagRepository.findAllActive(Sort.by("category", "name"))
                 .stream()
                 .collect(Collectors.groupingBy(Tag::getCategory));
 

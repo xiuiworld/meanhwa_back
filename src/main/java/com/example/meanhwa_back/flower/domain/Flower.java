@@ -52,6 +52,8 @@ public class Flower {
     @Column(nullable = false)
     private LocalDateTime updatedAt;
 
+    private LocalDateTime deletedAt;
+
     protected Flower() {
     }
 
@@ -103,5 +105,35 @@ public class Flower {
 
     public PriceRange getPriceRange() {
         return priceRange;
+    }
+
+    public LocalDateTime getDeletedAt() {
+        return deletedAt;
+    }
+
+    public boolean isDeleted() {
+        return deletedAt != null;
+    }
+
+    public void update(
+            String name,
+            String imageUrl,
+            String coreMeaning,
+            ManagementLevel managementLevel,
+            String managementInfo,
+            boolean isToxicToPets,
+            PriceRange priceRange
+    ) {
+        this.name = name;
+        this.imageUrl = imageUrl;
+        this.coreMeaning = coreMeaning;
+        this.managementLevel = managementLevel;
+        this.managementInfo = managementInfo;
+        this.isToxicToPets = isToxicToPets;
+        this.priceRange = priceRange;
+    }
+
+    public void softDelete() {
+        this.deletedAt = LocalDateTime.now();
     }
 }

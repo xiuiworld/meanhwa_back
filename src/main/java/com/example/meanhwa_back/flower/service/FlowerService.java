@@ -65,7 +65,7 @@ public class FlowerService {
 
     @Transactional
     public FlowerDetailResponse getFlower(Long flowerId) {
-        Flower flower = flowerRepository.findById(flowerId)
+        Flower flower = flowerRepository.findActiveById(flowerId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.FLOWER_NOT_FOUND));
         List<TagSummaryResponse> tags = mappingRepository.findByFlowerIdWithTag(flowerId)
                 .stream()

@@ -39,6 +39,7 @@ public class UserHistoryService {
         User user = authenticatedUserProvider.getCurrentUser();
         return userHistoryRepository.findByUserIdOrderByViewedAtDesc(user.getId())
                 .stream()
+                .filter(history -> !history.getFlower().isDeleted())
                 .map(history -> FlowerSummaryResponse.from(history.getFlower()))
                 .toList();
     }
@@ -56,7 +57,7 @@ public class UserHistoryService {
             return;
         }
 
-        Flower flower = flowerRepository.findById(flowerId)
+        Flower flower = flowerRepository.findActiveById(flowerId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.FLOWER_NOT_FOUND));
         LocalDateTime now = LocalDateTime.now();
         userHistoryRepository.findByUserIdAndFlowerId(user.getId(), flowerId)
