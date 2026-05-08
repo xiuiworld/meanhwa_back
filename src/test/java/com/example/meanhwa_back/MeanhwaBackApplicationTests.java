@@ -1,6 +1,7 @@
 package com.example.meanhwa_back;
 
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -338,6 +339,13 @@ class MeanhwaBackApplicationTests {
     void adminFlowerCmsCreatesUpdatesMapsAndSoftDeletesFlower() throws Exception {
         TokenPair admin = login("admin-flower-user-1", "ROLE_ADMIN");
 
+        mockMvc.perform(get("/api/v1/flowers")
+                        .param("keyword", "관리자테스트꽃")
+                        .param("page", "0")
+                        .param("size", "20"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.content", hasSize(0)));
+
         String createdResponse = mockMvc.perform(post("/api/v1/admin/flowers")
                         .header("Authorization", bearer(admin.accessToken()))
                         .contentType(MediaType.APPLICATION_JSON)
@@ -348,6 +356,14 @@ class MeanhwaBackApplicationTests {
                 .getResponse()
                 .getContentAsString(StandardCharsets.UTF_8);
         Integer flowerId = JsonPath.read(createdResponse, "$.data.id");
+
+        mockMvc.perform(get("/api/v1/flowers")
+                        .param("keyword", "관리자테스트꽃")
+                        .param("page", "0")
+                        .param("size", "20"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.content", hasSize(1)))
+                .andExpect(jsonPath("$.data.content[0].id").value(flowerId));
 
         mockMvc.perform(put("/api/v1/admin/flowers/{flowerId}", flowerId)
                         .header("Authorization", bearer(admin.accessToken()))
@@ -388,6 +404,9 @@ class MeanhwaBackApplicationTests {
     void adminTagCmsRejectsDuplicateActiveTagAndSoftDeletesTag() throws Exception {
         TokenPair admin = login("admin-tag-user-1", "ROLE_ADMIN");
 
+        mockMvc.perform(get("/api/v1/tags"))
+                .andExpect(status().isOk());
+
         mockMvc.perform(post("/api/v1/admin/tags")
                         .header("Authorization", bearer(admin.accessToken()))
                         .contentType(MediaType.APPLICATION_JSON)
@@ -415,6 +434,10 @@ class MeanhwaBackApplicationTests {
                 .getResponse()
                 .getContentAsString(StandardCharsets.UTF_8);
         Integer tagId = JsonPath.read(createdResponse, "$.data.id");
+
+        mockMvc.perform(get("/api/v1/tags"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data[*].tags[*].id", hasItem(tagId)));
 
         mockMvc.perform(put("/api/v1/admin/tags/{tagId}", tagId)
                         .header("Authorization", bearer(admin.accessToken()))
@@ -493,6 +516,71 @@ class MeanhwaBackApplicationTests {
                         .header("Authorization", bearer(admin.accessToken())))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errorCode").value("INVALID_FILE_TYPE"));
+    }
+
+    @Test
+    void adminStatisticsRequireAdminRole() throws Exception {
+        mockMvc.perform(get("/api/v1/admin/statistics/summary"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.errorCode").value("UNAUTHORIZED"));
+
+        TokenPair user = login("statistics-denied-user-1", "ROLE_USER");
+        mockMvc.perform(get("/api/v1/admin/statistics/summary")
+                        .header("Authorization", bearer(user.accessToken())))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.errorCode").value("FORBIDDEN"));
+    }
+
+    @Test
+    void adminStatisticsReturnSummaryPopularItemsAndDailyActiveUsers() throws Exception {
+        TokenPair admin = login("statistics-admin-user-1", "ROLE_ADMIN");
+        Long adminUserId = extractUserId(admin.accessToken());
+        LocalDate today = LocalDate.now();
+        actionLogRepository.save(new ActionLog(null, ActionType.CURATION_START, """
+                {"tagIds":[1,2],"isPetSafe":true,"priceRange":"LOW","resultFlowerIds":[1,2]}
+                """));
+        actionLogRepository.save(new ActionLog(null, ActionType.FLOWER_DETAIL_VIEW, "{\"flowerId\":1}"));
+        actionLogRepository.save(new ActionLog(adminUserId, ActionType.CURATION_RESULT_CLICK, "{\"flowerId\":1}"));
+        actionLogRepository.save(new ActionLog(adminUserId, ActionType.DICTIONARY_SEARCH, "{\"keyword\":\"장미\"}"));
+
+        mockMvc.perform(get("/api/v1/admin/statistics/summary")
+                        .header("Authorization", bearer(admin.accessToken()))
+                        .param("from", today.toString())
+                        .param("to", today.toString()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.from").value(today.toString()))
+                .andExpect(jsonPath("$.data.to").value(today.toString()))
+                .andExpect(jsonPath("$.data.totalUsers", greaterThan(0)))
+                .andExpect(jsonPath("$.data.activeFlowers", greaterThan(0)))
+                .andExpect(jsonPath("$.data.curationCount", greaterThan(0)))
+                .andExpect(jsonPath("$.data.searchCount", greaterThan(0)))
+                .andExpect(jsonPath("$.data.detailViewCount", greaterThan(0)))
+                .andExpect(jsonPath("$.data.curationClickCount", greaterThan(0)));
+
+        mockMvc.perform(get("/api/v1/admin/statistics/popular-tags")
+                        .header("Authorization", bearer(admin.accessToken()))
+                        .param("from", today.toString())
+                        .param("to", today.toString())
+                        .param("limit", "100"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data[*].tagId", hasItem(1)))
+                .andExpect(jsonPath("$.data[*].tagId", hasItem(2)));
+
+        mockMvc.perform(get("/api/v1/admin/statistics/popular-flowers")
+                        .header("Authorization", bearer(admin.accessToken()))
+                        .param("from", today.toString())
+                        .param("to", today.toString())
+                        .param("limit", "100"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data[*].flowerId", hasItem(1)));
+
+        mockMvc.perform(get("/api/v1/admin/statistics/daily-active-users")
+                        .header("Authorization", bearer(admin.accessToken()))
+                        .param("from", today.toString())
+                        .param("to", today.toString()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data[0].date").value(today.toString()))
+                .andExpect(jsonPath("$.data[0].activeUsers", greaterThan(0)));
     }
 
     @Test

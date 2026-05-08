@@ -29,6 +29,9 @@ jobs:
           AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
           AWS_REGION: ${{ secrets.AWS_REGION }}
           AWS_S3_PUBLIC_BASE_URL: ${{ secrets.AWS_S3_PUBLIC_BASE_URL }}
+          CACHE_TYPE: ${{ secrets.CACHE_TYPE }}
+          REDIS_HOST: ${{ secrets.REDIS_HOST }}
+          REDIS_PORT: ${{ secrets.REDIS_PORT }}
         run: |
           if [ -z "$JWT_SECRET" ]; then
             echo "JWT_SECRET GitHub Actions secret is required for prod deployment."
@@ -48,6 +51,18 @@ jobs:
           fi
           if [ -z "$AWS_S3_PUBLIC_BASE_URL" ]; then
             echo "AWS_S3_PUBLIC_BASE_URL GitHub Actions secret is required for prod image URLs."
+            exit 1
+          fi
+          if [ -z "$CACHE_TYPE" ]; then
+            echo "CACHE_TYPE GitHub Actions secret is required for prod cache."
+            exit 1
+          fi
+          if [ -z "$REDIS_HOST" ]; then
+            echo "REDIS_HOST GitHub Actions secret is required for prod cache."
+            exit 1
+          fi
+          if [ -z "$REDIS_PORT" ]; then
+            echo "REDIS_PORT GitHub Actions secret is required for prod cache."
             exit 1
           fi
 
@@ -74,24 +89,42 @@ jobs:
           AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
           AWS_REGION: ${{ secrets.AWS_REGION }}
           AWS_S3_PUBLIC_BASE_URL: ${{ secrets.AWS_S3_PUBLIC_BASE_URL }}
+          CACHE_TYPE: ${{ secrets.CACHE_TYPE }}
+          REDIS_HOST: ${{ secrets.REDIS_HOST }}
+          REDIS_PORT: ${{ secrets.REDIS_PORT }}
         with:
           host: ${{ secrets.AWS_EC2_HOST }}
           username: ubuntu
           key: ${{ secrets.AWS_EC2_PEM_KEY }}
-          envs: DOCKERHUB_USERNAME,DB_URL,DB_USERNAME,DB_PASSWORD,JWT_SECRET,JWT_ACCESS_TOKEN_VALIDITY_MINUTES,JWT_REFRESH_TOKEN_VALIDITY_DAYS,CORS_ALLOWED_ORIGINS,AWS_S3_BUCKET,AWS_REGION,AWS_S3_PUBLIC_BASE_URL
+          envs: DOCKERHUB_USERNAME,DB_URL,DB_USERNAME,DB_PASSWORD,JWT_SECRET,JWT_ACCESS_TOKEN_VALIDITY_MINUTES,JWT_REFRESH_TOKEN_VALIDITY_DAYS,CORS_ALLOWED_ORIGINS,AWS_S3_BUCKET,AWS_REGION,AWS_S3_PUBLIC_BASE_URL,CACHE_TYPE,REDIS_HOST,REDIS_PORT
           script: |
             set -e
             test -n "$JWT_SECRET"
             test -n "$AWS_S3_BUCKET"
             test -n "$AWS_REGION"
             test -n "$AWS_S3_PUBLIC_BASE_URL"
+            test -n "$CACHE_TYPE"
+            test -n "$REDIS_HOST"
+            test -n "$REDIS_PORT"
+
+            sudo docker network create meanhwa-net || true
+            if ! sudo docker inspect meanhwa-redis > /dev/null 2>&1; then
+              sudo docker run -d --restart unless-stopped --name meanhwa-redis --network meanhwa-net \
+                redis:alpine
+            elif [ "$(sudo docker inspect -f '{{.State.Running}}' meanhwa-redis)" != "true" ]; then
+              sudo docker start meanhwa-redis
+            fi
+            sudo docker network connect meanhwa-net meanhwa-redis || true
 
             sudo docker pull "$DOCKERHUB_USERNAME/meanhwa-back"
             sudo docker stop meanhwa-server || true
             sudo docker rm meanhwa-server || true
             
-            sudo docker run -d --name meanhwa-server -p 8080:8080 \
+            sudo docker run -d --restart unless-stopped --name meanhwa-server --network meanhwa-net -p 8080:8080 \
               -e SPRING_PROFILES_ACTIVE="prod" \
+              -e CACHE_TYPE="$CACHE_TYPE" \
+              -e REDIS_HOST="$REDIS_HOST" \
+              -e REDIS_PORT="$REDIS_PORT" \
               -e DB_URL="$DB_URL" \
               -e DB_USERNAME="$DB_USERNAME" \
               -e DB_PASSWORD="$DB_PASSWORD" \
@@ -114,5 +147,6 @@ jobs:
             done
 
             sudo docker ps -a
+            sudo docker logs --tail=100 meanhwa-redis
             sudo docker logs --tail=200 meanhwa-server
             exit 1

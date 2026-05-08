@@ -16,8 +16,6 @@ import com.example.meanhwa_back.log.domain.ActionType;
 import com.example.meanhwa_back.log.service.ActionLogService;
 import com.example.meanhwa_back.user.service.UserHistoryService;
 
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,29 +26,25 @@ public class FlowerService {
     private final FlowerTagMappingRepository mappingRepository;
     private final UserHistoryService userHistoryService;
     private final ActionLogService actionLogService;
+    private final FlowerReadCacheService flowerReadCacheService;
 
     public FlowerService(
             FlowerRepository flowerRepository,
             FlowerTagMappingRepository mappingRepository,
             UserHistoryService userHistoryService,
-            ActionLogService actionLogService
+            ActionLogService actionLogService,
+            FlowerReadCacheService flowerReadCacheService
     ) {
         this.flowerRepository = flowerRepository;
         this.mappingRepository = mappingRepository;
         this.userHistoryService = userHistoryService;
         this.actionLogService = actionLogService;
+        this.flowerReadCacheService = flowerReadCacheService;
     }
 
     public PageResponse<FlowerSummaryResponse> searchFlowers(String keyword, int page, int size) {
         String normalizedKeyword = normalize(keyword);
-        PageRequest pageRequest = PageRequest.of(
-                page,
-                size,
-                Sort.by(Sort.Direction.ASC, "name")
-        );
-
-        PageResponse<FlowerSummaryResponse> response = PageResponse.from(flowerRepository.search(normalizedKeyword, pageRequest)
-                .map(FlowerSummaryResponse::from));
+        PageResponse<FlowerSummaryResponse> response = flowerReadCacheService.searchFlowers(normalizedKeyword, page, size);
         if (normalizedKeyword != null) {
             actionLogService.record(ActionType.DICTIONARY_SEARCH, Map.of(
                     "keyword", normalizedKeyword,

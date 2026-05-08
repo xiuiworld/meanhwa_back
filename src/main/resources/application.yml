@@ -3,6 +3,11 @@ spring:
     name: meanhwa_back
   profiles:
     default: local
+  cache:
+    type: simple
+    cache-names:
+      - flowers
+      - tags
 
 server:
   port: 8080

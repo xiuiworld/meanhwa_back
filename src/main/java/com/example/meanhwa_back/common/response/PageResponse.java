@@ -1,5 +1,6 @@
 package com.example.meanhwa_back.common.response;
 
+import java.io.Serializable;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -11,7 +12,7 @@ public record PageResponse<T>(
         long totalElements,
         int totalPages,
         boolean hasNext
-) {
+) implements Serializable {
     public static <T> PageResponse<T> from(Page<T> page) {
         return new PageResponse<>(
                 page.getContent(),

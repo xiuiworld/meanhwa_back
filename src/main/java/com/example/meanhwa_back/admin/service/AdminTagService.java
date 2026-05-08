@@ -7,6 +7,8 @@ import com.example.meanhwa_back.common.error.ErrorCode;
 import com.example.meanhwa_back.tag.domain.Tag;
 import com.example.meanhwa_back.tag.repository.TagRepository;
 
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,6 +21,10 @@ public class AdminTagService {
     }
 
     @Transactional
+    @Caching(evict = {
+            @CacheEvict(cacheNames = "tags", allEntries = true),
+            @CacheEvict(cacheNames = "flowers", allEntries = true)
+    })
     public AdminTagResponse createTag(AdminTagRequest request) {
         String name = normalizeName(request.name());
         validateDuplicate(request.category(), name, null);
@@ -26,6 +32,10 @@ public class AdminTagService {
     }
 
     @Transactional
+    @Caching(evict = {
+            @CacheEvict(cacheNames = "tags", allEntries = true),
+            @CacheEvict(cacheNames = "flowers", allEntries = true)
+    })
     public AdminTagResponse updateTag(Long tagId, AdminTagRequest request) {
         Tag tag = getActiveTag(tagId);
         String name = normalizeName(request.name());
@@ -35,6 +45,10 @@ public class AdminTagService {
     }
 
     @Transactional
+    @Caching(evict = {
+            @CacheEvict(cacheNames = "tags", allEntries = true),
+            @CacheEvict(cacheNames = "flowers", allEntries = true)
+    })
     public void deleteTag(Long tagId) {
         getActiveTag(tagId).softDelete();
     }

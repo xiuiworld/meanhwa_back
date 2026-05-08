@@ -1,4 +1,15 @@
 spring:
+  cache:
+    type: ${CACHE_TYPE:simple}
+    cache-names:
+      - flowers
+      - tags
+    redis:
+      time-to-live: ${CACHE_TTL_MILLIS:300000}
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
   datasource:
     url: ${DB_URL:jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/meanhwa?serverTimezone=Asia/Seoul&characterEncoding=UTF-8}
     username: ${DB_USERNAME}

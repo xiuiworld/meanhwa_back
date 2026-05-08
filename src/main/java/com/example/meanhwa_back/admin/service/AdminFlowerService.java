@@ -20,6 +20,7 @@ import com.example.meanhwa_back.flower.repository.FlowerTagMappingRepository;
 import com.example.meanhwa_back.tag.domain.Tag;
 import com.example.meanhwa_back.tag.repository.TagRepository;
 
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,6 +41,7 @@ public class AdminFlowerService {
     }
 
     @Transactional
+    @CacheEvict(cacheNames = "flowers", allEntries = true)
     public FlowerDetailResponse createFlower(AdminFlowerRequest request) {
         Flower flower = flowerRepository.save(new Flower(
                 normalizeRequired(request.name()),
@@ -54,6 +56,7 @@ public class AdminFlowerService {
     }
 
     @Transactional
+    @CacheEvict(cacheNames = "flowers", allEntries = true)
     public FlowerDetailResponse updateFlower(Long flowerId, AdminFlowerRequest request) {
         Flower flower = getActiveFlower(flowerId);
         flower.update(
@@ -69,15 +72,22 @@ public class AdminFlowerService {
     }
 
     @Transactional
+    @CacheEvict(cacheNames = "flowers", allEntries = true)
     public void deleteFlower(Long flowerId) {
         getActiveFlower(flowerId).softDelete();
     }
 
     @Transactional
+    @CacheEvict(cacheNames = "flowers", allEntries = true)
     public FlowerDetailResponse replaceMappings(Long flowerId, FlowerTagMappingUpdateRequest request) {
         Flower flower = getActiveFlower(flowerId);
         List<FlowerTagMappingItemRequest> items = request.tags();
         validateDuplicateTagIds(items);
+
+        if (items.isEmpty()) {
+            mappingRepository.deleteByFlowerId(flowerId);
+            return toDetailResponse(flower);
+        }
 
         Map<Long, Tag> tagsById = tagRepository.findActiveByIdIn(items.stream()
                         .map(FlowerTagMappingItemRequest::tagId)

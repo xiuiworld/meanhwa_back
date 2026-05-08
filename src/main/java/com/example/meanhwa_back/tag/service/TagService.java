@@ -11,6 +11,7 @@ import com.example.meanhwa_back.tag.dto.TagCategoryResponse;
 import com.example.meanhwa_back.tag.dto.TagItemResponse;
 import com.example.meanhwa_back.tag.repository.TagRepository;
 
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,6 +25,7 @@ public class TagService {
         this.tagRepository = tagRepository;
     }
 
+    @Cacheable(cacheNames = "tags", key = "'grouped'")
     public List<TagCategoryResponse> getTagsByCategory() {
         Map<TagCategory, List<Tag>> tagsByCategory = tagRepository.findAllActive(Sort.by("category", "name"))
                 .stream()

@@ -65,4 +65,8 @@ public class ActionLog {
     public String getActionData() {
         return actionData;
     }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
 }

@@ -2,6 +2,7 @@ package com.example.meanhwa_back.flower.repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Collection;
 
 import com.example.meanhwa_back.flower.domain.Flower;
 
@@ -20,6 +21,21 @@ public interface FlowerRepository extends JpaRepository<Flower, Long> {
               and f.deletedAt is null
             """)
     Optional<Flower> findActiveById(@Param("id") Long id);
+
+    @Query("""
+            select count(f)
+            from Flower f
+            where f.deletedAt is null
+            """)
+    long countActive();
+
+    @Query("""
+            select f
+            from Flower f
+            where f.id in :ids
+              and f.deletedAt is null
+            """)
+    List<Flower> findActiveByIdIn(@Param("ids") Collection<Long> ids);
 
     @Query("""
             select f
