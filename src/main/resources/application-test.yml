@@ -30,3 +30,7 @@ app:
   storage:
     type: fake
     fake-base-url: https://fake.meanhwa.local/uploads
+  openai:
+    model: gpt-5.4-mini
+    timeout-millis: 1000
+    max-output-tokens: 300

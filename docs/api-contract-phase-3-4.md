@@ -9,7 +9,7 @@ Phase 3 and Phase 4 are implemented.
 - JWT access token and refresh token are issued by the backend.
 - Refresh tokens are stored in the backend DB as SHA-256 hashes, not as raw tokens.
 - `dev` login is available for `local` and `test` profiles.
-- Kakao/Naver real OAuth is not implemented yet. The frontend may show Kakao/Naver buttons, but actual login should use the `dev` backend endpoint until real OAuth is added.
+- Kakao/Naver real OAuth is implemented in Phase 10. See `docs/api-contract-phase-10.md` for the production social login contract.
 - Core public APIs remain usable without login.
 - Authenticated user APIs require `Authorization: Bearer {accessToken}`.
 
@@ -86,7 +86,7 @@ Auth-related error codes:
 | `UNAUTHORIZED` | 401 | No access token or login required |
 | `INVALID_TOKEN` | 401 | Token is malformed, expired, wrong type, revoked, or unknown |
 | `FORBIDDEN` | 403 | Logged in but role is not allowed |
-| `UNSUPPORTED_OAUTH_PROVIDER` | 400 | `kakao`/`naver` real OAuth is not implemented yet |
+| `UNSUPPORTED_OAUTH_PROVIDER` | 400 | Unknown provider, or `dev` login used where it is not allowed |
 | `USER_NOT_FOUND` | 404 | Token points to a deleted or missing user |
 
 ## Phase F4: Auth APIs
@@ -99,7 +99,7 @@ Current supported provider:
 dev
 ```
 
-`kakao` and `naver` currently return `UNSUPPORTED_OAUTH_PROVIDER`.
+Phase 10 implements `kakao` and `naver` login with provider access tokens. See `docs/api-contract-phase-10.md`.
 
 Request for local/test dev login:
 
@@ -372,7 +372,7 @@ Response:
 
 Phase F4:
 
-- Build login UI now, but wire Kakao/Naver buttons to a temporary dev-login path or disabled state until real OAuth exists.
+- Use Kakao/Naver buttons with the Phase 10 provider access-token flow.
 - Use `POST /api/v1/auth/login/dev` for integration testing.
 - Keep public pages usable without auth.
 - Protect my page and personalization routes by checking global auth state.
