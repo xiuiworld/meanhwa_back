@@ -13,8 +13,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
 @Service
 public class ActionLogService {
@@ -23,30 +24,32 @@ public class ActionLogService {
     private final ActionLogRepository actionLogRepository;
     private final AuthenticatedUserProvider authenticatedUserProvider;
     private final ObjectMapper objectMapper;
+    private final TransactionTemplate transactionTemplate;
 
     public ActionLogService(
             ActionLogRepository actionLogRepository,
             AuthenticatedUserProvider authenticatedUserProvider,
-            ObjectMapper objectMapper
+            ObjectMapper objectMapper,
+            PlatformTransactionManager transactionManager
     ) {
         this.actionLogRepository = actionLogRepository;
         this.authenticatedUserProvider = authenticatedUserProvider;
         this.objectMapper = objectMapper;
+        this.transactionTemplate = new TransactionTemplate(transactionManager);
+        this.transactionTemplate.setPropagationBehavior(Propagation.REQUIRES_NEW.value());
     }
 
     public void record(ActionType actionType, Map<String, Object> payload) {
         try {
             User user = authenticatedUserProvider.getCurrentUserOrNull();
             Long userId = user == null ? null : user.getId();
-            save(userId, actionType, toJson(payload));
+            String actionData = toJson(payload);
+            transactionTemplate.executeWithoutResult(status ->
+                    actionLogRepository.save(new ActionLog(userId, actionType, actionData))
+            );
         } catch (Exception exception) {
             log.warn("Failed to record action log. actionType={}", actionType, exception);
         }
-    }
-
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void save(Long userId, ActionType actionType, String actionData) {
-        actionLogRepository.save(new ActionLog(userId, actionType, actionData));
     }
 
     private String toJson(Map<String, Object> payload) throws JsonProcessingException {
