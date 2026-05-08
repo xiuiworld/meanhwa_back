@@ -2,6 +2,7 @@ package com.example.meanhwa_back.auth.controller;
 
 import com.example.meanhwa_back.auth.dto.DevLoginRequest;
 import com.example.meanhwa_back.auth.dto.LogoutRequest;
+import com.example.meanhwa_back.auth.dto.SocialLoginRequest;
 import com.example.meanhwa_back.auth.dto.TokenRefreshRequest;
 import com.example.meanhwa_back.auth.dto.TokenResponse;
 import com.example.meanhwa_back.auth.service.AuthService;
@@ -24,12 +25,19 @@ public class AuthController {
         this.authService = authService;
     }
 
-    @PostMapping("/login/{provider}")
-    public ApiResponse<TokenResponse> login(
-            @PathVariable String provider,
+    @PostMapping("/login/dev")
+    public ApiResponse<TokenResponse> devLogin(
             @Valid @RequestBody DevLoginRequest request
     ) {
-        return ApiResponse.ok(authService.login(provider, request));
+        return ApiResponse.ok(authService.devLogin(request));
+    }
+
+    @PostMapping("/login/{provider}")
+    public ApiResponse<TokenResponse> socialLogin(
+            @PathVariable String provider,
+            @Valid @RequestBody SocialLoginRequest request
+    ) {
+        return ApiResponse.ok(authService.socialLogin(provider, request));
     }
 
     @PostMapping("/refresh")

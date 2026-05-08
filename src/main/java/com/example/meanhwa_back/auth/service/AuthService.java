@@ -1,10 +1,14 @@
 package com.example.meanhwa_back.auth.service;
 
 import java.util.Arrays;
+import java.util.EnumMap;
+import java.util.List;
+import java.util.Map;
 
 import com.example.meanhwa_back.auth.domain.OAuthProvider;
 import com.example.meanhwa_back.auth.dto.DevLoginRequest;
 import com.example.meanhwa_back.auth.dto.LogoutRequest;
+import com.example.meanhwa_back.auth.dto.SocialLoginRequest;
 import com.example.meanhwa_back.auth.dto.TokenRefreshRequest;
 import com.example.meanhwa_back.auth.dto.TokenResponse;
 import com.example.meanhwa_back.common.error.BusinessException;
@@ -16,46 +20,73 @@ import com.example.meanhwa_back.user.repository.UserRepository;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
 @Service
 public class AuthService {
     private final UserRepository userRepository;
     private final TokenService tokenService;
     private final Environment environment;
+    private final Map<OAuthProvider, OAuthClient> oauthClients;
+    private final TransactionTemplate transactionTemplate;
 
     public AuthService(
             UserRepository userRepository,
             TokenService tokenService,
-            Environment environment
+            Environment environment,
+            List<OAuthClient> oauthClients,
+            TransactionTemplate transactionTemplate
     ) {
         this.userRepository = userRepository;
         this.tokenService = tokenService;
         this.environment = environment;
+        this.transactionTemplate = transactionTemplate;
+        this.oauthClients = new EnumMap<>(OAuthProvider.class);
+        oauthClients.forEach(client -> this.oauthClients.put(client.getProvider(), client));
     }
 
     @Transactional
-    public TokenResponse login(String providerValue, DevLoginRequest request) {
-        OAuthProvider provider = OAuthProvider.from(providerValue);
-        if (provider != OAuthProvider.DEV || isProdProfile()) {
+    public TokenResponse devLogin(DevLoginRequest request) {
+        if (isProdProfile()) {
             throw new BusinessException(ErrorCode.UNSUPPORTED_OAUTH_PROVIDER);
         }
 
         Role role = parseRole(request.role());
-        String nickname = normalizeNickname(request.nickname());
-        User user = userRepository.findByProviderAndOauthId(provider, request.oauthId().trim())
-                .map(existingUser -> {
-                    existingUser.updateProfile(normalizeEmail(request.email()), nickname, role);
-                    return existingUser;
-                })
-                .orElseGet(() -> userRepository.save(new User(
-                        provider,
-                        request.oauthId().trim(),
-                        normalizeEmail(request.email()),
-                        nickname,
-                        role
-                )));
+        User user = upsertUser(
+                OAuthProvider.DEV,
+                request.oauthId().trim(),
+                normalizeEmail(request.email()),
+                normalizeNickname(request.nickname()),
+                role,
+                true
+        );
 
         return tokenService.issue(user);
+    }
+
+    public TokenResponse socialLogin(String providerValue, SocialLoginRequest request) {
+        OAuthProvider provider = OAuthProvider.from(providerValue);
+        if (provider == OAuthProvider.DEV) {
+            throw new BusinessException(ErrorCode.UNSUPPORTED_OAUTH_PROVIDER);
+        }
+
+        OAuthClient oauthClient = oauthClients.get(provider);
+        if (oauthClient == null) {
+            throw new BusinessException(ErrorCode.UNSUPPORTED_OAUTH_PROVIDER);
+        }
+
+        OAuthProfile profile = oauthClient.fetchProfile(request.accessToken().trim());
+        return transactionTemplate.execute(status -> {
+            User user = upsertUser(
+                    profile.provider(),
+                    profile.oauthId(),
+                    normalizeEmail(profile.email()),
+                    normalizeNickname(profile.nickname()),
+                    Role.ROLE_USER,
+                    false
+            );
+            return tokenService.issue(user);
+        });
     }
 
     @Transactional
@@ -96,5 +127,28 @@ public class AuthService {
             return "민화유저";
         }
         return nickname.trim();
+    }
+
+    private User upsertUser(
+            OAuthProvider provider,
+            String oauthId,
+            String email,
+            String nickname,
+            Role role,
+            boolean updateExistingRole
+    ) {
+        return userRepository.findByProviderAndOauthId(provider, oauthId)
+                .map(existingUser -> {
+                    Role nextRole = updateExistingRole ? role : existingUser.getRole();
+                    existingUser.updateProfile(email, nickname, nextRole);
+                    return existingUser;
+                })
+                .orElseGet(() -> userRepository.save(new User(
+                        provider,
+                        oauthId,
+                        email,
+                        nickname,
+                        role
+                )));
     }
 }

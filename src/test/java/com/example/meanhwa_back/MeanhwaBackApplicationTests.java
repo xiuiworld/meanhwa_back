@@ -236,9 +236,13 @@ class MeanhwaBackApplicationTests {
 
     @Test
     void unsupportedOAuthProviderReturnsError() throws Exception {
-        mockMvc.perform(post("/api/v1/auth/login/kakao")
+        mockMvc.perform(post("/api/v1/auth/login/unknown")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(devLoginBody("kakao-user-1", "ROLE_USER")))
+                        .content("""
+                                {
+                                  "accessToken": "provider-token"
+                                }
+                                """))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errorCode").value("UNSUPPORTED_OAUTH_PROVIDER"));
     }
