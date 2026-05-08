@@ -1,0 +1,8 @@
+spring:
+  application:
+    name: meanhwa_back
+  profiles:
+    default: local
+
+server:
+  port: 8080
