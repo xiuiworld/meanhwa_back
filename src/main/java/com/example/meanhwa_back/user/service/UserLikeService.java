@@ -1,0 +1,59 @@
+package com.example.meanhwa_back.user.service;
+
+import java.util.List;
+
+import com.example.meanhwa_back.common.error.BusinessException;
+import com.example.meanhwa_back.common.error.ErrorCode;
+import com.example.meanhwa_back.common.security.AuthenticatedUserProvider;
+import com.example.meanhwa_back.flower.domain.Flower;
+import com.example.meanhwa_back.flower.dto.FlowerSummaryResponse;
+import com.example.meanhwa_back.flower.repository.FlowerRepository;
+import com.example.meanhwa_back.user.domain.User;
+import com.example.meanhwa_back.user.domain.UserLike;
+import com.example.meanhwa_back.user.repository.UserLikeRepository;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+@Service
+public class UserLikeService {
+    private final AuthenticatedUserProvider authenticatedUserProvider;
+    private final FlowerRepository flowerRepository;
+    private final UserLikeRepository userLikeRepository;
+
+    public UserLikeService(
+            AuthenticatedUserProvider authenticatedUserProvider,
+            FlowerRepository flowerRepository,
+            UserLikeRepository userLikeRepository
+    ) {
+        this.authenticatedUserProvider = authenticatedUserProvider;
+        this.flowerRepository = flowerRepository;
+        this.userLikeRepository = userLikeRepository;
+    }
+
+    @Transactional(readOnly = true)
+    public List<FlowerSummaryResponse> getLikes() {
+        User user = authenticatedUserProvider.getCurrentUser();
+        return userLikeRepository.findByUserIdOrderByCreatedAtDesc(user.getId())
+                .stream()
+                .map(userLike -> FlowerSummaryResponse.from(userLike.getFlower()))
+                .toList();
+    }
+
+    @Transactional
+    public FlowerSummaryResponse addLike(Long flowerId) {
+        User user = authenticatedUserProvider.getCurrentUser();
+        Flower flower = flowerRepository.findById(flowerId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.FLOWER_NOT_FOUND));
+        if (!userLikeRepository.existsByUserIdAndFlowerId(user.getId(), flowerId)) {
+            userLikeRepository.save(new UserLike(user, flower));
+        }
+        return FlowerSummaryResponse.from(flower);
+    }
+
+    @Transactional
+    public void deleteLike(Long flowerId) {
+        User user = authenticatedUserProvider.getCurrentUser();
+        userLikeRepository.deleteByUserIdAndFlowerId(user.getId(), flowerId);
+    }
+}

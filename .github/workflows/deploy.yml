@@ -39,12 +39,18 @@ jobs:
           DB_URL: ${{ secrets.DB_URL }}
           DB_USERNAME: ${{ secrets.DB_USERNAME }}
           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          JWT_ACCESS_TOKEN_VALIDITY_MINUTES: ${{ secrets.JWT_ACCESS_TOKEN_VALIDITY_MINUTES }}
+          JWT_REFRESH_TOKEN_VALIDITY_DAYS: ${{ secrets.JWT_REFRESH_TOKEN_VALIDITY_DAYS }}
+          CORS_ALLOWED_ORIGINS: ${{ secrets.CORS_ALLOWED_ORIGINS }}
         with:
           host: ${{ secrets.AWS_EC2_HOST }}
           username: ubuntu
           key: ${{ secrets.AWS_EC2_PEM_KEY }}
-          envs: DOCKERHUB_USERNAME,DB_URL,DB_USERNAME,DB_PASSWORD
+          envs: DOCKERHUB_USERNAME,DB_URL,DB_USERNAME,DB_PASSWORD,JWT_SECRET,JWT_ACCESS_TOKEN_VALIDITY_MINUTES,JWT_REFRESH_TOKEN_VALIDITY_DAYS,CORS_ALLOWED_ORIGINS
           script: |
+            test -n "$JWT_SECRET"
+
             sudo docker pull "$DOCKERHUB_USERNAME/meanhwa-back"
             sudo docker stop meanhwa-server || true
             sudo docker rm meanhwa-server || true
@@ -54,4 +60,8 @@ jobs:
               -e DB_URL="$DB_URL" \
               -e DB_USERNAME="$DB_USERNAME" \
               -e DB_PASSWORD="$DB_PASSWORD" \
+              -e JWT_SECRET="$JWT_SECRET" \
+              -e JWT_ACCESS_TOKEN_VALIDITY_MINUTES="${JWT_ACCESS_TOKEN_VALIDITY_MINUTES:-30}" \
+              -e JWT_REFRESH_TOKEN_VALIDITY_DAYS="${JWT_REFRESH_TOKEN_VALIDITY_DAYS:-14}" \
+              -e CORS_ALLOWED_ORIGINS="${CORS_ALLOWED_ORIGINS:-http://localhost:3000,http://localhost:5173}" \
               "$DOCKERHUB_USERNAME/meanhwa-back"

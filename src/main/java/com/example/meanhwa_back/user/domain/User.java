@@ -1,0 +1,95 @@
+package com.example.meanhwa_back.user.domain;
+
+import java.time.LocalDateTime;
+
+import com.example.meanhwa_back.auth.domain.OAuthProvider;
+
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
+
+@Entity
+@Table(
+        name = "users",
+        uniqueConstraints = @UniqueConstraint(name = "uk_users_provider_oauth_id", columnNames = {"provider", "oauth_id"})
+)
+public class User {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private OAuthProvider provider;
+
+    @Column(name = "oauth_id", nullable = false, length = 100)
+    private String oauthId;
+
+    @Column(length = 100)
+    private String email;
+
+    @Column(nullable = false, length = 50)
+    private String nickname;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private Role role;
+
+    @CreationTimestamp
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+    @UpdateTimestamp
+    @Column(nullable = false)
+    private LocalDateTime updatedAt;
+
+    protected User() {
+    }
+
+    public User(OAuthProvider provider, String oauthId, String email, String nickname, Role role) {
+        this.provider = provider;
+        this.oauthId = oauthId;
+        this.email = email;
+        this.nickname = nickname;
+        this.role = role;
+    }
+
+    public void updateProfile(String email, String nickname, Role role) {
+        this.email = email;
+        this.nickname = nickname;
+        this.role = role;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public OAuthProvider getProvider() {
+        return provider;
+    }
+
+    public String getOauthId() {
+        return oauthId;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public String getNickname() {
+        return nickname;
+    }
+
+    public Role getRole() {
+        return role;
+    }
+}

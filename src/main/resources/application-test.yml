@@ -21,3 +21,7 @@ app:
     allowed-origins:
       - http://localhost:3000
       - http://localhost:5173
+  jwt:
+    secret: test-jwt-secret-for-meanhwa-phase-three-tests-please-change
+    access-token-validity-minutes: 30
+    refresh-token-validity-days: 14

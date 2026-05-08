@@ -1,5 +1,15 @@
 package com.example.meanhwa_back;
 
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
+
+import com.example.meanhwa_back.flower.domain.Flower;
+import com.example.meanhwa_back.flower.domain.ManagementLevel;
+import com.example.meanhwa_back.flower.domain.PriceRange;
+import com.example.meanhwa_back.flower.repository.FlowerRepository;
+import com.jayway.jsonpath.JsonPath;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -10,8 +20,11 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.not;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -23,6 +36,9 @@ class MeanhwaBackApplicationTests {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @Autowired
+    private FlowerRepository flowerRepository;
 
     @Test
     void contextLoads() {
@@ -133,5 +149,239 @@ class MeanhwaBackApplicationTests {
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.status").value(404))
                 .andExpect(jsonPath("$.errorCode").value("FLOWER_NOT_FOUND"));
+    }
+
+    @Test
+    void devLoginReturnsAccessAndRefreshTokens() throws Exception {
+        String body = devLoginBody("auth-user-1", "ROLE_USER");
+
+        mockMvc.perform(post("/api/v1/auth/login/dev")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value(200))
+                .andExpect(jsonPath("$.data.tokenType").value("Bearer"))
+                .andExpect(jsonPath("$.data.expiresInSeconds").value(1800))
+                .andExpect(jsonPath("$.data.accessToken").isNotEmpty())
+                .andExpect(jsonPath("$.data.refreshToken").isNotEmpty());
+    }
+
+    @Test
+    void unsupportedOAuthProviderReturnsError() throws Exception {
+        mockMvc.perform(post("/api/v1/auth/login/kakao")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(devLoginBody("kakao-user-1", "ROLE_USER")))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errorCode").value("UNSUPPORTED_OAUTH_PROVIDER"));
+    }
+
+    @Test
+    void refreshRotatesRefreshTokenAndRejectsOldToken() throws Exception {
+        TokenPair tokenPair = login("refresh-user-1", "ROLE_USER");
+
+        String refreshBody = """
+                {
+                  "refreshToken": "%s"
+                }
+                """.formatted(tokenPair.refreshToken());
+        TokenPair rotatedTokenPair = extractTokenPair(mockMvc.perform(post("/api/v1/auth/refresh")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(refreshBody))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.accessToken").isNotEmpty())
+                .andExpect(jsonPath("$.data.refreshToken").isNotEmpty())
+                .andReturn()
+                .getResponse()
+                .getContentAsString(StandardCharsets.UTF_8));
+
+        mockMvc.perform(post("/api/v1/auth/refresh")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(refreshBody))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.errorCode").value("INVALID_TOKEN"));
+
+        mockMvc.perform(post("/api/v1/auth/logout")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "refreshToken": "%s"
+                                }
+                                """.formatted(rotatedTokenPair.refreshToken())))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(post("/api/v1/auth/refresh")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "refreshToken": "%s"
+                                }
+                                """.formatted(rotatedTokenPair.refreshToken())))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.errorCode").value("INVALID_TOKEN"));
+    }
+
+    @Test
+    void usersMeRequiresAuthentication() throws Exception {
+        mockMvc.perform(get("/api/v1/users/me"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.errorCode").value("UNAUTHORIZED"));
+
+        mockMvc.perform(get("/api/v1/users/me/likes"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.errorCode").value("UNAUTHORIZED"));
+    }
+
+    @Test
+    void userCanReadMeWithBearerToken() throws Exception {
+        TokenPair tokenPair = login("me-user-1", "ROLE_USER");
+
+        mockMvc.perform(get("/api/v1/users/me")
+                        .header("Authorization", bearer(tokenPair.accessToken())))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.oauthId").value("me-user-1"))
+                .andExpect(jsonPath("$.data.nickname").value("민화유저"))
+                .andExpect(jsonPath("$.data.role").value("ROLE_USER"));
+    }
+
+    @Test
+    void userRoleCannotAccessAdminApi() throws Exception {
+        TokenPair tokenPair = login("admin-denied-user-1", "ROLE_USER");
+
+        mockMvc.perform(get("/api/v1/admin/flowers")
+                        .header("Authorization", bearer(tokenPair.accessToken())))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.errorCode").value("FORBIDDEN"));
+    }
+
+    @Test
+    void userLikesAreIdempotentAndScopedByUser() throws Exception {
+        TokenPair firstUser = login("like-user-1", "ROLE_USER");
+        TokenPair secondUser = login("like-user-2", "ROLE_USER");
+
+        mockMvc.perform(post("/api/v1/users/me/likes/{flowerId}", 1)
+                        .header("Authorization", bearer(firstUser.accessToken())))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.id").value(1));
+        mockMvc.perform(post("/api/v1/users/me/likes/{flowerId}", 1)
+                        .header("Authorization", bearer(firstUser.accessToken())))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.id").value(1));
+        mockMvc.perform(post("/api/v1/users/me/likes/{flowerId}", 2)
+                        .header("Authorization", bearer(secondUser.accessToken())))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.id").value(2));
+
+        mockMvc.perform(get("/api/v1/users/me/likes")
+                        .header("Authorization", bearer(firstUser.accessToken())))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data", hasSize(1)))
+                .andExpect(jsonPath("$.data[0].id").value(1));
+        mockMvc.perform(get("/api/v1/users/me/likes")
+                        .header("Authorization", bearer(secondUser.accessToken())))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data", hasSize(1)))
+                .andExpect(jsonPath("$.data[0].id").value(2));
+
+        mockMvc.perform(delete("/api/v1/users/me/likes/{flowerId}", 1)
+                        .header("Authorization", bearer(firstUser.accessToken())))
+                .andExpect(status().isOk());
+        mockMvc.perform(delete("/api/v1/users/me/likes/{flowerId}", 1)
+                        .header("Authorization", bearer(firstUser.accessToken())))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(get("/api/v1/users/me/likes")
+                        .header("Authorization", bearer(firstUser.accessToken())))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data", hasSize(0)));
+    }
+
+    @Test
+    void flowerDetailStoresHistoryOnlyForAuthenticatedUser() throws Exception {
+        TokenPair tokenPair = login("history-user-1", "ROLE_USER");
+
+        mockMvc.perform(get("/api/v1/flowers/{flowerId}", 1))
+                .andExpect(status().isOk());
+        mockMvc.perform(get("/api/v1/users/me/histories")
+                        .header("Authorization", bearer(tokenPair.accessToken())))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data", hasSize(0)));
+
+        mockMvc.perform(get("/api/v1/flowers/{flowerId}", 1)
+                        .header("Authorization", bearer(tokenPair.accessToken())))
+                .andExpect(status().isOk());
+        mockMvc.perform(get("/api/v1/flowers/{flowerId}", 1)
+                        .header("Authorization", bearer(tokenPair.accessToken())))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(get("/api/v1/users/me/histories")
+                        .header("Authorization", bearer(tokenPair.accessToken())))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data", hasSize(1)))
+                .andExpect(jsonPath("$.data[0].id").value(1));
+    }
+
+    @Test
+    void historiesKeepLatestFiftyFlowers() throws Exception {
+        TokenPair tokenPair = login("history-user-2", "ROLE_USER");
+        List<Flower> flowers = new ArrayList<>();
+        for (int index = 0; index < 51; index++) {
+            flowers.add(flowerRepository.save(new Flower(
+                    "테스트식물" + index,
+                    "https://cdn.meanhwa.example/test/" + index + ".jpg",
+                    "테스트 의미 " + index,
+                    ManagementLevel.EASY,
+                    "테스트 관리법",
+                    false,
+                    PriceRange.LOW
+            )));
+        }
+
+        for (Flower flower : flowers) {
+            mockMvc.perform(get("/api/v1/flowers/{flowerId}", flower.getId())
+                            .header("Authorization", bearer(tokenPair.accessToken())))
+                    .andExpect(status().isOk());
+        }
+
+        mockMvc.perform(get("/api/v1/users/me/histories")
+                        .header("Authorization", bearer(tokenPair.accessToken())))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data", hasSize(50)))
+                .andExpect(jsonPath("$.data[*].id", not(hasItem(flowers.get(0).getId().intValue()))));
+    }
+
+    private TokenPair login(String oauthId, String role) throws Exception {
+        String response = mockMvc.perform(post("/api/v1/auth/login/dev")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(devLoginBody(oauthId, role)))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString(StandardCharsets.UTF_8);
+        return extractTokenPair(response);
+    }
+
+    private TokenPair extractTokenPair(String response) {
+        return new TokenPair(
+                JsonPath.read(response, "$.data.accessToken"),
+                JsonPath.read(response, "$.data.refreshToken")
+        );
+    }
+
+    private String devLoginBody(String oauthId, String role) {
+        return """
+                {
+                  "oauthId": "%s",
+                  "email": "%s@example.com",
+                  "nickname": "민화유저",
+                  "role": "%s"
+                }
+                """.formatted(oauthId, oauthId, role);
+    }
+
+    private String bearer(String accessToken) {
+        return "Bearer " + accessToken;
+    }
+
+    private record TokenPair(String accessToken, String refreshToken) {
     }
 }
