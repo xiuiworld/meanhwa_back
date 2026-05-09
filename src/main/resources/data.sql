@@ -11,7 +11,15 @@ values
     (9, '아이비', 'https://cdn.meanhwa.example/plants/ivy.jpg', '우정과 신뢰', 'EASY', '반음지에서도 잘 자라며 흙이 마르면 충분히 물을 주세요.', true, 'LOW', current_timestamp, current_timestamp),
     (10, '카네이션', 'https://cdn.meanhwa.example/flowers/carnation.jpg', '감사와 존경', 'NORMAL', '서늘하고 햇빛이 드는 곳에서 오래 꽃을 볼 수 있습니다.', false, 'MEDIUM', current_timestamp, current_timestamp),
     (11, '호접란', 'https://cdn.meanhwa.example/flowers/orchid.jpg', '품격과 축하', 'HARD', '밝은 간접광과 일정한 습도를 유지해야 합니다.', false, 'PREMIUM', current_timestamp, current_timestamp),
-    (12, '프리지아', 'https://cdn.meanhwa.example/flowers/freesia.jpg', '새로운 시작', 'NORMAL', '서늘한 곳에서 관리하면 향과 꽃을 오래 즐길 수 있습니다.', false, 'MEDIUM', current_timestamp, current_timestamp);
+    (12, '프리지아', 'https://cdn.meanhwa.example/flowers/freesia.jpg', '새로운 시작', 'NORMAL', '서늘한 곳에서 관리하면 향과 꽃을 오래 즐길 수 있습니다.', false, 'MEDIUM', current_timestamp, current_timestamp),
+    (13, '수국', 'https://cdn.meanhwa.example/flowers/hydrangea.jpg', '진심과 변함없는 마음', 'NORMAL', '물을 좋아하므로 흙이 마르지 않게 관리하고 직사광선은 피하세요.', true, 'HIGH', current_timestamp, current_timestamp),
+    (14, '작약', 'https://cdn.meanhwa.example/flowers/peony.jpg', '풍요와 행복', 'NORMAL', '밝고 서늘한 곳에서 관리하면 큰 꽃을 오래 감상할 수 있습니다.', false, 'HIGH', current_timestamp, current_timestamp),
+    (15, '거베라', 'https://cdn.meanhwa.example/flowers/gerbera.jpg', '희망과 즐거움', 'EASY', '햇빛을 좋아하고 물빠짐이 좋은 흙에서 잘 자랍니다.', false, 'LOW', current_timestamp, current_timestamp),
+    (16, '유칼립투스', 'https://cdn.meanhwa.example/plants/eucalyptus.jpg', '치유와 기억', 'NORMAL', '통풍이 잘 되는 밝은 곳에 두고 과습을 피하세요.', true, 'MEDIUM', current_timestamp, current_timestamp),
+    (17, '필로덴드론', 'https://cdn.meanhwa.example/plants/philodendron.jpg', '성장과 신뢰', 'EASY', '밝은 간접광과 적당한 습도를 유지하면 잎이 건강하게 자랍니다.', true, 'MEDIUM', current_timestamp, current_timestamp),
+    (18, '금전수', 'https://cdn.meanhwa.example/plants/zz-plant.jpg', '번영과 행운', 'EASY', '건조에 강해 물을 자주 주지 않아도 되며 반음지에서도 잘 자랍니다.', true, 'LOW', current_timestamp, current_timestamp),
+    (19, '칼라디움', 'https://cdn.meanhwa.example/plants/caladium.jpg', '기쁨과 섬세함', 'HARD', '높은 습도와 따뜻한 환경을 좋아하며 찬바람을 피해야 합니다.', true, 'MEDIUM', current_timestamp, current_timestamp),
+    (20, '로즈마리', 'https://cdn.meanhwa.example/plants/rosemary.jpg', '기억과 응원', 'EASY', '햇빛과 통풍을 좋아하고 흙이 충분히 마른 뒤 물을 주세요.', false, 'LOW', current_timestamp, current_timestamp);
 
 insert into tags (id, category, name)
 values
@@ -45,4 +53,12 @@ values
     (34, 9, 6, 5), (35, 9, 10, 3), (36, 9, 15, 4), (37, 9, 14, 3),
     (38, 10, 7, 5), (39, 10, 10, 5), (40, 10, 1, 3), (41, 10, 16, 4),
     (42, 11, 4, 5), (43, 11, 8, 4), (44, 11, 10, 4), (45, 11, 14, 4), (46, 11, 16, 3),
-    (47, 12, 2, 5), (48, 12, 6, 4), (49, 12, 12, 4), (50, 12, 13, 3), (51, 12, 16, 3);
+    (47, 12, 2, 5), (48, 12, 6, 4), (49, 12, 12, 4), (50, 12, 13, 3), (51, 12, 16, 3),
+    (52, 13, 1, 3), (53, 13, 5, 3), (54, 13, 10, 4), (55, 13, 14, 5),
+    (56, 14, 4, 4), (57, 14, 7, 3), (58, 14, 10, 4), (59, 14, 13, 3), (60, 14, 16, 2),
+    (61, 15, 1, 4), (62, 15, 6, 3), (63, 15, 12, 4), (64, 15, 13, 5), (65, 15, 16, 4),
+    (66, 16, 3, 3), (67, 16, 11, 5), (68, 16, 14, 4), (69, 16, 15, 3),
+    (70, 17, 3, 4), (71, 17, 8, 3), (72, 17, 12, 3), (73, 17, 15, 4),
+    (74, 18, 3, 4), (75, 18, 4, 4), (76, 18, 8, 3), (77, 18, 15, 5),
+    (78, 19, 1, 3), (79, 19, 5, 3), (80, 19, 13, 5), (81, 19, 14, 2),
+    (82, 20, 6, 4), (83, 20, 11, 3), (84, 20, 12, 5), (85, 20, 15, 5), (86, 20, 16, 4);

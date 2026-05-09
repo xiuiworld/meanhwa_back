@@ -11,6 +11,7 @@ import com.example.meanhwa_back.admin.dto.FlowerTagMappingItemRequest;
 import com.example.meanhwa_back.admin.dto.FlowerTagMappingUpdateRequest;
 import com.example.meanhwa_back.common.error.BusinessException;
 import com.example.meanhwa_back.common.error.ErrorCode;
+import com.example.meanhwa_back.common.security.AuthenticatedUserProvider;
 import com.example.meanhwa_back.flower.domain.Flower;
 import com.example.meanhwa_back.flower.domain.FlowerTagMapping;
 import com.example.meanhwa_back.flower.dto.FlowerDetailResponse;
@@ -29,21 +30,25 @@ public class AdminFlowerService {
     private final FlowerRepository flowerRepository;
     private final FlowerTagMappingRepository mappingRepository;
     private final TagRepository tagRepository;
+    private final AuthenticatedUserProvider authenticatedUserProvider;
 
     public AdminFlowerService(
             FlowerRepository flowerRepository,
             FlowerTagMappingRepository mappingRepository,
-            TagRepository tagRepository
+            TagRepository tagRepository,
+            AuthenticatedUserProvider authenticatedUserProvider
     ) {
         this.flowerRepository = flowerRepository;
         this.mappingRepository = mappingRepository;
         this.tagRepository = tagRepository;
+        this.authenticatedUserProvider = authenticatedUserProvider;
     }
 
     @Transactional
     @CacheEvict(cacheNames = "flowers", allEntries = true)
     public FlowerDetailResponse createFlower(AdminFlowerRequest request) {
-        Flower flower = flowerRepository.save(new Flower(
+        Long adminUserId = currentAdminUserId();
+        Flower flower = new Flower(
                 normalizeRequired(request.name()),
                 normalizeOptional(request.imageUrl()),
                 normalizeOptional(request.coreMeaning()),
@@ -51,13 +56,16 @@ public class AdminFlowerService {
                 normalizeOptional(request.managementInfo()),
                 request.isToxicToPets(),
                 request.priceRange()
-        ));
+        );
+        flower.markCreatedBy(adminUserId);
+        flowerRepository.save(flower);
         return toDetailResponse(flower);
     }
 
     @Transactional
     @CacheEvict(cacheNames = "flowers", allEntries = true)
     public FlowerDetailResponse updateFlower(Long flowerId, AdminFlowerRequest request) {
+        Long adminUserId = currentAdminUserId();
         Flower flower = getActiveFlower(flowerId);
         flower.update(
                 normalizeRequired(request.name()),
@@ -68,13 +76,16 @@ public class AdminFlowerService {
                 request.isToxicToPets(),
                 request.priceRange()
         );
+        flower.markUpdatedBy(adminUserId);
         return toDetailResponse(flower);
     }
 
     @Transactional
     @CacheEvict(cacheNames = "flowers", allEntries = true)
     public void deleteFlower(Long flowerId) {
-        getActiveFlower(flowerId).softDelete();
+        Flower flower = getActiveFlower(flowerId);
+        flower.markUpdatedBy(currentAdminUserId());
+        flower.softDelete();
     }
 
     @Transactional
@@ -109,6 +120,10 @@ public class AdminFlowerService {
     private Flower getActiveFlower(Long flowerId) {
         return flowerRepository.findActiveById(flowerId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.FLOWER_NOT_FOUND));
+    }
+
+    private Long currentAdminUserId() {
+        return authenticatedUserProvider.getCurrentUser().getId();
     }
 
     private FlowerDetailResponse toDetailResponse(Flower flower) {

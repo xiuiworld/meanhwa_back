@@ -68,6 +68,11 @@ class MeanhwaBackApplicationTests {
     }
 
     @Test
+    void seedDataContainsAtLeastTwentyActiveFlowers() {
+        org.assertj.core.api.Assertions.assertThat(flowerRepository.countActive()).isGreaterThanOrEqualTo(20);
+    }
+
+    @Test
     void keywordSearchRecordsDictionarySearchActionLog() throws Exception {
         long beforeCount = actionLogRepository.countByActionType(ActionType.DICTIONARY_SEARCH);
 
@@ -342,6 +347,7 @@ class MeanhwaBackApplicationTests {
     @Test
     void adminFlowerCmsCreatesUpdatesMapsAndSoftDeletesFlower() throws Exception {
         TokenPair admin = login("admin-flower-user-1", "ROLE_ADMIN");
+        Long adminUserId = extractUserId(admin.accessToken());
 
         mockMvc.perform(get("/api/v1/flowers")
                         .param("keyword", "관리자테스트꽃")
@@ -360,6 +366,9 @@ class MeanhwaBackApplicationTests {
                 .getResponse()
                 .getContentAsString(StandardCharsets.UTF_8);
         Integer flowerId = JsonPath.read(createdResponse, "$.data.id");
+        Flower createdFlower = flowerRepository.findById(flowerId.longValue()).orElseThrow();
+        org.assertj.core.api.Assertions.assertThat(createdFlower.getCreatedBy()).isEqualTo(adminUserId);
+        org.assertj.core.api.Assertions.assertThat(createdFlower.getUpdatedBy()).isEqualTo(adminUserId);
 
         mockMvc.perform(get("/api/v1/flowers")
                         .param("keyword", "관리자테스트꽃")
@@ -376,6 +385,8 @@ class MeanhwaBackApplicationTests {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.name").value("관리자테스트꽃수정"))
                 .andExpect(jsonPath("$.data.priceRange").value("MEDIUM"));
+        org.assertj.core.api.Assertions.assertThat(flowerRepository.findById(flowerId.longValue()).orElseThrow().getUpdatedBy())
+                .isEqualTo(adminUserId);
 
         mockMvc.perform(put("/api/v1/admin/flowers/{flowerId}/tags", flowerId)
                         .header("Authorization", bearer(admin.accessToken()))
@@ -398,6 +409,9 @@ class MeanhwaBackApplicationTests {
         mockMvc.perform(delete("/api/v1/admin/flowers/{flowerId}", flowerId)
                         .header("Authorization", bearer(admin.accessToken())))
                 .andExpect(status().isOk());
+        Flower deletedFlower = flowerRepository.findById(flowerId.longValue()).orElseThrow();
+        org.assertj.core.api.Assertions.assertThat(deletedFlower.getUpdatedBy()).isEqualTo(adminUserId);
+        org.assertj.core.api.Assertions.assertThat(deletedFlower.getDeletedAt()).isNotNull();
 
         mockMvc.perform(get("/api/v1/flowers/{flowerId}", flowerId))
                 .andExpect(status().isNotFound())

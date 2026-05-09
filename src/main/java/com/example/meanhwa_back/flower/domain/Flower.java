@@ -52,6 +52,12 @@ public class Flower {
     @Column(nullable = false)
     private LocalDateTime updatedAt;
 
+    @Column(name = "created_by")
+    private Long createdBy;
+
+    @Column(name = "updated_by")
+    private Long updatedBy;
+
     private LocalDateTime deletedAt;
 
     protected Flower() {
@@ -111,8 +117,25 @@ public class Flower {
         return deletedAt;
     }
 
+    public Long getCreatedBy() {
+        return createdBy;
+    }
+
+    public Long getUpdatedBy() {
+        return updatedBy;
+    }
+
     public boolean isDeleted() {
         return deletedAt != null;
+    }
+
+    public void markCreatedBy(Long adminUserId) {
+        this.createdBy = adminUserId;
+        this.updatedBy = adminUserId;
+    }
+
+    public void markUpdatedBy(Long adminUserId) {
+        this.updatedBy = adminUserId;
     }
 
     public void update(
