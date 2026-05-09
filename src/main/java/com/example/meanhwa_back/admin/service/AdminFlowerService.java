@@ -6,7 +6,9 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import com.example.meanhwa_back.admin.dto.AdminFlowerDetailResponse;
 import com.example.meanhwa_back.admin.dto.AdminFlowerRequest;
+import com.example.meanhwa_back.admin.dto.AdminFlowerTagMappingResponse;
 import com.example.meanhwa_back.admin.dto.FlowerTagMappingItemRequest;
 import com.example.meanhwa_back.admin.dto.FlowerTagMappingUpdateRequest;
 import com.example.meanhwa_back.common.error.BusinessException;
@@ -14,8 +16,6 @@ import com.example.meanhwa_back.common.error.ErrorCode;
 import com.example.meanhwa_back.common.security.AuthenticatedUserProvider;
 import com.example.meanhwa_back.flower.domain.Flower;
 import com.example.meanhwa_back.flower.domain.FlowerTagMapping;
-import com.example.meanhwa_back.flower.dto.FlowerDetailResponse;
-import com.example.meanhwa_back.flower.dto.TagSummaryResponse;
 import com.example.meanhwa_back.flower.repository.FlowerRepository;
 import com.example.meanhwa_back.flower.repository.FlowerTagMappingRepository;
 import com.example.meanhwa_back.tag.domain.Tag;
@@ -46,7 +46,7 @@ public class AdminFlowerService {
 
     @Transactional
     @CacheEvict(cacheNames = "flowers", allEntries = true)
-    public FlowerDetailResponse createFlower(AdminFlowerRequest request) {
+    public AdminFlowerDetailResponse createFlower(AdminFlowerRequest request) {
         Long adminUserId = currentAdminUserId();
         Flower flower = new Flower(
                 normalizeRequired(request.name()),
@@ -62,9 +62,14 @@ public class AdminFlowerService {
         return toDetailResponse(flower);
     }
 
+    @Transactional(readOnly = true)
+    public AdminFlowerDetailResponse getFlower(Long flowerId) {
+        return toDetailResponse(getActiveFlower(flowerId));
+    }
+
     @Transactional
     @CacheEvict(cacheNames = "flowers", allEntries = true)
-    public FlowerDetailResponse updateFlower(Long flowerId, AdminFlowerRequest request) {
+    public AdminFlowerDetailResponse updateFlower(Long flowerId, AdminFlowerRequest request) {
         Long adminUserId = currentAdminUserId();
         Flower flower = getActiveFlower(flowerId);
         flower.update(
@@ -90,7 +95,7 @@ public class AdminFlowerService {
 
     @Transactional
     @CacheEvict(cacheNames = "flowers", allEntries = true)
-    public FlowerDetailResponse replaceMappings(Long flowerId, FlowerTagMappingUpdateRequest request) {
+    public AdminFlowerDetailResponse replaceMappings(Long flowerId, FlowerTagMappingUpdateRequest request) {
         Flower flower = getActiveFlower(flowerId);
         List<FlowerTagMappingItemRequest> items = request.tags();
         validateDuplicateTagIds(items);
@@ -126,12 +131,12 @@ public class AdminFlowerService {
         return authenticatedUserProvider.getCurrentUser().getId();
     }
 
-    private FlowerDetailResponse toDetailResponse(Flower flower) {
-        List<TagSummaryResponse> tags = mappingRepository.findByFlowerIdWithTag(flower.getId())
+    private AdminFlowerDetailResponse toDetailResponse(Flower flower) {
+        List<AdminFlowerTagMappingResponse> tags = mappingRepository.findByFlowerIdWithTag(flower.getId())
                 .stream()
-                .map(mapping -> TagSummaryResponse.from(mapping.getTag()))
+                .map(AdminFlowerTagMappingResponse::from)
                 .toList();
-        return FlowerDetailResponse.of(flower, tags);
+        return AdminFlowerDetailResponse.of(flower, tags);
     }
 
     private void validateDuplicateTagIds(List<FlowerTagMappingItemRequest> items) {

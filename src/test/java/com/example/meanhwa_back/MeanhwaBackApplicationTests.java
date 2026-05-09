@@ -137,7 +137,9 @@ class MeanhwaBackApplicationTests {
                 .andExpect(jsonPath("$.status").value(200))
                 .andExpect(jsonPath("$.data", hasSize(greaterThan(0))))
                 .andExpect(jsonPath("$.data[0].category").value("EVENT"))
-                .andExpect(jsonPath("$.data[0].tags", hasSize(greaterThan(0))));
+                .andExpect(jsonPath("$.data[0].tags", hasSize(greaterThan(0))))
+                .andExpect(jsonPath("$.data[*].category", hasItem("SEASON")))
+                .andExpect(jsonPath("$.data[*].category", hasItem("ENVIRONMENT")));
     }
 
     @Test
@@ -152,7 +154,20 @@ class MeanhwaBackApplicationTests {
                 .andExpect(jsonPath("$.data.content[0].score").value(10))
                 .andExpect(jsonPath("$.data.content[0].isPetSafe").value(true))
                 .andExpect(jsonPath("$.data.content[0].priceRange").value("MEDIUM"))
+                .andExpect(jsonPath("$.data.content[0].recommendationReason").isNotEmpty())
                 .andExpect(jsonPath("$.data.content[0].matchedTags", hasSize(2)));
+    }
+
+    @Test
+    void curateUsesSeasonAndEnvironmentTags() throws Exception {
+        mockMvc.perform(get("/api/v1/curation")
+                        .param("tagIds", "18", "22"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.content[0].flowerId").value(2))
+                .andExpect(jsonPath("$.data.content[0].score").value(10))
+                .andExpect(jsonPath("$.data.content[0].recommendationReason").isNotEmpty())
+                .andExpect(jsonPath("$.data.content[0].matchedTags[*].name", hasItem("여름")))
+                .andExpect(jsonPath("$.data.content[0].matchedTags[*].name", hasItem("실외")));
     }
 
     @Test
@@ -400,7 +415,21 @@ class MeanhwaBackApplicationTests {
                                 }
                                 """))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.tags", hasSize(2)));
+                .andExpect(jsonPath("$.data.tags", hasSize(2)))
+                .andExpect(jsonPath("$.data.tags[*].id", hasItem(1)))
+                .andExpect(jsonPath("$.data.tags[*].id", hasItem(10)))
+                .andExpect(jsonPath("$.data.tags[*].weight", hasItem(5)))
+                .andExpect(jsonPath("$.data.tags[*].weight", hasItem(3)));
+
+        mockMvc.perform(get("/api/v1/admin/flowers/{flowerId}", flowerId)
+                        .header("Authorization", bearer(admin.accessToken())))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.name").value("관리자테스트꽃수정"))
+                .andExpect(jsonPath("$.data.tags", hasSize(2)))
+                .andExpect(jsonPath("$.data.tags[*].id", hasItem(1)))
+                .andExpect(jsonPath("$.data.tags[0].category").exists())
+                .andExpect(jsonPath("$.data.tags[0].name").exists())
+                .andExpect(jsonPath("$.data.tags[*].weight", hasItem(5)));
 
         mockMvc.perform(get("/api/v1/flowers/{flowerId}", flowerId))
                 .andExpect(status().isOk())

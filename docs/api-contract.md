@@ -58,7 +58,7 @@ Enums:
 ```ts
 type ManagementLevel = "EASY" | "NORMAL" | "HARD";
 type PriceRange = "LOW" | "MEDIUM" | "HIGH" | "PREMIUM";
-type TagCategory = "EVENT" | "RELATION" | "EMOTION" | "STYLE" | "CARE";
+type TagCategory = "EVENT" | "RELATION" | "EMOTION" | "STYLE" | "CARE" | "SEASON" | "ENVIRONMENT";
 type Role = "ROLE_USER" | "ROLE_ADMIN";
 type OAuthProvider = "DEV" | "KAKAO" | "NAVER";
 ```
@@ -308,6 +308,7 @@ Response:
         "priceRange": "MEDIUM",
         "isPetSafe": true,
         "score": 10,
+        "recommendationReason": "연인 조건과 잘 맞고 5~10만원 예산대에 어울리는 추천입니다. 반려동물에게도 비교적 안전한 식물입니다.",
         "matchedTags": [
           {
             "id": 5,
@@ -326,7 +327,14 @@ Response:
 }
 ```
 
-`score` is the sum of matched flower-tag weights. If `tagIds` is omitted, matching flowers are returned with `score: 0`.
+`score` is the sum of matched flower-tag weights. `recommendationReason` is a short template-generated reason based on matched tags, price range, and pet safety. If `tagIds` is omitted, matching flowers are returned with `score: 0`.
+
+Season and environment are represented as tags:
+
+```text
+SEASON: 봄, 여름, 가을, 겨울
+ENVIRONMENT: 실내, 실외, 책상, 거실
+```
 
 ## Messages
 
@@ -424,11 +432,36 @@ Creates a flower. The backend records the admin user id in `created_by` and `upd
 }
 ```
 
-Response data uses `FlowerDetailResponse`.
+Response data uses `AdminFlowerDetailResponse`. It matches public flower detail fields, but `tags[]` includes mapping `weight`.
+
+```json
+{
+  "id": 1,
+  "name": "관리자테스트꽃",
+  "imageUrl": "https://cdn.meanhwa.example/admin-test.jpg",
+  "coreMeaning": "처음 의미",
+  "managementLevel": "EASY",
+  "managementInfo": "관리자 테스트 관리법",
+  "isPetSafe": true,
+  "priceRange": "LOW",
+  "tags": [
+    {
+      "id": 1,
+      "category": "EVENT",
+      "name": "생일",
+      "weight": 5
+    }
+  ]
+}
+```
+
+### GET /api/v1/admin/flowers/{flowerId}
+
+Returns `AdminFlowerDetailResponse` for CMS edit screens, including existing tag mapping weights.
 
 ### PUT /api/v1/admin/flowers/{flowerId}
 
-Updates flower metadata and records `updated_by`.
+Updates flower metadata, records `updated_by`, and returns `AdminFlowerDetailResponse`.
 
 ### DELETE /api/v1/admin/flowers/{flowerId}
 
@@ -453,7 +486,7 @@ Replaces all mappings.
 }
 ```
 
-`weight` must be from 1 to 5. Duplicate `tagId` values return `INVALID_MAPPING`.
+`weight` must be from 1 to 5. Duplicate `tagId` values return `INVALID_MAPPING`. Response data uses `AdminFlowerDetailResponse`, so CMS clients can render the saved `weight` values.
 
 ### POST /api/v1/admin/tags
 

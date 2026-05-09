@@ -5,5 +5,7 @@ public enum TagCategory {
     RELATION,
     EMOTION,
     STYLE,
-    CARE
+    CARE,
+    SEASON,
+    ENVIRONMENT
 }

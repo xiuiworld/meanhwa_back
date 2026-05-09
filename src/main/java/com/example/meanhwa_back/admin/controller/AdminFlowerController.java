@@ -1,16 +1,17 @@
 package com.example.meanhwa_back.admin.controller;
 
 import com.example.meanhwa_back.admin.dto.AdminFlowerRequest;
+import com.example.meanhwa_back.admin.dto.AdminFlowerDetailResponse;
 import com.example.meanhwa_back.admin.dto.FlowerTagMappingUpdateRequest;
 import com.example.meanhwa_back.admin.service.AdminFlowerService;
 import com.example.meanhwa_back.common.response.ApiResponse;
-import com.example.meanhwa_back.flower.dto.FlowerDetailResponse;
 
 import jakarta.validation.Valid;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -28,14 +29,19 @@ public class AdminFlowerController {
     }
 
     @PostMapping
-    public ResponseEntity<ApiResponse<FlowerDetailResponse>> createFlower(@Valid @RequestBody AdminFlowerRequest request) {
+    public ResponseEntity<ApiResponse<AdminFlowerDetailResponse>> createFlower(@Valid @RequestBody AdminFlowerRequest request) {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(ApiResponse.created(adminFlowerService.createFlower(request)));
     }
 
+    @GetMapping("/{flowerId}")
+    public ApiResponse<AdminFlowerDetailResponse> getFlower(@PathVariable Long flowerId) {
+        return ApiResponse.ok(adminFlowerService.getFlower(flowerId));
+    }
+
     @PutMapping("/{flowerId}")
-    public ApiResponse<FlowerDetailResponse> updateFlower(
+    public ApiResponse<AdminFlowerDetailResponse> updateFlower(
             @PathVariable Long flowerId,
             @Valid @RequestBody AdminFlowerRequest request
     ) {
@@ -49,7 +55,7 @@ public class AdminFlowerController {
     }
 
     @PutMapping("/{flowerId}/tags")
-    public ApiResponse<FlowerDetailResponse> replaceMappings(
+    public ApiResponse<AdminFlowerDetailResponse> replaceMappings(
             @PathVariable Long flowerId,
             @Valid @RequestBody FlowerTagMappingUpdateRequest request
     ) {

@@ -37,6 +37,8 @@ RELATION
 EMOTION
 STYLE
 CARE
+SEASON
+ENVIRONMENT
 ```
 
 ### `users.provider`
@@ -327,8 +329,8 @@ refresh API는 성공 시 토큰을 회전시키고 기존 refresh token을 폐�
 `src/main/resources/data.sql`은 테스트/local 초기 데이터를 제공합니다.
 
 - `flowers`: 20종
-- `tags`: 16개
-- `flower_tag_mappings`: 86개
+- `tags`: 24개
+- `flower_tag_mappings`: 146개
 
 테스트 프로필에서는 `spring.sql.init.mode=always`와 H2 in-memory DB를 사용해 seed 데이터가 매번 초기화됩니다.
 

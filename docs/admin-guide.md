@@ -97,6 +97,7 @@ WHERE provider = 'NAVER'
 
 ```http
 POST   /api/v1/admin/flowers
+GET    /api/v1/admin/flowers/{flowerId}
 PUT    /api/v1/admin/flowers/{flowerId}
 DELETE /api/v1/admin/flowers/{flowerId}
 PUT    /api/v1/admin/flowers/{flowerId}/tags
@@ -134,8 +135,11 @@ GET    /api/v1/admin/statistics/daily-active-users
 매핑 교체 API:
 
 ```http
+GET /api/v1/admin/flowers/{flowerId}
 PUT /api/v1/admin/flowers/{flowerId}/tags
 ```
+
+`GET /api/v1/admin/flowers/{flowerId}` 응답의 `tags[]`에는 기존 매핑의 `id`, `category`, `name`, `weight`가 포함됩니다. 수정 화면은 이 값을 사용해 기존 weight를 표시합니다.
 
 Request:
 
