@@ -85,7 +85,6 @@ flowVersion: "2026-05-v1"
 | `GET` | `/api/v1/curation/flow` | 플로우 메타(버전, 단계 정의, 분기 규칙 요약) |
 | `GET` | `/api/v1/curation/steps/{stepKey}/options` | 해당 단계 선택지 + 동적 질문 문구 |
 | `POST` | `/api/v1/curation/results` | 최종 선택으로 꽃 목록(점수·페이지) |
-| `GET` | `/api/v1/curation/results` | *(선택)* GET 호환용. POST 권장 |
 
 ---
 
@@ -169,7 +168,7 @@ flowVersion: "2026-05-v1"
 | Name | Type | Required | Description |
 | --- | --- | --- | --- |
 | `flowVersion` | string | no | 미지정 시 서버 최신 버전 |
-| `selections` | string (JSON) | 조건부 | 이전 단계 선택 배열 URL-encoded JSON |
+| `selections` | string (JSON) | 조건부 | 이전 단계 선택 배열 URL-encoded JSON. 현재/이후 단계가 포함되면 거절 |
 
 `selections` 예시 (Step3 요청 시):
 
@@ -193,6 +192,8 @@ GET /api/v1/curation/steps/EMOTION/options?selections=%5B%7B%22step%22%3A%22OCCA
 | `EMOTION` | `OCCASION` 필수 |
 | `FLOWER_MEANING` | `OCCASION`, `RECIPIENT`, `EMOTION` 필수 |
 | `SPACE`, `BUDGET` | 불필요 (질문 문구만 Step2 반영 가능) |
+
+전달된 이전 선택은 실제 분기표 기준으로 함께 검증합니다. 예: `OCCASION=PROMOTION`에서 허용되지 않는 `EMOTION=LOVE` 조합은 `INVALID_CURATION_SELECTION`입니다.
 
 ### Response `data`
 
@@ -227,7 +228,7 @@ GET /api/v1/curation/steps/EMOTION/options?selections=%5B%7B%22step%22%3A%22OCCA
 {
   "step": "FLOWER_MEANING",
   "questionTitle": "부모님에게 전달하고 싶은 꽃말은 무엇인가요?",
-  "questionSubtitle": null
+  "questionSubtitle": "전하고 싶은 마음을 조금 더 구체적으로 들려주세요."
 }
 ```
 
@@ -396,7 +397,7 @@ GET /api/v1/curation/steps/EMOTION/options?selections=%5B%7B%22step%22%3A%22OCCA
 | code | label |
 | --- | --- |
 | `RESPECT_1` | 깊은 존경 |
-| `RESPECT_2` | 영예와 인정 |
+| `RESPECT_2` | 명예와 인정 |
 | `RESPECT_3` | 굳건한 신뢰 |
 | `RESPECT_4` | 탄탄대로 |
 
@@ -431,7 +432,7 @@ GET /api/v1/curation/steps/EMOTION/options?selections=%5B%7B%22step%22%3A%22OCCA
 
 | code | label |
 | --- | --- |
-| `PROSPERITY_1` | 풍요와 번창 |
+| `PROSPERITY_1` | 풍요와 번영 |
 | `PROSPERITY_2` | 피어나는 기쁨 |
 | `PROSPERITY_3` | 번창하는 일상 |
 | `PROSPERITY_4` | 가정의 행복 |
@@ -565,7 +566,7 @@ GET /api/v1/curation/steps/EMOTION/options?selections=%5B%7B%22step%22%3A%22OCCA
 | --- | --- |
 | `TagCategory` | `MEANING` (꽃말 결) 추가 검토 |
 | `tags` | 상황·대상·마음·꽃말·공간 코드별 row + `code` 컬럼 |
-| `curation_option_rules` | (신규 테이블) `flow_version`, `step`, `parent_code`, `option_code`, `sort_order` |
+| 분기 규칙 | 이번 PR은 신규 테이블 없이 `flow-2026-05-v1.yml` 정적 카탈로그로 관리. `curation_option_rules`는 향후 운영 DB 관리가 필요할 때 확장 후보 |
 | `flower_tag_mappings` | 신규 태그에 weight 재설정 |
 | 기존 `GET /api/v1/tags` | 관리·사전용 유지, 위저드 UI는 **steps/options API** 사용 |
 

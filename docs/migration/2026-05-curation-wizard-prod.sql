@@ -160,7 +160,7 @@ INSERT INTO tags (category, name, code) SELECT 'MEANING', '영원한 사랑', 'E
 INSERT INTO tags (category, name, code) SELECT 'MEANING', '아름다운 시작', 'ETERNITY_3' FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM tags WHERE code = 'ETERNITY_3' AND deleted_at IS NULL);
 INSERT INTO tags (category, name, code) SELECT 'MEANING', '고귀한 인연', 'ETERNITY_4' FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM tags WHERE code = 'ETERNITY_4' AND deleted_at IS NULL);
 INSERT INTO tags (category, name, code) SELECT 'MEANING', '깊은 존경', 'RESPECT_1' FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM tags WHERE code = 'RESPECT_1' AND deleted_at IS NULL);
-INSERT INTO tags (category, name, code) SELECT 'MEANING', '영예와 인정', 'RESPECT_2' FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM tags WHERE code = 'RESPECT_2' AND deleted_at IS NULL);
+INSERT INTO tags (category, name, code) SELECT 'MEANING', '명예와 인정', 'RESPECT_2' FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM tags WHERE code = 'RESPECT_2' AND deleted_at IS NULL);
 INSERT INTO tags (category, name, code) SELECT 'MEANING', '굳건한 신뢰', 'RESPECT_3' FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM tags WHERE code = 'RESPECT_3' AND deleted_at IS NULL);
 INSERT INTO tags (category, name, code) SELECT 'MEANING', '탄탄대로', 'RESPECT_4' FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM tags WHERE code = 'RESPECT_4' AND deleted_at IS NULL);
 INSERT INTO tags (category, name, code) SELECT 'MEANING', '값진 노력', 'PRIDE_1' FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM tags WHERE code = 'PRIDE_1' AND deleted_at IS NULL);
@@ -175,7 +175,7 @@ INSERT INTO tags (category, name, code) SELECT 'MEANING', '평온한 일상', 'P
 INSERT INTO tags (category, name, code) SELECT 'MEANING', '편안한 공간', 'PEACE_2' FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM tags WHERE code = 'PEACE_2' AND deleted_at IS NULL);
 INSERT INTO tags (category, name, code) SELECT 'MEANING', '마음의 안정', 'PEACE_3' FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM tags WHERE code = 'PEACE_3' AND deleted_at IS NULL);
 INSERT INTO tags (category, name, code) SELECT 'MEANING', '따뜻한 온기', 'PEACE_4' FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM tags WHERE code = 'PEACE_4' AND deleted_at IS NULL);
-INSERT INTO tags (category, name, code) SELECT 'MEANING', '풍요와 번창', 'PROSPERITY_1' FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM tags WHERE code = 'PROSPERITY_1' AND deleted_at IS NULL);
+INSERT INTO tags (category, name, code) SELECT 'MEANING', '풍요와 번영', 'PROSPERITY_1' FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM tags WHERE code = 'PROSPERITY_1' AND deleted_at IS NULL);
 INSERT INTO tags (category, name, code) SELECT 'MEANING', '피어나는 기쁨', 'PROSPERITY_2' FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM tags WHERE code = 'PROSPERITY_2' AND deleted_at IS NULL);
 INSERT INTO tags (category, name, code) SELECT 'MEANING', '번창하는 일상', 'PROSPERITY_3' FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM tags WHERE code = 'PROSPERITY_3' AND deleted_at IS NULL);
 INSERT INTO tags (category, name, code) SELECT 'MEANING', '가정의 행복', 'PROSPERITY_4' FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM tags WHERE code = 'PROSPERITY_4' AND deleted_at IS NULL);
@@ -201,8 +201,10 @@ UPDATE tags SET name = '진심 어린 고마움' WHERE code = 'GRATITUDE_1' AND 
 UPDATE tags SET name = '함께해서 행복' WHERE code = 'GRATITUDE_2' AND deleted_at IS NULL;
 UPDATE tags SET name = '아낌없는 축복' WHERE code = 'BLESSING_3' AND deleted_at IS NULL;
 UPDATE tags SET name = '영원히 하나됨' WHERE code = 'ETERNITY_1' AND deleted_at IS NULL;
+UPDATE tags SET name = '명예와 인정' WHERE code = 'RESPECT_2' AND deleted_at IS NULL;
 UPDATE tags SET name = '탄탄대로' WHERE code = 'RESPECT_4' AND deleted_at IS NULL;
 UPDATE tags SET name = '밝은 앞날' WHERE code = 'LEAP_2' AND deleted_at IS NULL;
+UPDATE tags SET name = '풍요와 번영' WHERE code = 'PROSPERITY_1' AND deleted_at IS NULL;
 UPDATE tags SET name = '피어나는 기쁨' WHERE code = 'PROSPERITY_2' AND deleted_at IS NULL;
 UPDATE tags SET name = '따뜻한 위안' WHERE code = 'COMFORT_1' AND deleted_at IS NULL;
 UPDATE tags SET name = '평온한 휴식' WHERE code = 'COMFORT_3' AND deleted_at IS NULL;

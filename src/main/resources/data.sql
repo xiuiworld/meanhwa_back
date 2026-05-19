@@ -116,7 +116,7 @@ values
     (90, 'MEANING', '편안한 공간', 'PEACE_2'),
     (91, 'MEANING', '마음의 안정', 'PEACE_3'),
     (92, 'MEANING', '따뜻한 온기', 'PEACE_4'),
-    (93, 'MEANING', '풍요와 번창', 'PROSPERITY_1'),
+    (93, 'MEANING', '풍요와 번영', 'PROSPERITY_1'),
     (94, 'MEANING', '피어나는 기쁨', 'PROSPERITY_2'),
     (95, 'MEANING', '번창하는 일상', 'PROSPERITY_3'),
     (96, 'MEANING', '가정의 행복', 'PROSPERITY_4'),

@@ -386,6 +386,7 @@ ENVIRONMENT: 실내, 실외, 책상, 거실
 ### Curation wizard (v2, recommended)
 
 Six-step branching curation. Store selections by stable `code` (not `label`). Full option code tables and branch matrices: [curation-wizard-api.md](curation-wizard-api.md).
+Current branch rules are served from the static YAML catalog (`flow-2026-05-v1.yml`) plus `tags.code`/`flower_tag_mappings`; no `curation_option_rules` table is required for this PR.
 
 Current `flowVersion`: `2026-05-v1`. When the backend bumps the version, reset the client wizard state.
 
@@ -434,7 +435,7 @@ Query parameters:
 | Name | Type | Required | Notes |
 | --- | --- | --- | --- |
 | `flowVersion` | string | no | Defaults to latest |
-| `selections` | string | conditional | URL-encoded JSON array of prior `{ step, code }` |
+| `selections` | string | conditional | URL-encoded JSON array of prior `{ step, code }`; current/future steps are rejected |
 
 `selections` example (requesting Step3 `EMOTION` after birthday + lover):
 
@@ -508,6 +509,7 @@ Validation:
 
 - Exactly 6 selections, unique `step`, any order.
 - Invalid branch combination → `400` `INVALID_CURATION_SELECTION`.
+- Missing step → `400` `INCOMPLETE_CURATION_SELECTION`.
 - Step6 `BUDGET_*` applies `flowers.price_range` filter only (not tag score).
 
 Scoring (same engine as legacy curation):
@@ -621,12 +623,13 @@ Automatic logs (server records these **after a successful response**; 4xx/5xx ar
 | `CURATION_START` | `GET /api/v1/curation`, `POST /api/v1/curation/results` | 큐레이션 결과 목록이 정상 반환될 때 저장. 백오피스 통계(`curationCount` 등)에 사용. |
 | `DICTIONARY_SEARCH` | `GET /api/v1/flowers?keyword=...` | `keyword`가 비어 있으면 기록하지 않음(전체 목록 조회와 구분). |
 | `FLOWER_DETAIL_VIEW` | `GET /api/v1/flowers/{flowerId}` | `action_data`에 `flowerId` 포함. 인기 식물 집계에 사용. |
+| `ADMIN_USER_ROLE_CHANGE` | `PUT /api/v1/admin/users/{userId}/role` | 관리자 권한 변경 성공 시 저장. payload는 `actorUserId`, `targetUserId`, `previousRole`, `newRole` 포함. |
 
 `CURATION_START` payloads include `source`: `curation-legacy` (tag query) or `curation-v2` (wizard `selections` + `flowVersion`).  
 서버가 해당 API 성공 시 자동으로 넣으며, 프론트는 body로 보내지 않는다.  
 아래 클릭 로그 `POST`의 `source`와 문자열이 같을 필요는 없다.
 
-Authentication is optional for automatic logs as well: valid Bearer → `user_id` stored; otherwise anonymous (`user_id` null).
+Authentication is optional for public automatic logs: valid Bearer → `user_id` stored; otherwise anonymous (`user_id` null). Admin role-change audit logs require `ROLE_ADMIN`.
 
 Frontend click log:
 

@@ -1,5 +1,7 @@
 package com.example.meanhwa_back.admin.service;
 
+import java.util.Map;
+
 import com.example.meanhwa_back.admin.dto.AdminUserDetailResponse;
 import com.example.meanhwa_back.admin.dto.AdminUserRoleUpdateRequest;
 import com.example.meanhwa_back.admin.dto.AdminUserSummaryResponse;
@@ -8,6 +10,8 @@ import com.example.meanhwa_back.common.error.BusinessException;
 import com.example.meanhwa_back.common.error.ErrorCode;
 import com.example.meanhwa_back.common.response.PageResponse;
 import com.example.meanhwa_back.common.security.AuthenticatedUserProvider;
+import com.example.meanhwa_back.log.domain.ActionType;
+import com.example.meanhwa_back.log.service.ActionLogService;
 import com.example.meanhwa_back.user.domain.Role;
 import com.example.meanhwa_back.user.domain.User;
 import com.example.meanhwa_back.user.repository.UserHistoryRepository;
@@ -32,17 +36,20 @@ public class AdminUserService {
     private final UserLikeRepository userLikeRepository;
     private final UserHistoryRepository userHistoryRepository;
     private final AuthenticatedUserProvider authenticatedUserProvider;
+    private final ActionLogService actionLogService;
 
     public AdminUserService(
             UserRepository userRepository,
             UserLikeRepository userLikeRepository,
             UserHistoryRepository userHistoryRepository,
-            AuthenticatedUserProvider authenticatedUserProvider
+            AuthenticatedUserProvider authenticatedUserProvider,
+            ActionLogService actionLogService
     ) {
         this.userRepository = userRepository;
         this.userLikeRepository = userLikeRepository;
         this.userHistoryRepository = userHistoryRepository;
         this.authenticatedUserProvider = authenticatedUserProvider;
+        this.actionLogService = actionLogService;
     }
 
     /**
@@ -106,8 +113,22 @@ public class AdminUserService {
             }
         }
 
+        Role previousRole = target.getRole();
         target.updateRole(newRole);
+        recordRoleChangeIfNeeded(currentAdmin, target, previousRole, newRole);
         return getUser(userId);
+    }
+
+    private void recordRoleChangeIfNeeded(User currentAdmin, User target, Role previousRole, Role newRole) {
+        if (previousRole == newRole) {
+            return;
+        }
+        actionLogService.record(ActionType.ADMIN_USER_ROLE_CHANGE, Map.of(
+                "actorUserId", currentAdmin.getId(),
+                "targetUserId", target.getId(),
+                "previousRole", previousRole.name(),
+                "newRole", newRole.name()
+        ));
     }
 
     private User getUserOrThrow(Long userId) {

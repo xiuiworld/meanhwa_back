@@ -37,6 +37,9 @@ public class CurationSelectionParser {
         List<CurationSelectionDto> selections = parseList(decoded);
         Map<CurationStepKey, String> map = new EnumMap<>(CurationStepKey.class);
         for (CurationSelectionDto selection : selections) {
+            if (selection == null) {
+                throw new BusinessException(ErrorCode.INVALID_CURATION_SELECTION);
+            }
             CurationStepKey stepKey;
             try {
                 stepKey = CurationStepKey.from(selection.step());
@@ -45,6 +48,9 @@ public class CurationSelectionParser {
             }
             String code = selection.code() == null ? "" : selection.code().trim().toUpperCase();
             if (code.isBlank()) {
+                throw new BusinessException(ErrorCode.INVALID_CURATION_SELECTION);
+            }
+            if (map.containsKey(stepKey)) {
                 throw new BusinessException(ErrorCode.INVALID_CURATION_SELECTION);
             }
             map.put(stepKey, code);

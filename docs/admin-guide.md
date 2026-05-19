@@ -155,6 +155,7 @@ Content-Type: application/json
 - 본인 계정의 role은 이 API로 변경할 수 없습니다 (`CANNOT_CHANGE_OWN_ROLE`).
 - 마지막 남은 관리자는 일반 사용자로 내릴 수 없습니다 (`LAST_ADMIN_CANNOT_BE_DEMOTED`).
 - 변경 후 대상 사용자는 **재로그인**해야 JWT에 새 role이 반영됩니다.
+- 변경 성공 시 `ADMIN_USER_ROLE_CHANGE` 감사 로그가 저장됩니다.
 
 ## 식물 운영 정책
 

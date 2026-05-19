@@ -118,28 +118,17 @@ public class CurationFlowCatalog {
      * <p>{@code selections} 배열 순서와 무관하게, 전체 선택을 Map에 모은 뒤 검증한다.
      */
     public Map<CurationStepKey, String> validateCompleteSelections(List<CurationSelectionDto> selections) {
-        if (selections == null || selections.size() != document.getTotalSteps()) {
+        if (selections == null) {
             throw new BusinessException(ErrorCode.INCOMPLETE_CURATION_SELECTION);
         }
 
-        Map<CurationStepKey, String> byStep = new EnumMap<>(CurationStepKey.class);
-        for (CurationSelectionDto selection : selections) {
-            CurationStepKey stepKey = parseStepKey(selection.step());
-            if (byStep.containsKey(stepKey)) {
-                throw new BusinessException(ErrorCode.INVALID_CURATION_SELECTION);
-            }
-            String code = normalizeCode(selection.code());
-            byStep.put(stepKey, code);
-        }
-
+        Map<CurationStepKey, String> byStep = parseSelectionListToMap(selections);
         for (CurationStepKey required : CurationStepKey.values()) {
             if (!byStep.containsKey(required)) {
                 throw new BusinessException(ErrorCode.INCOMPLETE_CURATION_SELECTION);
             }
         }
-        for (Map.Entry<CurationStepKey, String> entry : byStep.entrySet()) {
-            assertOptionAllowed(entry.getKey(), byStep, entry.getValue());
-        }
+        validateSelectionPath(byStep);
         return byStep;
     }
 
@@ -149,6 +138,9 @@ public class CurationFlowCatalog {
      * 키 존재 여부뿐 아니라 {@code OCCASION} 분기표와 맞는 {@code RECIPIENT}/{@code EMOTION} 인지도 검증한다.
      */
     public void validatePriorSelectionsForOptions(CurationStepKey stepKey, Map<CurationStepKey, String> prior) {
+        rejectCurrentOrFutureSelections(stepKey, prior);
+        validateSelectionPath(prior);
+
         switch (stepKey) {
             case RECIPIENT, EMOTION -> requirePriorCode(prior, CurationStepKey.OCCASION);
             case FLOWER_MEANING -> assertFlowerMeaningPriorSelectionsConsistent(prior);
@@ -191,6 +183,44 @@ public class CurationFlowCatalog {
         boolean found = allowed.stream().anyMatch(option -> option.code().equals(code));
         if (!found) {
             throw new BusinessException(ErrorCode.INVALID_CURATION_SELECTION);
+        }
+    }
+
+    private Map<CurationStepKey, String> parseSelectionListToMap(List<CurationSelectionDto> selections) {
+        Map<CurationStepKey, String> byStep = new EnumMap<>(CurationStepKey.class);
+        for (CurationSelectionDto selection : selections) {
+            if (selection == null) {
+                throw new BusinessException(ErrorCode.INVALID_CURATION_SELECTION);
+            }
+            CurationStepKey stepKey = parseStepKey(selection.step());
+            if (byStep.containsKey(stepKey)) {
+                throw new BusinessException(ErrorCode.INVALID_CURATION_SELECTION);
+            }
+            byStep.put(stepKey, normalizeCode(selection.code()));
+        }
+        return byStep;
+    }
+
+    private void validateSelectionPath(Map<CurationStepKey, String> selections) {
+        Map<CurationStepKey, String> validatedPrior = new EnumMap<>(CurationStepKey.class);
+        for (CurationStepKey stepKey : CurationStepKey.values()) {
+            String code = selections.get(stepKey);
+            if (code == null) {
+                continue;
+            }
+            assertOptionAllowed(stepKey, validatedPrior, code);
+            validatedPrior.put(stepKey, code);
+        }
+    }
+
+    private void rejectCurrentOrFutureSelections(
+            CurationStepKey requestedStep,
+            Map<CurationStepKey, String> prior
+    ) {
+        for (CurationStepKey selectedStep : prior.keySet()) {
+            if (selectedStep.ordinal() >= requestedStep.ordinal()) {
+                throw new BusinessException(ErrorCode.INVALID_CURATION_SELECTION);
+            }
         }
     }
 

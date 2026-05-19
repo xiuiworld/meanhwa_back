@@ -39,7 +39,10 @@ class CurationWizardIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.flowVersion").value("2026-05-v1"))
                 .andExpect(jsonPath("$.data.totalSteps").value(6))
-                .andExpect(jsonPath("$.data.steps", hasSize(6)));
+                .andExpect(jsonPath("$.data.steps", hasSize(6)))
+                .andExpect(jsonPath("$.data.steps[2].defaultQuestionTitle").value("어떤 마음을 전하고 싶나요?"))
+                .andExpect(jsonPath("$.data.steps[3].defaultQuestionSubtitle")
+                        .value("전하고 싶은 마음을 조금 더 구체적으로 들려주세요."));
     }
 
     @Test
@@ -80,17 +83,52 @@ class CurationWizardIntegrationTest {
     }
 
     @Test
-    void getFlowerMeaningOptionsRejectsEmotionNotAllowedForOccasion() throws Exception {
-        // 승진(PROMOTION) 분기에는 LOVE 없음 — Step3 options 와 달리 Step4는 EMOTION 만 보고 꽃말을 만들 수 있어 추가 검증 필요
-        String selections = """
-                [
-                  {"step":"OCCASION","code":"PROMOTION"},
-                  {"step":"RECIPIENT","code":"COLLEAGUE_JUNIOR"},
-                  {"step":"EMOTION","code":"LOVE"}
-                ]
+    void postResultsAcceptsSelectionsRegardlessOfArrayOrder() throws Exception {
+        String body = """
+                {
+                  "flowVersion": "2026-05-v1",
+                  "selections": [
+                    { "step": "FLOWER_MEANING", "code": "LOVE_3" },
+                    { "step": "BUDGET", "code": "BUDGET_MEDIUM" },
+                    { "step": "SPACE", "code": "DESK_SMALL" },
+                    { "step": "EMOTION", "code": "LOVE" },
+                    { "step": "RECIPIENT", "code": "LOVER" },
+                    { "step": "OCCASION", "code": "BIRTHDAY" }
+                  ],
+                  "page": 0,
+                  "size": 5
+                }
                 """;
+        mockMvc.perform(post("/api/v1/curation/results")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.content", hasSize(greaterThan(0))));
+    }
+
+    @Test
+    void stepOptionsRejectInvalidPriorBranchCombination() throws Exception {
         mockMvc.perform(get("/api/v1/curation/steps/FLOWER_MEANING/options")
-                        .param("selections", selections))
+                        .param("selections", """
+                                [
+                                  { "step": "OCCASION", "code": "PROMOTION" },
+                                  { "step": "RECIPIENT", "code": "COLLEAGUE_JUNIOR" },
+                                  { "step": "EMOTION", "code": "LOVE" }
+                                ]
+                                """))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errorCode").value("INVALID_CURATION_SELECTION"));
+    }
+
+    @Test
+    void stepOptionsRejectCurrentOrFutureSelections() throws Exception {
+        mockMvc.perform(get("/api/v1/curation/steps/EMOTION/options")
+                        .param("selections", """
+                                [
+                                  { "step": "OCCASION", "code": "BIRTHDAY" },
+                                  { "step": "EMOTION", "code": "LOVE" }
+                                ]
+                                """))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errorCode").value("INVALID_CURATION_SELECTION"));
     }
@@ -113,27 +151,104 @@ class CurationWizardIntegrationTest {
     }
 
     @Test
-    void postResultsAcceptsSelectionsInAnyArrayOrder() throws Exception {
+    void duplicateStepReturnsInvalidCurationSelection() throws Exception {
         String body = """
                 {
                   "flowVersion": "2026-05-v1",
                   "selections": [
-                    { "step": "BUDGET", "code": "BUDGET_MEDIUM" },
-                    { "step": "SPACE", "code": "DESK_SMALL" },
-                    { "step": "FLOWER_MEANING", "code": "LOVE_3" },
-                    { "step": "EMOTION", "code": "LOVE" },
+                    { "step": "OCCASION", "code": "BIRTHDAY" },
+                    { "step": "OCCASION", "code": "GRADUATION" },
                     { "step": "RECIPIENT", "code": "LOVER" },
-                    { "step": "OCCASION", "code": "BIRTHDAY" }
-                  ],
-                  "page": 0,
-                  "size": 5
+                    { "step": "EMOTION", "code": "LOVE" },
+                    { "step": "FLOWER_MEANING", "code": "LOVE_3" },
+                    { "step": "SPACE", "code": "DESK_SMALL" }
+                  ]
                 }
                 """;
         mockMvc.perform(post("/api/v1/curation/results")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errorCode").value("INVALID_CURATION_SELECTION"));
+    }
+
+    @Test
+    void missingStepReturnsIncompleteCurationSelection() throws Exception {
+        String body = """
+                {
+                  "flowVersion": "2026-05-v1",
+                  "selections": [
+                    { "step": "OCCASION", "code": "BIRTHDAY" },
+                    { "step": "RECIPIENT", "code": "LOVER" },
+                    { "step": "EMOTION", "code": "LOVE" },
+                    { "step": "FLOWER_MEANING", "code": "LOVE_3" },
+                    { "step": "SPACE", "code": "DESK_SMALL" }
+                  ]
+                }
+                """;
+        mockMvc.perform(post("/api/v1/curation/results")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errorCode").value("INCOMPLETE_CURATION_SELECTION"));
+    }
+
+    @Test
+    void flowerMeaningOptionsUsePdfLabels() throws Exception {
+        mockMvc.perform(get("/api/v1/curation/steps/FLOWER_MEANING/options")
+                        .param("selections", """
+                                [
+                                  { "step": "OCCASION", "code": "BIRTHDAY" },
+                                  { "step": "RECIPIENT", "code": "LOVER" },
+                                  { "step": "EMOTION", "code": "LOVE" }
+                                ]
+                                """))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.content", hasSize(greaterThan(0))));
+                .andExpect(jsonPath("$.data.questionTitle").value("연인에게 전달하고 싶은 꽃말은 무엇인가요?"))
+                .andExpect(jsonPath("$.data.questionSubtitle")
+                        .value("전하고 싶은 마음을 조금 더 구체적으로 들려주세요."))
+                .andExpect(jsonPath("$.data.options[0].code").value("LOVE_1"))
+                .andExpect(jsonPath("$.data.options[0].label").value("변함없는 마음"))
+                .andExpect(jsonPath("$.data.options[3].code").value("LOVE_4"))
+                .andExpect(jsonPath("$.data.options[3].label").value("진실한 사랑"));
+
+        mockMvc.perform(get("/api/v1/curation/steps/FLOWER_MEANING/options")
+                        .param("selections", """
+                                [
+                                  { "step": "OCCASION", "code": "BIRTHDAY" },
+                                  { "step": "RECIPIENT", "code": "FRIEND" },
+                                  { "step": "EMOTION", "code": "SUPPORT" }
+                                ]
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.options[1].code").value("SUPPORT_2"))
+                .andExpect(jsonPath("$.data.options[1].label").value("변치 않는 우정"))
+                .andExpect(jsonPath("$.data.options[2].code").value("SUPPORT_3"))
+                .andExpect(jsonPath("$.data.options[2].label").value("찬란한 미소"));
+
+        mockMvc.perform(get("/api/v1/curation/steps/FLOWER_MEANING/options")
+                        .param("selections", """
+                                [
+                                  { "step": "OCCASION", "code": "RECOVERY" },
+                                  { "step": "RECIPIENT", "code": "FAMILY" },
+                                  { "step": "EMOTION", "code": "COMFORT" }
+                                ]
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.options[3].code").value("COMFORT_4"))
+                .andExpect(jsonPath("$.data.options[3].label").value("마음의 안계"));
+
+        mockMvc.perform(get("/api/v1/curation/steps/FLOWER_MEANING/options")
+                        .param("selections", """
+                                [
+                                  { "step": "OCCASION", "code": "RECOVERY" },
+                                  { "step": "RECIPIENT", "code": "FAMILY" },
+                                  { "step": "EMOTION", "code": "GET_WELL" }
+                                ]
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.options[1].code").value("GET_WELL_2"))
+                .andExpect(jsonPath("$.data.options[1].label").value("다시 찾은 활력"));
     }
 
     @Test

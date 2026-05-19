@@ -2,6 +2,9 @@ package com.example.meanhwa_back.admin;
 
 import java.nio.charset.StandardCharsets;
 
+import com.example.meanhwa_back.log.domain.ActionLog;
+import com.example.meanhwa_back.log.domain.ActionType;
+import com.example.meanhwa_back.log.repository.ActionLogRepository;
 import com.example.meanhwa_back.user.domain.Role;
 import com.example.meanhwa_back.user.repository.UserRepository;
 import com.jayway.jsonpath.JsonPath;
@@ -14,6 +17,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -33,6 +37,9 @@ class AdminUserManagementIntegrationTest {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private ActionLogRepository actionLogRepository;
+
     @Test
     void nonAdminCannotListUsers() throws Exception {
         String token = login("admin-user-deny-list", Role.ROLE_USER.name());
@@ -44,9 +51,14 @@ class AdminUserManagementIntegrationTest {
     @Test
     void adminListsUsersAndUpdatesRole() throws Exception {
         String targetOauthId = "admin-target-user-1";
-        String adminToken = login("admin-operator-1", Role.ROLE_ADMIN.name());
+        String adminOauthId = "admin-operator-1";
+        String adminToken = login(adminOauthId, Role.ROLE_ADMIN.name());
         login(targetOauthId, Role.ROLE_USER.name());
 
+        Long adminUserId = userRepository.findByProviderAndOauthId(
+                com.example.meanhwa_back.auth.domain.OAuthProvider.DEV,
+                adminOauthId
+        ).orElseThrow().getId();
         Long targetUserId = userRepository.findByProviderAndOauthId(
                 com.example.meanhwa_back.auth.domain.OAuthProvider.DEV,
                 targetOauthId
@@ -65,6 +77,7 @@ class AdminUserManagementIntegrationTest {
                 .andExpect(jsonPath("$.data.id").value(targetUserId))
                 .andExpect(jsonPath("$.data.likeCount").isNumber());
 
+        long beforeRoleChangeLogCount = actionLogRepository.countByActionType(ActionType.ADMIN_USER_ROLE_CHANGE);
         mockMvc.perform(put("/api/v1/admin/users/{userId}/role", targetUserId)
                         .header("Authorization", "Bearer " + adminToken)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -74,9 +87,20 @@ class AdminUserManagementIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.role").value("ROLE_ADMIN"));
 
-        org.assertj.core.api.Assertions.assertThat(
+        assertThat(
                 userRepository.findById(targetUserId).orElseThrow().getRole()
         ).isEqualTo(Role.ROLE_ADMIN);
+        ActionLog latestRoleChangeLog = actionLogRepository
+                .findByActionTypeOrderByIdDesc(ActionType.ADMIN_USER_ROLE_CHANGE)
+                .get(0);
+        assertThat(actionLogRepository.countByActionType(ActionType.ADMIN_USER_ROLE_CHANGE))
+                .isEqualTo(beforeRoleChangeLogCount + 1);
+        assertThat(latestRoleChangeLog.getUserId()).isEqualTo(adminUserId);
+        assertThat(latestRoleChangeLog.getActionData())
+                .contains("\"actorUserId\":" + adminUserId)
+                .contains("\"targetUserId\":" + targetUserId)
+                .contains("\"previousRole\":\"ROLE_USER\"")
+                .contains("\"newRole\":\"ROLE_ADMIN\"");
     }
 
     @Test
@@ -87,6 +111,7 @@ class AdminUserManagementIntegrationTest {
                 "admin-self-role-1"
         ).orElseThrow().getId();
 
+        long beforeRoleChangeLogCount = actionLogRepository.countByActionType(ActionType.ADMIN_USER_ROLE_CHANGE);
         mockMvc.perform(put("/api/v1/admin/users/{userId}/role", adminId)
                         .header("Authorization", "Bearer " + adminToken)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -95,6 +120,8 @@ class AdminUserManagementIntegrationTest {
                                 """))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errorCode").value("CANNOT_CHANGE_OWN_ROLE"));
+        assertThat(actionLogRepository.countByActionType(ActionType.ADMIN_USER_ROLE_CHANGE))
+                .isEqualTo(beforeRoleChangeLogCount);
     }
 
     private String login(String oauthId, String role) throws Exception {
