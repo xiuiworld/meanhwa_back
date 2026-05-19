@@ -252,9 +252,67 @@ public class CurationFlowCatalog {
             if (loaded.getFlowVersion() == null || loaded.getFlowVersion().isBlank()) {
                 throw new IllegalStateException("flowVersion이 비어 있습니다: " + classpathLocation);
             }
+            normalizeYamlTypes(loaded);
             return loaded;
         } catch (IOException exception) {
             throw new IllegalStateException("큐레이션 플로우 YAML 로드 실패: " + classpathLocation, exception);
         }
+    }
+
+    /**
+     * SnakeYAML은 중첩 리스트 항목을 {@link CurationFlowDocument.OptionDocument} 대신 Map으로 넣는 경우가 있어
+     * 런타임 {@link ClassCastException}을 방지한다.
+     */
+    private static void normalizeYamlTypes(CurationFlowDocument document) {
+        document.setOccasionOptions(coerceOptionList(document.getOccasionOptions()));
+        document.setRecipientBranches(coerceBranchMap(document.getRecipientBranches()));
+        document.setEmotionBranches(coerceBranchMap(document.getEmotionBranches()));
+        document.setSpaceOptions(coerceOptionList(document.getSpaceOptions()));
+        document.setBudgetOptions(coerceOptionList(document.getBudgetOptions()));
+    }
+
+    private static Map<String, List<CurationFlowDocument.OptionDocument>> coerceBranchMap(
+            Map<String, List<CurationFlowDocument.OptionDocument>> branches
+    ) {
+        if (branches == null || branches.isEmpty()) {
+            return Map.of();
+        }
+        Map<String, List<CurationFlowDocument.OptionDocument>> normalized = new LinkedHashMap<>();
+        for (Map.Entry<String, List<CurationFlowDocument.OptionDocument>> entry : branches.entrySet()) {
+            normalized.put(entry.getKey(), coerceOptionList(entry.getValue()));
+        }
+        return Map.copyOf(normalized);
+    }
+
+    private static List<CurationFlowDocument.OptionDocument> coerceOptionList(
+            List<CurationFlowDocument.OptionDocument> options
+    ) {
+        if (options == null || options.isEmpty()) {
+            return List.of();
+        }
+        List<CurationFlowDocument.OptionDocument> normalized = new ArrayList<>(options.size());
+        for (Object option : options) {
+            normalized.add(coerceOption(option));
+        }
+        return List.copyOf(normalized);
+    }
+
+    private static CurationFlowDocument.OptionDocument coerceOption(Object option) {
+        if (option instanceof CurationFlowDocument.OptionDocument document) {
+            return document;
+        }
+        if (option instanceof Map<?, ?> map) {
+            CurationFlowDocument.OptionDocument document = new CurationFlowDocument.OptionDocument();
+            Object code = map.get("code");
+            Object label = map.get("label");
+            if (code != null) {
+                document.setCode(String.valueOf(code));
+            }
+            if (label != null) {
+                document.setLabel(String.valueOf(label));
+            }
+            return document;
+        }
+        throw new IllegalStateException("지원하지 않는 옵션 타입: " + option.getClass().getName());
     }
 }
