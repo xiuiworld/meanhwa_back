@@ -25,6 +25,7 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/** 관리자 꽃 등록·수정·삭제 및 태그 매핑 일괄 교체. */
 @Service
 public class AdminFlowerService {
     private final FlowerRepository flowerRepository;

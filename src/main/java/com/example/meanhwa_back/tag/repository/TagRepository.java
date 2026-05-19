@@ -57,4 +57,20 @@ public interface TagRepository extends JpaRepository<Tag, Long> {
             @Param("name") String name,
             @Param("excludedId") Long excludedId
     );
+
+    @Query("""
+            select t
+            from Tag t
+            where t.code = :code
+              and t.deletedAt is null
+            """)
+    Optional<Tag> findActiveByCode(@Param("code") String code);
+
+    @Query("""
+            select t
+            from Tag t
+            where t.code in :codes
+              and t.deletedAt is null
+            """)
+    List<Tag> findActiveByCodeIn(@Param("codes") Collection<String> codes);
 }

@@ -12,6 +12,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
+/** 꽃-태그 연관 및 큐레이션 가중치(weight). */
 @Entity
 @Table(
         name = "flower_tag_mappings",

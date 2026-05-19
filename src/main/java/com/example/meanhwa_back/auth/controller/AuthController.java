@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+/** 로그인·토큰 갱신·로그아웃 REST API. */
 @RestController
 @RequestMapping("/api/v1/auth")
 public class AuthController {

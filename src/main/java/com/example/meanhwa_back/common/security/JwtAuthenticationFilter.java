@@ -18,6 +18,10 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+/**
+ * Authorization 헤더의 Bearer JWT를 검증하고 SecurityContext에 인증 정보를 설정한다.
+ * 토큰이 없으면 비인증 상태로 다음 필터로 넘긴다.
+ */
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private static final String AUTHORIZATION_HEADER = "Authorization";

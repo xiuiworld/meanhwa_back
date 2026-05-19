@@ -58,3 +58,9 @@ app:
     model: ${OPENAI_MODEL:gpt-5.4-mini}
     timeout-millis: ${OPENAI_TIMEOUT_MILLIS:5000}
     max-output-tokens: ${OPENAI_MAX_OUTPUT_TOKENS:300}
+  message:
+    rate-limit:
+      enabled: true
+      max-requests: 10
+      window: 1h
+      store: redis

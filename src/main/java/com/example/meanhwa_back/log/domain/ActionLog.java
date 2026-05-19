@@ -14,6 +14,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.Table;
 
+/** 사용자·비로그인 행동 이벤트 로그 (actionData는 JSON). */
 @Entity
 @Table(
         name = "action_logs",

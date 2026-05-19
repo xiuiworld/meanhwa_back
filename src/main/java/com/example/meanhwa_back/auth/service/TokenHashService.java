@@ -7,6 +7,7 @@ import java.util.Base64;
 
 import org.springframework.stereotype.Component;
 
+/** Refresh 토큰 원문 대신 DB에 저장할 SHA-256 해시 생성. */
 @Component
 public class TokenHashService {
 

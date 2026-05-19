@@ -11,6 +11,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
+/** 큐레이션·메시지 생성에 사용하는 태그. soft delete 지원. */
 @Entity
 @Table(name = "tags")
 public class Tag {
@@ -25,6 +26,13 @@ public class Tag {
     @Column(nullable = false, length = 50)
     private String name;
 
+    /**
+     * 위저드·API 공통 식별 코드 (예: {@code BIRTHDAY}, {@code LOVE_3}).
+     * 레거시 태그(스타일·계절 등)는 null 가능.
+     */
+    @Column(length = 80, unique = true)
+    private String code;
+
     private LocalDateTime deletedAt;
 
     protected Tag() {
@@ -33,6 +41,12 @@ public class Tag {
     public Tag(TagCategory category, String name) {
         this.category = category;
         this.name = name;
+    }
+
+    public Tag(TagCategory category, String name, String code) {
+        this.category = category;
+        this.name = name;
+        this.code = code;
     }
 
     public Long getId() {
@@ -45,6 +59,10 @@ public class Tag {
 
     public String getName() {
         return name;
+    }
+
+    public String getCode() {
+        return code;
     }
 
     public LocalDateTime getDeletedAt() {

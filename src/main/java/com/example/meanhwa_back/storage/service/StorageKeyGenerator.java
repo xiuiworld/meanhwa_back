@@ -5,6 +5,7 @@ import java.util.UUID;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
+/** S3 객체 키(경로) 생성. */
 @Component
 public class StorageKeyGenerator {
     public String generateImageKey(MultipartFile file) {

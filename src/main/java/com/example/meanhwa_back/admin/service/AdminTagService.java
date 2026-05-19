@@ -12,6 +12,7 @@ import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/** 관리자 태그 등록·수정·삭제 (태그 캐시 evict). */
 @Service
 public class AdminTagService {
     private final TagRepository tagRepository;

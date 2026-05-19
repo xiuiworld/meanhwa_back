@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
 
+/** 카카오 OAuth 사용자 정보 API 클라이언트. */
 @Component
 public class KakaoOAuthClient implements OAuthClient {
     private final OAuthProperties properties;

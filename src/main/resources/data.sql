@@ -21,32 +21,113 @@ values
     (19, '칼라디움', 'https://cdn.meanhwa.example/plants/caladium.jpg', '기쁨과 섬세함', 'HARD', '높은 습도와 따뜻한 환경을 좋아하며 찬바람을 피해야 합니다.', true, 'MEDIUM', current_timestamp, current_timestamp),
     (20, '로즈마리', 'https://cdn.meanhwa.example/plants/rosemary.jpg', '기억과 응원', 'EASY', '햇빛과 통풍을 좋아하고 흙이 충분히 마른 뒤 물을 주세요.', false, 'LOW', current_timestamp, current_timestamp);
 
-insert into tags (id, category, name)
+-- tags.code: 위저드 선택 code ↔ DB 태그 (P2). null은 사전·레거시 전용 태그.
+insert into tags (id, category, name, code)
 values
-    (1, 'EVENT', '생일'),
-    (2, 'EVENT', '졸업'),
-    (3, 'EVENT', '집들이'),
-    (4, 'EVENT', '승진'),
-    (5, 'RELATION', '연인'),
-    (6, 'RELATION', '친구'),
-    (7, 'RELATION', '부모님'),
-    (8, 'RELATION', '동료'),
-    (9, 'EMOTION', '사랑'),
-    (10, 'EMOTION', '감사'),
-    (11, 'EMOTION', '위로'),
-    (12, 'EMOTION', '응원'),
-    (13, 'STYLE', '화사한'),
-    (14, 'STYLE', '차분한'),
-    (15, 'CARE', '초보자'),
-    (16, 'CARE', '반려동물 안전'),
-    (17, 'SEASON', '봄'),
-    (18, 'SEASON', '여름'),
-    (19, 'SEASON', '가을'),
-    (20, 'SEASON', '겨울'),
-    (21, 'ENVIRONMENT', '실내'),
-    (22, 'ENVIRONMENT', '실외'),
-    (23, 'ENVIRONMENT', '책상'),
-    (24, 'ENVIRONMENT', '거실');
+    (1, 'EVENT', '생일', 'BIRTHDAY'),
+    (2, 'EVENT', '졸업', 'GRADUATION'),
+    (3, 'EVENT', '집들이', 'HOUSEWARMING'),
+    (4, 'EVENT', '승진', 'PROMOTION'),
+    (5, 'RELATION', '연인', 'LOVER'),
+    (6, 'RELATION', '친구', 'FRIEND'),
+    (7, 'RELATION', '부모님', 'PARENT'),
+    (8, 'RELATION', '동료', 'COLLEAGUE'),
+    (9, 'EMOTION', '사랑', 'LOVE'),
+    (10, 'EMOTION', '감사', 'GRATITUDE'),
+    (11, 'EMOTION', '위로', 'COMFORT'),
+    (12, 'EMOTION', '응원', 'SUPPORT'),
+    (13, 'STYLE', '화사한', null),
+    (14, 'STYLE', '차분한', null),
+    (15, 'CARE', '초보자', null),
+    (16, 'CARE', '반려동물 안전', null),
+    (17, 'SEASON', '봄', null),
+    (18, 'SEASON', '여름', null),
+    (19, 'SEASON', '가을', null),
+    (20, 'SEASON', '겨울', null),
+    (21, 'ENVIRONMENT', '실내', null),
+    (22, 'ENVIRONMENT', '실외', 'BALCONY_OUTDOOR'),
+    (23, 'ENVIRONMENT', '책상', 'DESK_SMALL'),
+    (24, 'ENVIRONMENT', '거실', 'LIVING_ROOM'),
+    (25, 'EVENT', '결혼', 'WEDDING'),
+    (26, 'EVENT', '병문안·회복', 'RECOVERY'),
+    (27, 'RELATION', '가족', 'FAMILY'),
+    (28, 'RELATION', '선후배·스승', 'SENIOR_JUNIOR_MENTOR'),
+    (29, 'RELATION', '동료·후배', 'COLLEAGUE_JUNIOR'),
+    (30, 'RELATION', '상사·선배', 'BOSS_SENIOR'),
+    (31, 'RELATION', '친구·지인', 'FRIEND_ACQUAINTANCE'),
+    (32, 'RELATION', '은사·귀빈', 'VIP_MENTOR'),
+    (33, 'EMOTION', '축하', 'CELEBRATION'),
+    (34, 'EMOTION', '격려', 'ENCOURAGEMENT'),
+    (35, 'EMOTION', '도약', 'LEAP'),
+    (36, 'EMOTION', '존경', 'RESPECT'),
+    (37, 'EMOTION', '자부심', 'PRIDE'),
+    (38, 'EMOTION', '축복', 'BLESSING'),
+    (39, 'EMOTION', '진심', 'SINCERITY'),
+    (40, 'EMOTION', '영원', 'ETERNITY'),
+    (41, 'EMOTION', '평온', 'PEACE'),
+    (42, 'EMOTION', '번창', 'PROSPERITY'),
+    (43, 'EMOTION', '쾌유', 'GET_WELL'),
+    (44, 'ENVIRONMENT', '창가·밝은 실내', 'WINDOW_BRIGHT'),
+    (45, 'MEANING', '변치 않는 마음', 'LOVE_1'),
+    (46, 'MEANING', '첫사랑의 설렘', 'LOVE_2'),
+    (47, 'MEANING', '소중한 당신', 'LOVE_3'),
+    (48, 'MEANING', '진정한 사랑', 'LOVE_4'),
+    (49, 'MEANING', '언제나 응원해', 'SUPPORT_1'),
+    (50, 'MEANING', '변함없는 우정', 'SUPPORT_2'),
+    (51, 'MEANING', '환한 미소', 'SUPPORT_3'),
+    (52, 'MEANING', '일상의 행복', 'SUPPORT_4'),
+    (53, 'MEANING', '용기와 자신감', 'ENCOURAGEMENT_1'),
+    (54, 'MEANING', '새로운 도전', 'ENCOURAGEMENT_2'),
+    (55, 'MEANING', '당당한 걸음', 'ENCOURAGEMENT_3'),
+    (56, 'MEANING', '무한한 가능성', 'ENCOURAGEMENT_4'),
+    (57, 'MEANING', '밝은 축하', 'CELEBRATION_1'),
+    (58, 'MEANING', '빛나는 성취', 'CELEBRATION_2'),
+    (59, 'MEANING', '새로운 시작', 'CELEBRATION_3'),
+    (60, 'MEANING', '함께하는 기쁨', 'CELEBRATION_4'),
+    (61, 'MEANING', '진심 어린 감사', 'GRATITUDE_1'),
+    (62, 'MEANING', '함께해서 행복해', 'GRATITUDE_2'),
+    (63, 'MEANING', '오래된 인연', 'GRATITUDE_3'),
+    (64, 'MEANING', '따뜻한 기억', 'GRATITUDE_4'),
+    (65, 'MEANING', '행복한 시작', 'BLESSING_1'),
+    (66, 'MEANING', '아름다운 인연', 'BLESSING_2'),
+    (67, 'MEANING', '넉넉한 축복', 'BLESSING_3'),
+    (68, 'MEANING', '조화와 화합', 'BLESSING_4'),
+    (69, 'MEANING', '진심을 담아', 'SINCERITY_1'),
+    (70, 'MEANING', '소중한 인연', 'SINCERITY_2'),
+    (71, 'MEANING', '영원한 약속', 'SINCERITY_3'),
+    (72, 'MEANING', '고귀한 사랑', 'SINCERITY_4'),
+    (73, 'MEANING', '영원히 하나 되기를', 'ETERNITY_1'),
+    (74, 'MEANING', '영원한 사랑', 'ETERNITY_2'),
+    (75, 'MEANING', '아름다운 시작', 'ETERNITY_3'),
+    (76, 'MEANING', '고귀한 인연', 'ETERNITY_4'),
+    (77, 'MEANING', '깊은 존경', 'RESPECT_1'),
+    (78, 'MEANING', '영예와 인정', 'RESPECT_2'),
+    (79, 'MEANING', '굳건한 신뢰', 'RESPECT_3'),
+    (80, 'MEANING', '굳건한 길', 'RESPECT_4'),
+    (81, 'MEANING', '값진 노력', 'PRIDE_1'),
+    (82, 'MEANING', '빛나는 성공', 'PRIDE_2'),
+    (83, 'MEANING', '끊임없는 성장', 'PRIDE_3'),
+    (84, 'MEANING', '위풍당당', 'PRIDE_4'),
+    (85, 'MEANING', '희망과 도약', 'LEAP_1'),
+    (86, 'MEANING', '밝은 미래', 'LEAP_2'),
+    (87, 'MEANING', '무한한 가능성', 'LEAP_3'),
+    (88, 'MEANING', '꿈을 향해', 'LEAP_4'),
+    (89, 'MEANING', '평온한 일상', 'PEACE_1'),
+    (90, 'MEANING', '편안한 공간', 'PEACE_2'),
+    (91, 'MEANING', '마음의 안정', 'PEACE_3'),
+    (92, 'MEANING', '따뜻한 온기', 'PEACE_4'),
+    (93, 'MEANING', '풍요와 번창', 'PROSPERITY_1'),
+    (94, 'MEANING', '꽃피는 기쁨', 'PROSPERITY_2'),
+    (95, 'MEANING', '번창하는 일상', 'PROSPERITY_3'),
+    (96, 'MEANING', '가정의 행복', 'PROSPERITY_4'),
+    (97, 'MEANING', '따뜻한 위로', 'COMFORT_1'),
+    (98, 'MEANING', '깊은 배려', 'COMFORT_2'),
+    (99, 'MEANING', '편안한 쉼', 'COMFORT_3'),
+    (100, 'MEANING', '마음의 안식', 'COMFORT_4'),
+    (101, 'MEANING', '빠른 회복', 'GET_WELL_1'),
+    (102, 'MEANING', '되찾은 활력', 'GET_WELL_2'),
+    (103, 'MEANING', '건강한 내일', 'GET_WELL_3'),
+    (104, 'MEANING', '희망의 빛', 'GET_WELL_4');
 
 insert into flower_tag_mappings (id, flower_id, tag_id, weight)
 values
@@ -90,3 +171,85 @@ values
     (138, 18, 20, 5), (139, 18, 21, 5), (140, 18, 23, 4),
     (141, 19, 18, 5), (142, 19, 21, 4), (143, 19, 24, 4),
     (144, 20, 19, 5), (145, 20, 22, 4), (146, 20, 23, 3);
+
+-- 위저드 신규 태그: 기존 유사 태그 매핑을 복제해 초기 추천 점수를 채운다.
+insert into flower_tag_mappings (flower_id, tag_id, weight) select flower_id, 25, weight from flower_tag_mappings where tag_id = 1;
+insert into flower_tag_mappings (flower_id, tag_id, weight) select flower_id, 26, weight from flower_tag_mappings where tag_id = 11;
+insert into flower_tag_mappings (flower_id, tag_id, weight) select flower_id, 27, weight from flower_tag_mappings where tag_id = 7;
+insert into flower_tag_mappings (flower_id, tag_id, weight) select flower_id, 28, weight from flower_tag_mappings where tag_id = 8;
+insert into flower_tag_mappings (flower_id, tag_id, weight) select flower_id, 29, weight from flower_tag_mappings where tag_id = 8;
+insert into flower_tag_mappings (flower_id, tag_id, weight) select flower_id, 30, weight from flower_tag_mappings where tag_id = 8;
+insert into flower_tag_mappings (flower_id, tag_id, weight) select flower_id, 31, weight from flower_tag_mappings where tag_id = 6;
+insert into flower_tag_mappings (flower_id, tag_id, weight) select flower_id, 32, weight from flower_tag_mappings where tag_id = 7;
+insert into flower_tag_mappings (flower_id, tag_id, weight) select flower_id, 33, weight from flower_tag_mappings where tag_id = 12;
+insert into flower_tag_mappings (flower_id, tag_id, weight) select flower_id, 34, weight from flower_tag_mappings where tag_id = 12;
+insert into flower_tag_mappings (flower_id, tag_id, weight) select flower_id, 35, weight from flower_tag_mappings where tag_id = 12;
+insert into flower_tag_mappings (flower_id, tag_id, weight) select flower_id, 36, weight from flower_tag_mappings where tag_id = 10;
+insert into flower_tag_mappings (flower_id, tag_id, weight) select flower_id, 37, weight from flower_tag_mappings where tag_id = 12;
+insert into flower_tag_mappings (flower_id, tag_id, weight) select flower_id, 38, weight from flower_tag_mappings where tag_id = 9;
+insert into flower_tag_mappings (flower_id, tag_id, weight) select flower_id, 39, weight from flower_tag_mappings where tag_id = 9;
+insert into flower_tag_mappings (flower_id, tag_id, weight) select flower_id, 40, weight from flower_tag_mappings where tag_id = 9;
+insert into flower_tag_mappings (flower_id, tag_id, weight) select flower_id, 41, weight from flower_tag_mappings where tag_id = 11;
+insert into flower_tag_mappings (flower_id, tag_id, weight) select flower_id, 42, weight from flower_tag_mappings where tag_id = 10;
+insert into flower_tag_mappings (flower_id, tag_id, weight) select flower_id, 43, weight from flower_tag_mappings where tag_id = 11;
+insert into flower_tag_mappings (flower_id, tag_id, weight) select flower_id, 44, weight from flower_tag_mappings where tag_id = 21;
+insert into flower_tag_mappings (flower_id, tag_id, weight) select flower_id, 45, weight from flower_tag_mappings where tag_id = 9;
+insert into flower_tag_mappings (flower_id, tag_id, weight) select flower_id, 46, weight from flower_tag_mappings where tag_id = 9;
+insert into flower_tag_mappings (flower_id, tag_id, weight) select flower_id, 47, weight from flower_tag_mappings where tag_id = 9;
+insert into flower_tag_mappings (flower_id, tag_id, weight) select flower_id, 48, weight from flower_tag_mappings where tag_id = 9;
+insert into flower_tag_mappings (flower_id, tag_id, weight) select flower_id, 49, weight from flower_tag_mappings where tag_id = 12;
+insert into flower_tag_mappings (flower_id, tag_id, weight) select flower_id, 50, weight from flower_tag_mappings where tag_id = 12;
+insert into flower_tag_mappings (flower_id, tag_id, weight) select flower_id, 51, weight from flower_tag_mappings where tag_id = 12;
+insert into flower_tag_mappings (flower_id, tag_id, weight) select flower_id, 52, weight from flower_tag_mappings where tag_id = 12;
+insert into flower_tag_mappings (flower_id, tag_id, weight) select flower_id, 53, weight from flower_tag_mappings where tag_id = 12;
+insert into flower_tag_mappings (flower_id, tag_id, weight) select flower_id, 54, weight from flower_tag_mappings where tag_id = 12;
+insert into flower_tag_mappings (flower_id, tag_id, weight) select flower_id, 55, weight from flower_tag_mappings where tag_id = 12;
+insert into flower_tag_mappings (flower_id, tag_id, weight) select flower_id, 56, weight from flower_tag_mappings where tag_id = 12;
+insert into flower_tag_mappings (flower_id, tag_id, weight) select flower_id, 57, weight from flower_tag_mappings where tag_id = 12;
+insert into flower_tag_mappings (flower_id, tag_id, weight) select flower_id, 58, weight from flower_tag_mappings where tag_id = 12;
+insert into flower_tag_mappings (flower_id, tag_id, weight) select flower_id, 59, weight from flower_tag_mappings where tag_id = 12;
+insert into flower_tag_mappings (flower_id, tag_id, weight) select flower_id, 60, weight from flower_tag_mappings where tag_id = 12;
+insert into flower_tag_mappings (flower_id, tag_id, weight) select flower_id, 61, weight from flower_tag_mappings where tag_id = 10;
+insert into flower_tag_mappings (flower_id, tag_id, weight) select flower_id, 62, weight from flower_tag_mappings where tag_id = 10;
+insert into flower_tag_mappings (flower_id, tag_id, weight) select flower_id, 63, weight from flower_tag_mappings where tag_id = 10;
+insert into flower_tag_mappings (flower_id, tag_id, weight) select flower_id, 64, weight from flower_tag_mappings where tag_id = 10;
+insert into flower_tag_mappings (flower_id, tag_id, weight) select flower_id, 65, weight from flower_tag_mappings where tag_id = 9;
+insert into flower_tag_mappings (flower_id, tag_id, weight) select flower_id, 66, weight from flower_tag_mappings where tag_id = 9;
+insert into flower_tag_mappings (flower_id, tag_id, weight) select flower_id, 67, weight from flower_tag_mappings where tag_id = 9;
+insert into flower_tag_mappings (flower_id, tag_id, weight) select flower_id, 68, weight from flower_tag_mappings where tag_id = 9;
+insert into flower_tag_mappings (flower_id, tag_id, weight) select flower_id, 69, weight from flower_tag_mappings where tag_id = 9;
+insert into flower_tag_mappings (flower_id, tag_id, weight) select flower_id, 70, weight from flower_tag_mappings where tag_id = 9;
+insert into flower_tag_mappings (flower_id, tag_id, weight) select flower_id, 71, weight from flower_tag_mappings where tag_id = 9;
+insert into flower_tag_mappings (flower_id, tag_id, weight) select flower_id, 72, weight from flower_tag_mappings where tag_id = 9;
+insert into flower_tag_mappings (flower_id, tag_id, weight) select flower_id, 73, weight from flower_tag_mappings where tag_id = 9;
+insert into flower_tag_mappings (flower_id, tag_id, weight) select flower_id, 74, weight from flower_tag_mappings where tag_id = 9;
+insert into flower_tag_mappings (flower_id, tag_id, weight) select flower_id, 75, weight from flower_tag_mappings where tag_id = 9;
+insert into flower_tag_mappings (flower_id, tag_id, weight) select flower_id, 76, weight from flower_tag_mappings where tag_id = 9;
+insert into flower_tag_mappings (flower_id, tag_id, weight) select flower_id, 77, weight from flower_tag_mappings where tag_id = 10;
+insert into flower_tag_mappings (flower_id, tag_id, weight) select flower_id, 78, weight from flower_tag_mappings where tag_id = 10;
+insert into flower_tag_mappings (flower_id, tag_id, weight) select flower_id, 79, weight from flower_tag_mappings where tag_id = 10;
+insert into flower_tag_mappings (flower_id, tag_id, weight) select flower_id, 80, weight from flower_tag_mappings where tag_id = 10;
+insert into flower_tag_mappings (flower_id, tag_id, weight) select flower_id, 81, weight from flower_tag_mappings where tag_id = 12;
+insert into flower_tag_mappings (flower_id, tag_id, weight) select flower_id, 82, weight from flower_tag_mappings where tag_id = 12;
+insert into flower_tag_mappings (flower_id, tag_id, weight) select flower_id, 83, weight from flower_tag_mappings where tag_id = 12;
+insert into flower_tag_mappings (flower_id, tag_id, weight) select flower_id, 84, weight from flower_tag_mappings where tag_id = 12;
+insert into flower_tag_mappings (flower_id, tag_id, weight) select flower_id, 85, weight from flower_tag_mappings where tag_id = 12;
+insert into flower_tag_mappings (flower_id, tag_id, weight) select flower_id, 86, weight from flower_tag_mappings where tag_id = 12;
+insert into flower_tag_mappings (flower_id, tag_id, weight) select flower_id, 87, weight from flower_tag_mappings where tag_id = 12;
+insert into flower_tag_mappings (flower_id, tag_id, weight) select flower_id, 88, weight from flower_tag_mappings where tag_id = 12;
+insert into flower_tag_mappings (flower_id, tag_id, weight) select flower_id, 89, weight from flower_tag_mappings where tag_id = 11;
+insert into flower_tag_mappings (flower_id, tag_id, weight) select flower_id, 90, weight from flower_tag_mappings where tag_id = 11;
+insert into flower_tag_mappings (flower_id, tag_id, weight) select flower_id, 91, weight from flower_tag_mappings where tag_id = 11;
+insert into flower_tag_mappings (flower_id, tag_id, weight) select flower_id, 92, weight from flower_tag_mappings where tag_id = 11;
+insert into flower_tag_mappings (flower_id, tag_id, weight) select flower_id, 93, weight from flower_tag_mappings where tag_id = 10;
+insert into flower_tag_mappings (flower_id, tag_id, weight) select flower_id, 94, weight from flower_tag_mappings where tag_id = 10;
+insert into flower_tag_mappings (flower_id, tag_id, weight) select flower_id, 95, weight from flower_tag_mappings where tag_id = 10;
+insert into flower_tag_mappings (flower_id, tag_id, weight) select flower_id, 96, weight from flower_tag_mappings where tag_id = 10;
+insert into flower_tag_mappings (flower_id, tag_id, weight) select flower_id, 97, weight from flower_tag_mappings where tag_id = 11;
+insert into flower_tag_mappings (flower_id, tag_id, weight) select flower_id, 98, weight from flower_tag_mappings where tag_id = 11;
+insert into flower_tag_mappings (flower_id, tag_id, weight) select flower_id, 99, weight from flower_tag_mappings where tag_id = 11;
+insert into flower_tag_mappings (flower_id, tag_id, weight) select flower_id, 100, weight from flower_tag_mappings where tag_id = 11;
+insert into flower_tag_mappings (flower_id, tag_id, weight) select flower_id, 101, weight from flower_tag_mappings where tag_id = 11;
+insert into flower_tag_mappings (flower_id, tag_id, weight) select flower_id, 102, weight from flower_tag_mappings where tag_id = 11;
+insert into flower_tag_mappings (flower_id, tag_id, weight) select flower_id, 103, weight from flower_tag_mappings where tag_id = 11;
+insert into flower_tag_mappings (flower_id, tag_id, weight) select flower_id, 104, weight from flower_tag_mappings where tag_id = 11;

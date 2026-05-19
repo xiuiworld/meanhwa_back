@@ -9,6 +9,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
+/** SecurityContext에서 현재 {@link User} 엔티티를 조회한다. */
 @Component
 public class AuthenticatedUserProvider {
     private final UserRepository userRepository;

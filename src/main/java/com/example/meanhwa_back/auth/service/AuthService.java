@@ -22,6 +22,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 
+/**
+ * OAuth·개발용 로그인 처리 및 사용자 upsert.
+ * prod 환경에서는 dev 로그인을 차단한다.
+ */
 @Service
 public class AuthService {
     private final UserRepository userRepository;

@@ -17,6 +17,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 
+/** 사용자별 꽃 좋아요 (user-flower 유일). */
 @Entity
 @Table(
         name = "user_likes",

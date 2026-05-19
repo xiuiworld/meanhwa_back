@@ -200,18 +200,12 @@ class MeanhwaBackApplicationTests {
 
     @Test
     void generateMessageReturnsTemplateMessage() throws Exception {
-        String body = """
-                {
-                  "flowerId": 1,
-                  "selectedTagIds": [5, 9],
-                  "senderName": "민수",
-                  "receiverName": "지은"
-                }
-                """;
+        TokenPair tokenPair = login("message-user-1", "ROLE_USER");
 
         mockMvc.perform(post("/api/v1/messages/generate")
+                        .header("Authorization", bearer(tokenPair.accessToken()))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(body))
+                        .content(messageGenerateBody()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value(200))
                 .andExpect(jsonPath("$.data.flowerId").value(1))
@@ -222,6 +216,7 @@ class MeanhwaBackApplicationTests {
 
     @Test
     void generateMessageReturnsFlowerNotFoundError() throws Exception {
+        TokenPair tokenPair = login("message-user-2", "ROLE_USER");
         String body = """
                 {
                   "flowerId": 9999,
@@ -232,6 +227,7 @@ class MeanhwaBackApplicationTests {
                 """;
 
         mockMvc.perform(post("/api/v1/messages/generate")
+                        .header("Authorization", bearer(tokenPair.accessToken()))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isNotFound())
@@ -780,6 +776,17 @@ class MeanhwaBackApplicationTests {
                 JsonPath.read(response, "$.data.accessToken"),
                 JsonPath.read(response, "$.data.refreshToken")
         );
+    }
+
+    private String messageGenerateBody() {
+        return """
+                {
+                  "flowerId": 1,
+                  "selectedTagIds": [5, 9],
+                  "senderName": "민수",
+                  "receiverName": "지은"
+                }
+                """;
     }
 
     private String devLoginBody(String oauthId, String role) {

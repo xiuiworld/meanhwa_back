@@ -10,6 +10,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/** 꽃 목록 검색 결과 캐시 (관리자 수정 시 전체 evict). */
 @Service
 @Transactional(readOnly = true)
 public class FlowerReadCacheService {

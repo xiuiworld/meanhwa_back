@@ -17,6 +17,14 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.support.TransactionTemplate;
 
+/**
+ * 사용자 행동 로그를 별도 트랜잭션(REQUIRES_NEW)으로 저장한다.
+ * 로그 실패가 본 요청을 롤백하지 않도록 예외를 삼킨다.
+ *
+ * <p>대부분의 API는 서비스/컨트롤러에 {@link com.example.meanhwa_back.log.aop.LogAction} 을 선언하고
+ * {@link com.example.meanhwa_back.log.aop.ActionLogAspect} 가 본 메서드를 호출한다.
+ * 직접 {@link #record} 를 호출할 필요는 특수 케이스에만 남긴다.
+ */
 @Service
 public class ActionLogService {
     private static final Logger log = LoggerFactory.getLogger(ActionLogService.class);

@@ -16,6 +16,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/** 활성 태그를 카테고리별로 그룹화해 반환 (캐시 적용). */
 @Service
 @Transactional(readOnly = true)
 public class TagService {

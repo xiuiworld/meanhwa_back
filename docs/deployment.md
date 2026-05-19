@@ -109,6 +109,19 @@ sudo docker inspect meanhwa-server \
   | grep -E 'SPRING_PROFILES_ACTIVE|DB_URL|CACHE_TYPE|REDIS_HOST|OPENAI_MODEL|AWS_REGION'
 ```
 
+## 큐레이션 위저드 DB 마이그레이션 (최초 1회)
+
+6단계 큐레이션 API를 운영에서 쓰기 **전**에 RDS에 태그 `code`·신규 태그·매핑을 반영합니다.
+
+- 가이드: [migration/README.md](migration/README.md)
+- SQL: [migration/2026-05-curation-wizard-prod.sql](migration/2026-05-curation-wizard-prod.sql)
+
+```bash
+mysql -h {RDS_HOST} -P 3306 -u {DB_USERNAME} -p meanhwa < docs/migration/2026-05-curation-wizard-prod.sql
+```
+
+스크립트 마지막 `missing_wizard_code` 결과가 **0건**인지 확인한 뒤 백엔드/프론트 위저드 배포를 진행합니다.
+
 ## RDS 접속
 
 먼저 DB 접속 정보를 확인합니다.

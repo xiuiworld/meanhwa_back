@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.springframework.data.domain.Page;
 
+/** 페이지네이션 결과 공통 형식. */
 public record PageResponse<T>(
         List<T> content,
         int page,

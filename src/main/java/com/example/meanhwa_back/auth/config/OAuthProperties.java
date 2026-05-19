@@ -2,6 +2,7 @@ package com.example.meanhwa_back.auth.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
+/** 카카오·네이버 사용자 정보 API URL 등 OAuth 설정. */
 @ConfigurationProperties(prefix = "app.oauth")
 public class OAuthProperties {
     private Provider kakao = new Provider("https://kapi.kakao.com/v2/user/me");

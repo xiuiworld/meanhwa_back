@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+/** 관리자용 꽃 CRUD 및 태그 매핑 API. */
 @RestController
 @RequestMapping("/api/v1/admin/flowers")
 public class AdminFlowerController {

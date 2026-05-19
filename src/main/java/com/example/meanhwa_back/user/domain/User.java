@@ -17,6 +17,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 
+/** OAuth 제공자·oauthId 조합으로 식별되는 회원 엔티티. */
 @Entity
 @Table(
         name = "users",
@@ -69,6 +70,11 @@ public class User {
         this.role = role;
     }
 
+    /** 백오피스에서 권한만 변경할 때 사용한다. provider·oauthId는 변경하지 않는다. */
+    public void updateRole(Role role) {
+        this.role = role;
+    }
+
     public Long getId() {
         return id;
     }
@@ -91,5 +97,13 @@ public class User {
 
     public Role getRole() {
         return role;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
     }
 }

@@ -181,11 +181,15 @@ erDiagram
 | 컬럼 | 타입 | Null | 설명 |
 | --- | --- | --- | --- |
 | `id` | BIGINT | N | PK |
-| `category` | VARCHAR(50) | N | 태그 카테고리 |
+| `category` | VARCHAR(50) | N | 태그 카테고리 (`EVENT`, `RELATION`, `EMOTION`, `MEANING`, `ENVIRONMENT`, …) |
 | `name` | VARCHAR(50) | N | 태그명 |
+| `code` | VARCHAR(80) | Y | 위저드·API 공통 식별자 (예: `BIRTHDAY`, `LOVE_3`). UNIQUE. 레거시(스타일·계절 등)는 NULL 가능 |
 | `deleted_at` | DATETIME | Y | soft delete 일시 |
 
-중복 태그 검증은 서비스 계층에서 active tag 기준 `category + name` case-insensitive로 처리합니다.
+인덱스: `uk_tags_code` (`code`) — 운영 마이그레이션 [migration/2026-05-curation-wizard-prod.sql](migration/2026-05-curation-wizard-prod.sql) 참고.
+
+중복 태그 검증은 서비스 계층에서 active tag 기준 `category + name` case-insensitive로 처리합니다.  
+분기형 큐레이션 v2는 `code`로 `tagId`를 조회합니다 (`CurationCodeResolver`).
 
 ## `flower_tag_mappings`
 

@@ -11,6 +11,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 
+/** 필터·핸들러에서 JSON 형식의 인증/권한 오류 응답을 작성한다. */
 @Component
 public class SecurityErrorWriter {
     private final ObjectMapper objectMapper;

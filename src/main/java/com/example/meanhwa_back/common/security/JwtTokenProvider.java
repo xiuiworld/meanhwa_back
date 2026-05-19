@@ -17,6 +17,7 @@ import io.jsonwebtoken.security.Keys;
 
 import org.springframework.stereotype.Component;
 
+/** Access/Refresh JWT 발급·검증 및 클레임 추출. */
 @Component
 public class JwtTokenProvider {
     private static final String TOKEN_TYPE_CLAIM = "type";

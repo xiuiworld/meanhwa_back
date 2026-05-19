@@ -15,6 +15,10 @@ import io.jsonwebtoken.JwtException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * Access/Refresh 토큰 발급·갱신·폐기.
+ * Refresh 토큰은 DB에 해시만 저장하며, 갱신 시 기존 토큰을 revoke한다.
+ */
 @Service
 public class TokenService {
     private final JwtTokenProvider jwtTokenProvider;

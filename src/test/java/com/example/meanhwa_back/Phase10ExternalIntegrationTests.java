@@ -103,9 +103,11 @@ class Phase10ExternalIntegrationTests {
     @Test
     void openAiGeneratorReturnsGeneratedMessageWhenProviderSucceeds() throws Exception {
         openAiMode = OpenAiMode.SUCCESS;
+        TokenPair tokenPair = devLogin("openai-success-user");
 
         try {
             mockMvc.perform(post("/api/v1/messages/generate")
+                            .header("Authorization", bearer(tokenPair.accessToken()))
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(messageBody()))
                     .andExpect(status().isOk())
@@ -119,14 +121,38 @@ class Phase10ExternalIntegrationTests {
     @Test
     void openAiGeneratorFallsBackToTemplateWhenProviderFails() throws Exception {
         openAiMode = OpenAiMode.ERROR;
+        TokenPair tokenPair = devLogin("openai-fallback-user");
 
         mockMvc.perform(post("/api/v1/messages/generate")
+                        .header("Authorization", bearer(tokenPair.accessToken()))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(messageBody()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.flowerId").value(1))
                 .andExpect(jsonPath("$.data.message", containsString("지은님께")))
                 .andExpect(jsonPath("$.data.message", containsString("장미")));
+    }
+
+    private TokenPair devLogin(String oauthId) throws Exception {
+        String response = mockMvc.perform(post("/api/v1/auth/login/dev")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "oauthId": "%s",
+                                  "email": "%s@example.com",
+                                  "nickname": "민화유저",
+                                  "role": "ROLE_USER"
+                                }
+                                """.formatted(oauthId, oauthId)))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString(StandardCharsets.UTF_8);
+
+        return new TokenPair(
+                JsonPath.read(response, "$.data.accessToken"),
+                JsonPath.read(response, "$.data.refreshToken")
+        );
     }
 
     private TokenPair socialLogin(String provider, String accessToken) throws Exception {

@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+/** 관리자 대시보드용 통계·인기 꽃/태그 API. */
 @RestController
 @RequestMapping("/api/v1/admin/statistics")
 public class AdminStatisticsController {

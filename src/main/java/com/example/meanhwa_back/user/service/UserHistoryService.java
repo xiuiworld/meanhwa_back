@@ -16,6 +16,7 @@ import com.example.meanhwa_back.user.repository.UserHistoryRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/** 꽃 상세 조회 이력 (최대 50건, 인증 시에만 기록). */
 @Service
 public class UserHistoryService {
     private static final int MAX_HISTORY_COUNT = 50;

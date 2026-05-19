@@ -6,6 +6,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+/** /api/** 경로 CORS 설정. */
 @Configuration
 @EnableConfigurationProperties(CorsProperties.class)
 public class WebConfig implements WebMvcConfigurer {

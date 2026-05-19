@@ -7,6 +7,7 @@ import com.example.meanhwa_back.storage.config.StorageProperties;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
+/** 업로드 이미지 MIME·용량 검증. */
 @Component
 public class ImageFileValidator {
     private final StorageProperties storageProperties;

@@ -14,6 +14,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
+/** 꽃/식물 마스터 데이터. soft delete 지원. */
 @Entity
 @Table(name = "flowers")
 public class Flower {

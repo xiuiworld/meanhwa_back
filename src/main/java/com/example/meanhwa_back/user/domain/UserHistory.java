@@ -16,6 +16,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 
+/** 사용자별 꽃 상세 조회 이력. */
 @Entity
 @Table(
         name = "user_histories",

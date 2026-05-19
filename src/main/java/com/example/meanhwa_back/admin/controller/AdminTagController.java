@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+/** 관리자용 태그 CRUD API. */
 @RestController
 @RequestMapping("/api/v1/admin/tags")
 public class AdminTagController {

@@ -12,6 +12,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.stereotype.Component;
 
+/** 권한 부족 시 403 JSON 응답. */
 @Component
 public class RestAccessDeniedHandler implements AccessDeniedHandler {
     private final SecurityErrorWriter securityErrorWriter;

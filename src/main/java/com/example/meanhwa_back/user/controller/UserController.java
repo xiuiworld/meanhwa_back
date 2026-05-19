@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+/** 로그인 사용자 프로필·좋아요·조회 이력 API. */
 @RestController
 @RequestMapping("/api/v1/users/me")
 public class UserController {

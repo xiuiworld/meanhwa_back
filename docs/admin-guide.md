@@ -112,7 +112,49 @@ GET    /api/v1/admin/statistics/summary
 GET    /api/v1/admin/statistics/popular-tags
 GET    /api/v1/admin/statistics/popular-flowers
 GET    /api/v1/admin/statistics/daily-active-users
+
+GET    /api/v1/admin/users
+GET    /api/v1/admin/users/{userId}
+PUT    /api/v1/admin/users/{userId}/role
 ```
+
+## 회원(유저) 관리 API
+
+운영 DB에서 `users.role`을 직접 `UPDATE` 하던 작업을 API로 수행합니다.
+
+목록:
+
+```http
+GET /api/v1/admin/users?keyword=&provider=&role=&page=0&size=20
+Authorization: Bearer {adminAccessToken}
+```
+
+- `keyword`: email·nickname·oauthId 부분 검색 (선택)
+- `provider`: `DEV`, `KAKAO`, `NAVER` (선택)
+- `role`: `ROLE_USER`, `ROLE_ADMIN` (선택)
+
+상세:
+
+```http
+GET /api/v1/admin/users/{userId}
+```
+
+권한 변경:
+
+```http
+PUT /api/v1/admin/users/{userId}/role
+Content-Type: application/json
+
+{
+  "role": "ROLE_ADMIN"
+}
+```
+
+주의:
+
+- 본인 계정의 role은 이 API로 변경할 수 없습니다 (`CANNOT_CHANGE_OWN_ROLE`).
+- 마지막 남은 관리자는 일반 사용자로 내릴 수 없습니다 (`LAST_ADMIN_CANNOT_BE_DEMOTED`).
+- 변경 후 대상 사용자는 **재로그인**해야 JWT에 새 role이 반영됩니다.
 
 ## 식물 운영 정책
 

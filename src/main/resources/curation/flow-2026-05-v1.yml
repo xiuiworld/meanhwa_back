@@ -1,0 +1,149 @@
+# 분기형 큐레이션 플로우 정의 (P1: 정적 카탈로그, DB 분기 규칙 테이블 없이 로드)
+# flowVersion 변경 시 프론트는 localStorage 등 캐시를 무효화해야 한다.
+flowVersion: "2026-05-v1"
+totalSteps: 6
+
+steps:
+  - key: OCCASION
+    order: 1
+    defaultQuestionTitle: "어떤 날인가요?"
+    defaultQuestionSubtitle: "선물을 드리는 상황을 골라주세요."
+    selectionMode: SINGLE
+    dependsOn: []
+  - key: RECIPIENT
+    order: 2
+    defaultQuestionTitle: "누구에게 전하는 선물인가요?"
+    defaultQuestionSubtitle: "받으실 분을 선택해 주세요."
+    selectionMode: SINGLE
+    dependsOn: [OCCASION]
+  - key: EMOTION
+    order: 3
+    defaultQuestionTitle: "어떤 마음을 담고 싶나요?"
+    defaultQuestionSubtitle: "선물에 담을 감정을 골라주세요."
+    selectionMode: SINGLE
+    dependsOn: [OCCASION]
+  - key: FLOWER_MEANING
+    order: 4
+    defaultQuestionTitle: "어떤 꽃말의 결에 가까운가요?"
+    defaultQuestionSubtitle: null
+    selectionMode: SINGLE
+    dependsOn: [EMOTION]
+  - key: SPACE
+    order: 5
+    defaultQuestionTitle: "받는 분의 공간 환경은?"
+    defaultQuestionSubtitle: "식물이 놓일 공간을 알려주세요."
+    selectionMode: SINGLE
+    dependsOn: []
+  - key: BUDGET
+    order: 6
+    defaultQuestionTitle: "어느 정도 예산으로 준비하나요?"
+    defaultQuestionSubtitle: "원하시는 가격대를 알려주세요."
+    selectionMode: SINGLE
+    dependsOn: []
+
+occasionOptions:
+  - { code: BIRTHDAY, label: "생일" }
+  - { code: GRADUATION, label: "졸업" }
+  - { code: PROMOTION, label: "승진" }
+  - { code: WEDDING, label: "결혼" }
+  - { code: HOUSEWARMING, label: "집들이" }
+  - { code: RECOVERY, label: "병문안·회복" }
+
+recipientBranches:
+  BIRTHDAY:
+    - { code: FRIEND, label: "친구" }
+    - { code: FAMILY, label: "가족" }
+    - { code: LOVER, label: "연인" }
+    - { code: COLLEAGUE, label: "직장 동료" }
+  GRADUATION:
+    - { code: FRIEND, label: "친구" }
+    - { code: FAMILY, label: "가족" }
+    - { code: LOVER, label: "연인" }
+    - { code: SENIOR_JUNIOR_MENTOR, label: "선후배·스승" }
+  PROMOTION:
+    - { code: COLLEAGUE_JUNIOR, label: "동료·후배" }
+    - { code: BOSS_SENIOR, label: "상사·선배" }
+    - { code: FAMILY, label: "가족" }
+    - { code: FRIEND_ACQUAINTANCE, label: "친구·지인" }
+  WEDDING:
+    - { code: FRIEND, label: "친구" }
+    - { code: FAMILY, label: "가족" }
+    - { code: COLLEAGUE, label: "직장 동료" }
+    - { code: VIP_MENTOR, label: "은사·귀빈" }
+  HOUSEWARMING:
+    - { code: FRIEND, label: "친구" }
+    - { code: FAMILY, label: "가족" }
+    - { code: LOVER, label: "연인" }
+    - { code: COLLEAGUE, label: "직장 동료" }
+  RECOVERY:
+    - { code: FAMILY, label: "가족" }
+    - { code: FRIEND, label: "친구" }
+    - { code: LOVER, label: "연인" }
+    - { code: COLLEAGUE, label: "직장 동료" }
+
+emotionBranches:
+  BIRTHDAY:
+    - { code: CELEBRATION, label: "축하" }
+    - { code: GRATITUDE, label: "감사" }
+    - { code: LOVE, label: "사랑" }
+    - { code: SUPPORT, label: "응원" }
+  GRADUATION:
+    - { code: CELEBRATION, label: "축하" }
+    - { code: SUPPORT, label: "응원" }
+    - { code: ENCOURAGEMENT, label: "격려" }
+    - { code: LEAP, label: "도약" }
+  PROMOTION:
+    - { code: CELEBRATION, label: "축하" }
+    - { code: RESPECT, label: "존경" }
+    - { code: ENCOURAGEMENT, label: "격려" }
+    - { code: PRIDE, label: "자부심" }
+  WEDDING:
+    - { code: CELEBRATION, label: "축하" }
+    - { code: BLESSING, label: "축복" }
+    - { code: SINCERITY, label: "진심" }
+    - { code: ETERNITY, label: "영원" }
+  HOUSEWARMING:
+    - { code: CELEBRATION, label: "축하" }
+    - { code: GRATITUDE, label: "감사" }
+    - { code: PEACE, label: "평온" }
+    - { code: PROSPERITY, label: "번창" }
+  RECOVERY:
+    - { code: COMFORT, label: "위로" }
+    - { code: SUPPORT, label: "응원" }
+    - { code: GET_WELL, label: "쾌유" }
+    - { code: PEACE, label: "평온" }
+
+flowerMeaningLabels:
+  LOVE: ["변치 않는 마음", "첫사랑의 설렘", "소중한 당신", "진정한 사랑"]
+  SUPPORT: ["언제나 응원해", "변함없는 우정", "환한 미소", "일상의 행복"]
+  ENCOURAGEMENT: ["용기와 자신감", "새로운 도전", "당당한 걸음", "무한한 가능성"]
+  CELEBRATION: ["밝은 축하", "빛나는 성취", "새로운 시작", "함께하는 기쁨"]
+  GRATITUDE: ["진심 어린 감사", "함께해서 행복해", "오래된 인연", "따뜻한 기억"]
+  BLESSING: ["행복한 시작", "아름다운 인연", "넉넉한 축복", "조화와 화합"]
+  SINCERITY: ["진심을 담아", "소중한 인연", "영원한 약속", "고귀한 사랑"]
+  ETERNITY: ["영원히 하나 되기를", "영원한 사랑", "아름다운 시작", "고귀한 인연"]
+  RESPECT: ["깊은 존경", "영예와 인정", "굳건한 신뢰", "굳건한 길"]
+  PRIDE: ["값진 노력", "빛나는 성공", "끊임없는 성장", "위풍당당"]
+  LEAP: ["희망과 도약", "밝은 미래", "무한한 가능성", "꿈을 향해"]
+  PEACE: ["평온한 일상", "편안한 공간", "마음의 안정", "따뜻한 온기"]
+  PROSPERITY: ["풍요와 번창", "꽃피는 기쁨", "번창하는 일상", "가정의 행복"]
+  COMFORT: ["따뜻한 위로", "깊은 배려", "편안한 쉼", "마음의 안식"]
+  GET_WELL: ["빠른 회복", "되찾은 활력", "건강한 내일", "희망의 빛"]
+
+spaceOptions:
+  - { code: DESK_SMALL, label: "책상·좁은 공간" }
+  - { code: LIVING_ROOM, label: "거실·넓은 실내" }
+  - { code: WINDOW_BRIGHT, label: "창가·밝은 실내" }
+  - { code: BALCONY_OUTDOOR, label: "베란다·실외" }
+
+budgetOptions:
+  - { code: BUDGET_LOW, label: "실속형 (5만 원 이하)" }
+  - { code: BUDGET_MEDIUM, label: "기본형 (5~10만 원)" }
+  - { code: BUDGET_HIGH, label: "고급형 (10~20만 원)" }
+  - { code: BUDGET_PREMIUM, label: "프리미엄 (20만 원 이상)" }
+
+flowerMeaningQuestionByRecipient:
+  PARENT: "부모님에게 전달하고 싶은 꽃말은 무엇인가요?"
+  FAMILY: "가족에게 전달하고 싶은 꽃말은 무엇인가요?"
+  LOVER: "연인에게 전달하고 싶은 꽃말은 무엇인가요?"
+  default: "어떤 꽃말의 결에 가까운가요?"

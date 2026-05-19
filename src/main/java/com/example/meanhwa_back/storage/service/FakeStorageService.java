@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+/** 로컬·테스트용 가짜 업로드 URL 반환. */
 @Service
 @Profile({"local", "test"})
 public class FakeStorageService implements StorageService {

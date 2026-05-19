@@ -10,6 +10,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+/** Spring Security용 사용자 principal (userId·role). */
 public class CustomUserDetails implements UserDetails {
     private final Long userId;
     private final Role role;

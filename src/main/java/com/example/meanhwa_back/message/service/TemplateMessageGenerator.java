@@ -4,6 +4,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
 
+/** OpenAI 미사용·실패 시 사용하는 고정 템플릿 메시지 생성기. */
 @Component
 public class TemplateMessageGenerator implements MessageGenerator {
 

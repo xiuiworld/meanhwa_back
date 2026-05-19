@@ -17,6 +17,7 @@ import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.S3Exception;
 
+/** AWS S3에 이미지 업로드 (prod·s3 프로필). */
 @Service
 @Profile({"prod", "s3"})
 public class S3StorageService implements StorageService {

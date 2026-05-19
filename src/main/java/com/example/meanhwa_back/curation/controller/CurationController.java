@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+/** 태그·필터 기반 꽃 큐레이션 API. */
 @RestController
 @RequestMapping("/api/v1/curation")
 public class CurationController {

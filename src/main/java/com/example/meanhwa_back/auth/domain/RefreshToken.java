@@ -17,6 +17,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
+/** DB에 저장되는 Refresh 토큰(해시·만료·revoke 시각). */
 @Entity
 @Table(
         name = "refresh_tokens",

@@ -12,4 +12,6 @@ public interface UserLikeRepository extends JpaRepository<UserLike, Long> {
     List<UserLike> findByUserIdOrderByCreatedAtDesc(Long userId);
 
     void deleteByUserIdAndFlowerId(Long userId, Long flowerId);
+
+    long countByUserId(Long userId);
 }

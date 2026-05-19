@@ -2,6 +2,7 @@ package com.example.meanhwa_back.common.security;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
+/** application.yml의 app.jwt 설정 바인딩. */
 @ConfigurationProperties(prefix = "app.jwt")
 public class JwtProperties {
     private String secret;

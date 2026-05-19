@@ -16,35 +16,55 @@ import com.example.meanhwa_back.flower.domain.PriceRange;
 import com.example.meanhwa_back.flower.dto.TagSummaryResponse;
 import com.example.meanhwa_back.flower.repository.FlowerRepository;
 import com.example.meanhwa_back.flower.repository.FlowerTagMappingRepository;
+import com.example.meanhwa_back.log.aop.LogAction;
+import com.example.meanhwa_back.log.aop.extractor.CurationStartPayloadExtractor;
 import com.example.meanhwa_back.log.domain.ActionType;
-import com.example.meanhwa_back.log.service.ActionLogService;
 import com.example.meanhwa_back.tag.repository.TagRepository;
 
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * 선택 태그 가중치 합산으로 꽃을 점수화·정렬한다.
+ * 태그가 없으면 필터만 적용한 전체 목록을 반환한다.
+ */
 @Service
 @Transactional(readOnly = true)
 public class CurationService {
     private final FlowerRepository flowerRepository;
     private final FlowerTagMappingRepository mappingRepository;
     private final TagRepository tagRepository;
-    private final ActionLogService actionLogService;
 
     public CurationService(
             FlowerRepository flowerRepository,
             FlowerTagMappingRepository mappingRepository,
-            TagRepository tagRepository,
-            ActionLogService actionLogService
+            TagRepository tagRepository
     ) {
         this.flowerRepository = flowerRepository;
         this.mappingRepository = mappingRepository;
         this.tagRepository = tagRepository;
-        this.actionLogService = actionLogService;
     }
 
+    /**
+     * 레거시 {@code GET /api/v1/curation} 진입점.
+     * <p>성공 시 {@link LogAction} AOP가 {@link ActionType#CURATION_START} 로그를 남긴다.
+     */
+    @LogAction(value = ActionType.CURATION_START, extractor = CurationStartPayloadExtractor.class)
     public PageResponse<CurationFlowerResponse> curate(
+            List<Long> tagIds,
+            Boolean isPetSafe,
+            String priceRangeValue,
+            int page,
+            int size
+    ) {
+        return executeCurate(tagIds, isPetSafe, priceRangeValue, page, size);
+    }
+
+    /**
+     * 점수 합산만 수행한다. 위저드 v2 등 AOP 로그를 별도로 남기는 호출자가 사용한다.
+     */
+    public PageResponse<CurationFlowerResponse> executeCurate(
             List<Long> tagIds,
             Boolean isPetSafe,
             String priceRangeValue,
@@ -59,9 +79,7 @@ public class CurationService {
                 ? scoreAllFlowers(isPetSafe, priceRange)
                 : scoreMatchedFlowers(normalizedTagIds, isPetSafe, priceRange);
 
-        PageResponse<CurationFlowerResponse> response = toPage(results, page, size);
-        recordCurationLog(normalizedTagIds, isPetSafe, priceRange, page, size, response);
-        return response;
+        return toPage(results, page, size);
     }
 
     private List<CurationFlowerResponse> scoreMatchedFlowers(
@@ -144,29 +162,7 @@ public class CurationService {
                 .thenComparing(CurationFlowerResponse::name);
     }
 
-    private void recordCurationLog(
-            List<Long> tagIds,
-            Boolean isPetSafe,
-            PriceRange priceRange,
-            int page,
-            int size,
-            PageResponse<CurationFlowerResponse> response
-    ) {
-        Map<String, Object> payload = new LinkedHashMap<>();
-        payload.put("tagIds", tagIds);
-        payload.put("isPetSafe", isPetSafe);
-        payload.put("priceRange", priceRange == null ? null : priceRange.name());
-        payload.put("page", page);
-        payload.put("size", size);
-        payload.put("resultCount", response.content().size());
-        payload.put("totalElements", response.totalElements());
-        payload.put("resultFlowerIds", response.content()
-                .stream()
-                .map(CurationFlowerResponse::flowerId)
-                .toList());
-        actionLogService.record(ActionType.CURATION_START, payload);
-    }
-
+    /** 꽃별 매칭 태그·가중치 합산 점수를 누적한다. */
     private static class CurationAccumulator {
         private final Flower flower;
         private final List<TagSummaryResponse> matchedTags = new ArrayList<>();

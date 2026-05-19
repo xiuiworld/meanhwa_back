@@ -1,5 +1,6 @@
 package com.example.meanhwa_back.common.error;
 
+/** {@link ErrorCode}와 함께 던지는 비즈니스 예외. */
 public class BusinessException extends RuntimeException {
     private final ErrorCode errorCode;
 

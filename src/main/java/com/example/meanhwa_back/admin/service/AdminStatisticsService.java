@@ -32,6 +32,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/** 행동 로그·좋아요 등을 집계해 관리자 통계를 제공한다. */
 @Service
 @Transactional(readOnly = true)
 public class AdminStatisticsService {

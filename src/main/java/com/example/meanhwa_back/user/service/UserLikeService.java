@@ -15,6 +15,7 @@ import com.example.meanhwa_back.user.repository.UserLikeRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/** 로그인 사용자의 꽃 좋아요 추가·삭제·목록 조회. */
 @Service
 public class UserLikeService {
     private final AuthenticatedUserProvider authenticatedUserProvider;
