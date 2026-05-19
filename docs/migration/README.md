@@ -30,7 +30,8 @@ mysql -h {RDS_HOST} -P 3306 -u {DB_USERNAME} -p meanhwa < docs/migration/2026-05
 
 1. `tags.code` 컬럼 추가 (없을 때만)
 2. 기존 태그(생일·연인·사랑 등)에 `code` 백필 — **이름·카테고리** 기준
-3. 위저드용 신규 태그 INSERT (`code` 중복 시 스킵)
+3. 위저드용 신규 태그 INSERT (`code` 중복 시 스킵, PDF 2026-05 꽃말 표시명)
+3b. 이미 INSERT 된 DB용 `UPDATE tags SET name=...` (MEANING 표시명만 PDF 문구로 갱신)
 4. `flower_tag_mappings` — 신규 태그에 대해 유사 기존 태그 weight **복제** (로컬 `data.sql` 과 동일 전략)
 5. 검증 쿼리
 

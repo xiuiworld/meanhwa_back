@@ -18,14 +18,14 @@ steps:
     dependsOn: [OCCASION]
   - key: EMOTION
     order: 3
-    defaultQuestionTitle: "어떤 마음을 담고 싶나요?"
+    defaultQuestionTitle: "어떤 마음을 전하고 싶나요?"
     defaultQuestionSubtitle: "선물에 담을 감정을 골라주세요."
     selectionMode: SINGLE
     dependsOn: [OCCASION]
   - key: FLOWER_MEANING
     order: 4
     defaultQuestionTitle: "어떤 꽃말의 결에 가까운가요?"
-    defaultQuestionSubtitle: null
+    defaultQuestionSubtitle: "전하고 싶은 마음을 조금 더 구체적으로 들려주세요."
     selectionMode: SINGLE
     dependsOn: [EMOTION]
   - key: SPACE
@@ -114,21 +114,21 @@ emotionBranches:
     - { code: PEACE, label: "평온" }
 
 flowerMeaningLabels:
-  LOVE: ["변치 않는 마음", "첫사랑의 설렘", "소중한 당신", "진정한 사랑"]
-  SUPPORT: ["언제나 응원해", "변함없는 우정", "환한 미소", "일상의 행복"]
-  ENCOURAGEMENT: ["용기와 자신감", "새로운 도전", "당당한 걸음", "무한한 가능성"]
-  CELEBRATION: ["밝은 축하", "빛나는 성취", "새로운 시작", "함께하는 기쁨"]
-  GRATITUDE: ["진심 어린 감사", "함께해서 행복해", "오래된 인연", "따뜻한 기억"]
-  BLESSING: ["행복한 시작", "아름다운 인연", "넉넉한 축복", "조화와 화합"]
+  LOVE: ["변함없는 마음", "첫사랑의 설렘", "소중한 당신", "진실한 사랑"]
+  SUPPORT: ["언제나 응원해", "변치 않는 우정", "찬란한 미소", "매일의 행복"]
+  ENCOURAGEMENT: ["용기와 자신감", "새로운 도전", "당당한 발걸음", "무한한 가능성"]
+  CELEBRATION: ["화사한 축하", "빛나는 성취", "새로운 시작", "함께한 기쁨"]
+  GRATITUDE: ["진심 어린 고마움", "함께해서 행복", "오래된 인연", "따뜻한 기억"]
+  BLESSING: ["행복한 시작", "아름다운 인연", "아낌없는 축복", "조화와 화합"]
   SINCERITY: ["진심을 담아", "소중한 인연", "영원한 약속", "고귀한 사랑"]
-  ETERNITY: ["영원히 하나 되기를", "영원한 사랑", "아름다운 시작", "고귀한 인연"]
-  RESPECT: ["깊은 존경", "영예와 인정", "굳건한 신뢰", "굳건한 길"]
+  ETERNITY: ["영원히 하나됨", "영원한 사랑", "아름다운 시작", "고귀한 인연"]
+  RESPECT: ["깊은 존경", "명예와 인정", "굳건한 신뢰", "탄탄대로"]
   PRIDE: ["값진 노력", "빛나는 성공", "끊임없는 성장", "위풍당당"]
-  LEAP: ["희망과 도약", "밝은 미래", "무한한 가능성", "꿈을 향해"]
+  LEAP: ["희망과 도약", "밝은 앞날", "무한한 가능성", "꿈을 향해"]
   PEACE: ["평온한 일상", "편안한 공간", "마음의 안정", "따뜻한 온기"]
-  PROSPERITY: ["풍요와 번창", "꽃피는 기쁨", "번창하는 일상", "가정의 행복"]
-  COMFORT: ["따뜻한 위로", "깊은 배려", "편안한 쉼", "마음의 안식"]
-  GET_WELL: ["빠른 회복", "되찾은 활력", "건강한 내일", "희망의 빛"]
+  PROSPERITY: ["풍요와 번창", "피어나는 기쁨", "번창하는 일상", "가정의 행복"]
+  COMFORT: ["따뜻한 위안", "깊은 배려", "평온한 휴식", "마음의 안계"]
+  GET_WELL: ["빠른 회복", "다시 찾은 활력", "건강한 내일", "희망의 빛"]
 
 spaceOptions:
   - { code: DESK_SMALL, label: "책상·좁은 공간" }

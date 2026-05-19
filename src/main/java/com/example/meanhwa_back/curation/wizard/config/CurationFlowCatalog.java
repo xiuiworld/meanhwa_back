@@ -115,6 +115,7 @@ public class CurationFlowCatalog {
 
     /**
      * 결과 API용: 6단계가 모두 채워졌는지, code가 분기표에 존재하는지 검증한다.
+     * <p>{@code selections} 배열 순서와 무관하게, 전체 선택을 Map에 모은 뒤 검증한다.
      */
     public Map<CurationStepKey, String> validateCompleteSelections(List<CurationSelectionDto> selections) {
         if (selections == null || selections.size() != document.getTotalSteps()) {
@@ -128,7 +129,6 @@ public class CurationFlowCatalog {
                 throw new BusinessException(ErrorCode.INVALID_CURATION_SELECTION);
             }
             String code = normalizeCode(selection.code());
-            assertOptionAllowed(stepKey, byStep, code);
             byStep.put(stepKey, code);
         }
 
@@ -137,24 +137,39 @@ public class CurationFlowCatalog {
                 throw new BusinessException(ErrorCode.INCOMPLETE_CURATION_SELECTION);
             }
         }
+        for (Map.Entry<CurationStepKey, String> entry : byStep.entrySet()) {
+            assertOptionAllowed(entry.getKey(), byStep, entry.getValue());
+        }
         return byStep;
     }
 
     /**
      * options API용: 이전 단계 선택이 요구 조건을 만족하는지 검사한다.
+     * <p>Step4({@link CurationStepKey#FLOWER_MEANING})는 꽃말 목록을 {@code EMOTION} 코드만으로 만들기 때문에,
+     * 키 존재 여부뿐 아니라 {@code OCCASION} 분기표와 맞는 {@code RECIPIENT}/{@code EMOTION} 인지도 검증한다.
      */
     public void validatePriorSelectionsForOptions(CurationStepKey stepKey, Map<CurationStepKey, String> prior) {
         switch (stepKey) {
             case RECIPIENT, EMOTION -> requirePriorCode(prior, CurationStepKey.OCCASION);
-            case FLOWER_MEANING -> {
-                requirePriorCode(prior, CurationStepKey.OCCASION);
-                requirePriorCode(prior, CurationStepKey.RECIPIENT);
-                requirePriorCode(prior, CurationStepKey.EMOTION);
-            }
+            case FLOWER_MEANING -> assertFlowerMeaningPriorSelectionsConsistent(prior);
             default -> {
                 // OCCASION, SPACE, BUDGET — 필수 prior 없음
             }
         }
+    }
+
+    /**
+     * Step4 options 요청 전: 1~3단계 선택이 YAML 분기표와 일치하는지 확인한다.
+     * <p>예) {@code OCCASION=PROMOTION} 인데 {@code EMOTION=LOVE} 는 승진 분기에 없으므로 거부.
+     */
+    private void assertFlowerMeaningPriorSelectionsConsistent(Map<CurationStepKey, String> prior) {
+        requirePriorCode(prior, CurationStepKey.OCCASION);
+        String recipientCode = requirePriorCode(prior, CurationStepKey.RECIPIENT);
+        String emotionCode = requirePriorCode(prior, CurationStepKey.EMOTION);
+
+        // RECIPIENT·EMOTION 각각 해당 OCCASION 분기의 허용 code 목록에 있는지 (Step2/3 options 와 동일 규칙)
+        assertOptionAllowed(CurationStepKey.RECIPIENT, prior, recipientCode);
+        assertOptionAllowed(CurationStepKey.EMOTION, prior, emotionCode);
     }
 
     public Set<String> allScoringCodes(Map<CurationStepKey, String> completeSelections) {
@@ -164,6 +179,9 @@ public class CurationFlowCatalog {
                 .collect(Collectors.toSet());
     }
 
+    /**
+     * {@code code}가 {@code stepKey}의 분기 옵션 목록(이전 단계 {@code prior} 반영)에 포함되는지 검사한다.
+     */
     private void assertOptionAllowed(
             CurationStepKey stepKey,
             Map<CurationStepKey, String> prior,

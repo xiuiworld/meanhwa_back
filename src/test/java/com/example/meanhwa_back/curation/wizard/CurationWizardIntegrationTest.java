@@ -80,6 +80,63 @@ class CurationWizardIntegrationTest {
     }
 
     @Test
+    void getFlowerMeaningOptionsRejectsEmotionNotAllowedForOccasion() throws Exception {
+        // 승진(PROMOTION) 분기에는 LOVE 없음 — Step3 options 와 달리 Step4는 EMOTION 만 보고 꽃말을 만들 수 있어 추가 검증 필요
+        String selections = """
+                [
+                  {"step":"OCCASION","code":"PROMOTION"},
+                  {"step":"RECIPIENT","code":"COLLEAGUE_JUNIOR"},
+                  {"step":"EMOTION","code":"LOVE"}
+                ]
+                """;
+        mockMvc.perform(get("/api/v1/curation/steps/FLOWER_MEANING/options")
+                        .param("selections", selections))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errorCode").value("INVALID_CURATION_SELECTION"));
+    }
+
+    @Test
+    void getFlowerMeaningOptionsReturnsLabelsWhenPriorSelectionsMatchBranches() throws Exception {
+        String selections = """
+                [
+                  {"step":"OCCASION","code":"PROMOTION"},
+                  {"step":"RECIPIENT","code":"COLLEAGUE_JUNIOR"},
+                  {"step":"EMOTION","code":"CELEBRATION"}
+                ]
+                """;
+        mockMvc.perform(get("/api/v1/curation/steps/FLOWER_MEANING/options")
+                        .param("selections", selections))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.step").value("FLOWER_MEANING"))
+                .andExpect(jsonPath("$.data.options[0].code").value("CELEBRATION_1"))
+                .andExpect(jsonPath("$.data.options[3].code").value("CELEBRATION_4"));
+    }
+
+    @Test
+    void postResultsAcceptsSelectionsInAnyArrayOrder() throws Exception {
+        String body = """
+                {
+                  "flowVersion": "2026-05-v1",
+                  "selections": [
+                    { "step": "BUDGET", "code": "BUDGET_MEDIUM" },
+                    { "step": "SPACE", "code": "DESK_SMALL" },
+                    { "step": "FLOWER_MEANING", "code": "LOVE_3" },
+                    { "step": "EMOTION", "code": "LOVE" },
+                    { "step": "RECIPIENT", "code": "LOVER" },
+                    { "step": "OCCASION", "code": "BIRTHDAY" }
+                  ],
+                  "page": 0,
+                  "size": 5
+                }
+                """;
+        mockMvc.perform(post("/api/v1/curation/results")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.content", hasSize(greaterThan(0))));
+    }
+
+    @Test
     void postResultsRecordsCurationStartActionLogWithV2Source() throws Exception {
         long beforeCount = actionLogRepository.countByActionType(ActionType.CURATION_START);
 

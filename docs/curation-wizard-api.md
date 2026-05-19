@@ -14,8 +14,8 @@
 | ---: | --- | --- | --- |
 | 1 | `OCCASION` | 어떤 날인가요? 선물을 드리는 **상황**을 골라주세요. | 없음 (6지선다) |
 | 2 | `RECIPIENT` | 누구에게 전하는 선물인가요? **받으실 분**을 선택해 주세요. | Step1 `OCCASION` |
-| 3 | `EMOTION` | 어떤 **마음**을 담고 싶나요? 선물에 담을 감정을 골라주세요. | Step1 `OCCASION` |
-| 4 | `FLOWER_MEANING` | 어떤 **꽃말의 결**에 가까운가요? | Step3 `EMOTION` (선택 메시지 15종) |
+| 3 | `EMOTION` | 어떤 **마음**을 전하고 싶나요? 선물에 담을 감정을 골라주세요. | Step1 `OCCASION` |
+| 4 | `FLOWER_MEANING` | 어떤 **꽃말의 결**에 가까운가요? 전하고 싶은 마음을 조금 더 구체적으로 들려주세요. | Step3 `EMOTION` (선택 메시지 15종) |
 | 5 | `SPACE` | 받는 분의 **공간 환경**은? 식물이 놓일 공간을 알려주세요. | 없음 (4지선다) |
 | 6 | `BUDGET` | 어느 정도 **예산**으로 준비하나요? | 없음 (4지선다) |
 
@@ -119,7 +119,7 @@ flowVersion: "2026-05-v1"
     {
       "key": "EMOTION",
       "order": 3,
-      "defaultQuestionTitle": "어떤 마음을 담고 싶나요?",
+      "defaultQuestionTitle": "어떤 마음을 전하고 싶나요?",
       "defaultQuestionSubtitle": "선물에 담을 감정을 골라주세요.",
       "selectionMode": "SINGLE",
       "dependsOn": ["OCCASION"]
@@ -128,7 +128,7 @@ flowVersion: "2026-05-v1"
       "key": "FLOWER_MEANING",
       "order": 4,
       "defaultQuestionTitle": "어떤 꽃말의 결에 가까운가요?",
-      "defaultQuestionSubtitle": null,
+      "defaultQuestionSubtitle": "전하고 싶은 마음을 조금 더 구체적으로 들려주세요.",
       "selectionMode": "SINGLE",
       "dependsOn": ["EMOTION"]
     },
@@ -323,19 +323,19 @@ GET /api/v1/curation/steps/EMOTION/options?selections=%5B%7B%22step%22%3A%22OCCA
 
 | code | label |
 | --- | --- |
-| `LOVE_1` | 변치 않는 마음 |
+| `LOVE_1` | 변함없는 마음 |
 | `LOVE_2` | 첫사랑의 설렘 |
 | `LOVE_3` | 소중한 당신 |
-| `LOVE_4` | 진정한 사랑 |
+| `LOVE_4` | 진실한 사랑 |
 
 **`EMOTION=SUPPORT` (응원)**
 
 | code | label |
 | --- | --- |
 | `SUPPORT_1` | 언제나 응원해 |
-| `SUPPORT_2` | 변함없는 우정 |
-| `SUPPORT_3` | 환한 미소 |
-| `SUPPORT_4` | 일상의 행복 |
+| `SUPPORT_2` | 변치 않는 우정 |
+| `SUPPORT_3` | 찬란한 미소 |
+| `SUPPORT_4` | 매일의 행복 |
 
 **`EMOTION=ENCOURAGEMENT` (격려)**
 
@@ -343,24 +343,24 @@ GET /api/v1/curation/steps/EMOTION/options?selections=%5B%7B%22step%22%3A%22OCCA
 | --- | --- |
 | `ENCOURAGEMENT_1` | 용기와 자신감 |
 | `ENCOURAGEMENT_2` | 새로운 도전 |
-| `ENCOURAGEMENT_3` | 당당한 걸음 |
+| `ENCOURAGEMENT_3` | 당당한 발걸음 |
 | `ENCOURAGEMENT_4` | 무한한 가능성 |
 
 **`EMOTION=CELEBRATION` (축하)**
 
 | code | label |
 | --- | --- |
-| `CELEBRATION_1` | 밝은 축하 |
+| `CELEBRATION_1` | 화사한 축하 |
 | `CELEBRATION_2` | 빛나는 성취 |
 | `CELEBRATION_3` | 새로운 시작 |
-| `CELEBRATION_4` | 함께하는 기쁨 |
+| `CELEBRATION_4` | 함께한 기쁨 |
 
 **`EMOTION=GRATITUDE` (감사)**
 
 | code | label |
 | --- | --- |
-| `GRATITUDE_1` | 진심 어린 감사 |
-| `GRATITUDE_2` | 함께해서 행복해 |
+| `GRATITUDE_1` | 진심 어린 고마움 |
+| `GRATITUDE_2` | 함께해서 행복 |
 | `GRATITUDE_3` | 오래된 인연 |
 | `GRATITUDE_4` | 따뜻한 기억 |
 
@@ -370,7 +370,7 @@ GET /api/v1/curation/steps/EMOTION/options?selections=%5B%7B%22step%22%3A%22OCCA
 | --- | --- |
 | `BLESSING_1` | 행복한 시작 |
 | `BLESSING_2` | 아름다운 인연 |
-| `BLESSING_3` | 넉넉한 축복 |
+| `BLESSING_3` | 아낌없는 축복 |
 | `BLESSING_4` | 조화와 화합 |
 
 **`EMOTION=SINCERITY` (진심)**
@@ -386,7 +386,7 @@ GET /api/v1/curation/steps/EMOTION/options?selections=%5B%7B%22step%22%3A%22OCCA
 
 | code | label |
 | --- | --- |
-| `ETERNITY_1` | 영원히 하나 되기를 |
+| `ETERNITY_1` | 영원히 하나됨 |
 | `ETERNITY_2` | 영원한 사랑 |
 | `ETERNITY_3` | 아름다운 시작 |
 | `ETERNITY_4` | 고귀한 인연 |
@@ -398,7 +398,7 @@ GET /api/v1/curation/steps/EMOTION/options?selections=%5B%7B%22step%22%3A%22OCCA
 | `RESPECT_1` | 깊은 존경 |
 | `RESPECT_2` | 영예와 인정 |
 | `RESPECT_3` | 굳건한 신뢰 |
-| `RESPECT_4` | 굳건한 길 |
+| `RESPECT_4` | 탄탄대로 |
 
 **`EMOTION=PRIDE` (자부심)**
 
@@ -414,7 +414,7 @@ GET /api/v1/curation/steps/EMOTION/options?selections=%5B%7B%22step%22%3A%22OCCA
 | code | label |
 | --- | --- |
 | `LEAP_1` | 희망과 도약 |
-| `LEAP_2` | 밝은 미래 |
+| `LEAP_2` | 밝은 앞날 |
 | `LEAP_3` | 무한한 가능성 |
 | `LEAP_4` | 꿈을 향해 |
 
@@ -432,7 +432,7 @@ GET /api/v1/curation/steps/EMOTION/options?selections=%5B%7B%22step%22%3A%22OCCA
 | code | label |
 | --- | --- |
 | `PROSPERITY_1` | 풍요와 번창 |
-| `PROSPERITY_2` | 꽃피는 기쁨 |
+| `PROSPERITY_2` | 피어나는 기쁨 |
 | `PROSPERITY_3` | 번창하는 일상 |
 | `PROSPERITY_4` | 가정의 행복 |
 
@@ -440,17 +440,17 @@ GET /api/v1/curation/steps/EMOTION/options?selections=%5B%7B%22step%22%3A%22OCCA
 
 | code | label |
 | --- | --- |
-| `COMFORT_1` | 따뜻한 위로 |
+| `COMFORT_1` | 따뜻한 위안 |
 | `COMFORT_2` | 깊은 배려 |
-| `COMFORT_3` | 편안한 쉼 |
-| `COMFORT_4` | 마음의 안식 |
+| `COMFORT_3` | 평온한 휴식 |
+| `COMFORT_4` | 마음의 안계 |
 
 **`EMOTION=GET_WELL` (쾌유)**
 
 | code | label |
 | --- | --- |
 | `GET_WELL_1` | 빠른 회복 |
-| `GET_WELL_2` | 되찾은 활력 |
+| `GET_WELL_2` | 다시 찾은 활력 |
 | `GET_WELL_3` | 건강한 내일 |
 | `GET_WELL_4` | 희망의 빛 |
 
