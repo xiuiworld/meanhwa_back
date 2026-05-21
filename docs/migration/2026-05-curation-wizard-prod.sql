@@ -164,7 +164,7 @@ INSERT INTO tags (category, name, code) SELECT 'MEANING', '명예와 인정', 'R
 INSERT INTO tags (category, name, code) SELECT 'MEANING', '굳건한 신뢰', 'RESPECT_3' FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM tags WHERE code = 'RESPECT_3' AND deleted_at IS NULL);
 INSERT INTO tags (category, name, code) SELECT 'MEANING', '탄탄대로', 'RESPECT_4' FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM tags WHERE code = 'RESPECT_4' AND deleted_at IS NULL);
 INSERT INTO tags (category, name, code) SELECT 'MEANING', '값진 노력', 'PRIDE_1' FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM tags WHERE code = 'PRIDE_1' AND deleted_at IS NULL);
-INSERT INTO tags (category, name, code) SELECT 'MEANING', '빛나는 성취', 'PRIDE_2' FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM tags WHERE code = 'PRIDE_2' AND deleted_at IS NULL);
+INSERT INTO tags (category, name, code) SELECT 'MEANING', '빛나는 성공', 'PRIDE_2' FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM tags WHERE code = 'PRIDE_2' AND deleted_at IS NULL);
 INSERT INTO tags (category, name, code) SELECT 'MEANING', '끊임없는 성장', 'PRIDE_3' FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM tags WHERE code = 'PRIDE_3' AND deleted_at IS NULL);
 INSERT INTO tags (category, name, code) SELECT 'MEANING', '위풍당당', 'PRIDE_4' FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM tags WHERE code = 'PRIDE_4' AND deleted_at IS NULL);
 INSERT INTO tags (category, name, code) SELECT 'MEANING', '희망과 도약', 'LEAP_1' FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM tags WHERE code = 'LEAP_1' AND deleted_at IS NULL);
@@ -203,6 +203,7 @@ UPDATE tags SET name = '아낌없는 축복' WHERE code = 'BLESSING_3' AND delet
 UPDATE tags SET name = '영원히 하나됨' WHERE code = 'ETERNITY_1' AND deleted_at IS NULL;
 UPDATE tags SET name = '명예와 인정' WHERE code = 'RESPECT_2' AND deleted_at IS NULL;
 UPDATE tags SET name = '탄탄대로' WHERE code = 'RESPECT_4' AND deleted_at IS NULL;
+UPDATE tags SET name = '빛나는 성공' WHERE code = 'PRIDE_2' AND deleted_at IS NULL;
 UPDATE tags SET name = '밝은 앞날' WHERE code = 'LEAP_2' AND deleted_at IS NULL;
 UPDATE tags SET name = '풍요와 번영' WHERE code = 'PROSPERITY_1' AND deleted_at IS NULL;
 UPDATE tags SET name = '피어나는 기쁨' WHERE code = 'PROSPERITY_2' AND deleted_at IS NULL;

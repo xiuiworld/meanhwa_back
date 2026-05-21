@@ -107,6 +107,30 @@ class CurationWizardIntegrationTest {
     }
 
     @Test
+    void postResultsRejectsInvalidBranchCombinationRegardlessOfArrayOrder() throws Exception {
+        String body = """
+                {
+                  "flowVersion": "2026-05-v1",
+                  "selections": [
+                    { "step": "BUDGET", "code": "BUDGET_MEDIUM" },
+                    { "step": "FLOWER_MEANING", "code": "LOVE_3" },
+                    { "step": "OCCASION", "code": "PROMOTION" },
+                    { "step": "SPACE", "code": "DESK_SMALL" },
+                    { "step": "RECIPIENT", "code": "COLLEAGUE_JUNIOR" },
+                    { "step": "EMOTION", "code": "LOVE" }
+                  ],
+                  "page": 0,
+                  "size": 5
+                }
+                """;
+        mockMvc.perform(post("/api/v1/curation/results")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errorCode").value("INVALID_CURATION_SELECTION"));
+    }
+
+    @Test
     void stepOptionsRejectInvalidPriorBranchCombination() throws Exception {
         mockMvc.perform(get("/api/v1/curation/steps/FLOWER_MEANING/options")
                         .param("selections", """
@@ -235,6 +259,7 @@ class CurationWizardIntegrationTest {
                                 ]
                                 """))
                 .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.questionTitle").value("가족에게 전달하고 싶은 꽃말은 무엇인가요?"))
                 .andExpect(jsonPath("$.data.options[3].code").value("COMFORT_4"))
                 .andExpect(jsonPath("$.data.options[3].label").value("마음의 안계"));
 

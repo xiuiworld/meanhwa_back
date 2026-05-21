@@ -481,7 +481,7 @@ Response `data`:
 | `options[].tagId` | DB `tags.id` when mapped; may be `null` before seed |
 | `options[].description` | Optional helper text |
 
-Step4 `questionTitle` may change by Step2 `RECIPIENT` (e.g. `PARENT` → “부모님에게 전달하고 싶은 꽃말은 무엇인가요?”).
+Step4 `questionTitle` may change by Step2 `RECIPIENT` (e.g. `FAMILY` → “가족에게 전달하고 싶은 꽃말은 무엇인가요?”).
 
 #### POST /api/v1/curation/results
 

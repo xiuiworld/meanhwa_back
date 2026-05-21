@@ -21,8 +21,8 @@
 
 **동적 질문 문구 (UX)**  
 서버는 각 단계마다 `questionTitle`, `questionSubtitle`을 내려줍니다.  
-예: Step4에서 Step2=`PARENT`이면  
-`"어떤 꽃말의 결에 가까운가요?"` → `"부모님에게 전달하고 싶은 꽃말은 무엇인가요?"`
+예: Step4에서 Step2=`FAMILY`이면  
+`"어떤 꽃말의 결에 가까운가요?"` → `"가족에게 전달하고 싶은 꽃말은 무엇인가요?"`
 
 ---
 
@@ -222,12 +222,12 @@ GET /api/v1/curation/steps/EMOTION/options?selections=%5B%7B%22step%22%3A%22OCCA
 | `options[].tagId` | number \| null | DB `tags.id`. 구현 전 `null` 허용(Mock) |
 | `options[].description` | string \| null | 보조 설명 (선택) |
 
-**Step4 질문 문구 분기 예** (`RECIPIENT=PARENT`):
+**Step4 질문 문구 분기 예** (`RECIPIENT=FAMILY`):
 
 ```json
 {
   "step": "FLOWER_MEANING",
-  "questionTitle": "부모님에게 전달하고 싶은 꽃말은 무엇인가요?",
+  "questionTitle": "가족에게 전달하고 싶은 꽃말은 무엇인가요?",
   "questionSubtitle": "전하고 싶은 마음을 조금 더 구체적으로 들려주세요."
 }
 ```
