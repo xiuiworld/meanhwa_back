@@ -25,8 +25,8 @@ public class DictionarySearchPayloadExtractor implements ActionLogPayloadExtract
     public Optional<Map<String, Object>> extract(JoinPoint joinPoint, Object returnValue, LogAction logAction) {
         Object[] args = joinPoint.getArgs();
         String keyword = (String) args[0];
-        int page = (int) args[1];
-        int size = (int) args[2];
+        int page = (int) args[args.length >= 7 ? 5 : 1];
+        int size = (int) args[args.length >= 7 ? 6 : 2];
 
         if (keyword == null || keyword.isBlank()) {
             return Optional.empty();

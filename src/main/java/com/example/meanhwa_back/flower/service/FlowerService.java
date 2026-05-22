@@ -6,6 +6,8 @@ import com.example.meanhwa_back.common.error.BusinessException;
 import com.example.meanhwa_back.common.error.ErrorCode;
 import com.example.meanhwa_back.common.response.PageResponse;
 import com.example.meanhwa_back.flower.domain.Flower;
+import com.example.meanhwa_back.flower.domain.ManagementLevel;
+import com.example.meanhwa_back.flower.domain.PriceRange;
 import com.example.meanhwa_back.flower.dto.FlowerDetailResponse;
 import com.example.meanhwa_back.flower.dto.FlowerSummaryResponse;
 import com.example.meanhwa_back.flower.dto.TagSummaryResponse;
@@ -42,9 +44,29 @@ public class FlowerService {
     }
 
     @LogAction(value = ActionType.DICTIONARY_SEARCH, extractor = DictionarySearchPayloadExtractor.class)
-    public PageResponse<FlowerSummaryResponse> searchFlowers(String keyword, int page, int size) {
+    public PageResponse<FlowerSummaryResponse> searchFlowers(
+            String keyword,
+            String priceRange,
+            String isPetSafe,
+            String managementLevel,
+            List<Long> tagIds,
+            int page,
+            int size
+    ) {
         String normalizedKeyword = normalize(keyword);
-        return flowerReadCacheService.searchFlowers(normalizedKeyword, page, size);
+        PriceRange resolvedPriceRange = parsePriceRange(priceRange);
+        Boolean resolvedIsPetSafe = parseBooleanFilter(isPetSafe);
+        ManagementLevel resolvedManagementLevel = parseManagementLevel(managementLevel);
+        List<Long> normalizedTagIds = normalizeTagIds(tagIds);
+        return flowerReadCacheService.searchFlowers(
+                normalizedKeyword,
+                resolvedPriceRange,
+                resolvedIsPetSafe,
+                resolvedManagementLevel,
+                normalizedTagIds,
+                page,
+                size
+        );
     }
 
     @LogAction(value = ActionType.FLOWER_DETAIL_VIEW, extractor = FlowerDetailViewPayloadExtractor.class)
@@ -66,5 +88,55 @@ public class FlowerService {
             return null;
         }
         return keyword.trim();
+    }
+
+    private PriceRange parsePriceRange(String value) {
+        if (value == null || value.isBlank()) {
+            return null;
+        }
+        try {
+            return PriceRange.valueOf(value.trim().toUpperCase());
+        } catch (IllegalArgumentException exception) {
+            throw new BusinessException(ErrorCode.INVALID_FLOWER_FILTER);
+        }
+    }
+
+    private ManagementLevel parseManagementLevel(String value) {
+        if (value == null || value.isBlank()) {
+            return null;
+        }
+        try {
+            return ManagementLevel.valueOf(value.trim().toUpperCase());
+        } catch (IllegalArgumentException exception) {
+            throw new BusinessException(ErrorCode.INVALID_FLOWER_FILTER);
+        }
+    }
+
+    private Boolean parseBooleanFilter(String value) {
+        if (value == null || value.isBlank()) {
+            return null;
+        }
+        String normalized = value.trim().toLowerCase();
+        if ("true".equals(normalized)) {
+            return true;
+        }
+        if ("false".equals(normalized)) {
+            return false;
+        }
+        throw new BusinessException(ErrorCode.INVALID_FLOWER_FILTER);
+    }
+
+    private List<Long> normalizeTagIds(List<Long> tagIds) {
+        if (tagIds == null || tagIds.isEmpty()) {
+            return List.of();
+        }
+        if (tagIds.stream().anyMatch(id -> id == null || id <= 0)) {
+            throw new BusinessException(ErrorCode.INVALID_FLOWER_FILTER);
+        }
+        List<Long> normalized = tagIds.stream()
+                .distinct()
+                .sorted()
+                .toList();
+        return normalized;
     }
 }

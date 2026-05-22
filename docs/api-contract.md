@@ -1,6 +1,6 @@
 # Meanhwa Backend API Contract
 
-This is the consolidated frontend-facing API contract for the Meanhwa backend after Phase 11. The phase-specific documents are preserved for historical context; this file is the current single reference.
+This is the consolidated frontend-facing API contract for the Meanhwa backend after Phase 11. The phase-specific documents are preserved for historical context; this file is the current single reference. New mypage/flower dictionary additions are also summarized separately in [api-additions-mypage-flower.md](api-additions-mypage-flower.md).
 
 ## Base Rules
 
@@ -44,8 +44,10 @@ Common error codes:
 | `FORBIDDEN` | 403 | Logged in but role is not allowed |
 | `FLOWER_NOT_FOUND` | 404 | Flower missing or soft-deleted |
 | `TAG_NOT_FOUND` | 404 | Tag missing or soft-deleted |
+| `CURATION_RESULT_NOT_FOUND` | 404 | User curation result missing or owned by another user |
 | `DUPLICATE_TAG` | 409 | Active tag already exists |
 | `INVALID_MAPPING` | 400 | Invalid or duplicate flower-tag mapping |
+| `INVALID_FLOWER_FILTER` | 400 | Invalid flower dictionary filter value |
 | `INVALID_FILE_TYPE` | 400 | Uploaded file is not jpeg/png/webp |
 | `FILE_TOO_LARGE` | 400 | Uploaded image is too large |
 | `UPLOAD_FAILED` | 500 | Storage upload failed |
@@ -110,6 +112,10 @@ Authenticated user APIs include:
 
 ```http
 POST /api/v1/messages/generate
+GET  /api/v1/users/me/messages
+GET  /api/v1/users/me/curation-results
+GET  /api/v1/users/me/curation-results/latest
+GET  /api/v1/users/me/curation-results/{resultId}
 GET  /api/v1/users/me
 GET  /api/v1/users/me/likes
 POST /api/v1/users/me/likes/{flowerId}
@@ -238,7 +244,11 @@ Query parameters:
 
 | Name | Type | Required | Default | Notes |
 | --- | --- | --- | --- | --- |
-| `keyword` | string | no | null | Searches `name` and `coreMeaning` |
+| `keyword` | string | no | null | Searches `name`, `coreMeaning`, `description`, `scientificName`, and `origin` |
+| `priceRange` | string | no | null | `LOW`, `MEDIUM`, `HIGH`, `PREMIUM` |
+| `isPetSafe` | boolean | no | null | `true`: pet-safe only, `false`: pet-unsafe only, omitted: all |
+| `managementLevel` | string | no | null | `EASY`, `NORMAL`, `HARD` |
+| `tagIds` | number[] | no | empty | Repeated query param, e.g. `tagIds=5&tagIds=9`; flower must have all requested tags |
 | `page` | number | no | 0 | Zero-based |
 | `size` | number | no | 20 | Page size |
 
@@ -255,6 +265,7 @@ Response:
         "name": "장미",
         "imageUrl": "https://cdn.meanhwa.example/flowers/rose.jpg",
         "coreMeaning": "사랑과 열정",
+        "description": "장미는 선명한 색과 풍성한 꽃잎으로 마음을 직접적으로 전하기 좋은 대표적인 꽃입니다.",
         "managementLevel": "NORMAL",
         "isPetSafe": true,
         "priceRange": "MEDIUM"
@@ -271,6 +282,8 @@ Response:
 
 `GET /flowers?keyword=...` records `DICTIONARY_SEARCH`. Calls without keyword do not.
 
+Filters apply before paging. `tagIds` are matched with AND semantics, and repository/cache keys must include all filters (`keyword`, `priceRange`, `isPetSafe`, `managementLevel`, sorted `tagIds`, `page`, `size`).
+
 ### GET /api/v1/flowers/{flowerId}
 
 Response:
@@ -284,6 +297,11 @@ Response:
     "name": "장미",
     "imageUrl": "https://cdn.meanhwa.example/flowers/rose.jpg",
     "coreMeaning": "사랑과 열정",
+    "description": "장미는 선명한 색과 풍성한 꽃잎으로 마음을 직접적으로 전하기 좋은 대표적인 꽃입니다.",
+    "scientificName": "Rosa",
+    "origin": "아시아, 유럽",
+    "bloomingSeason": "봄~초여름",
+    "scent": "품종에 따라 은은하거나 진한 향",
     "managementLevel": "NORMAL",
     "managementInfo": "햇빛이 잘 드는 곳에 두고 겉흙이 마르면 물을 주세요.",
     "isPetSafe": true,
@@ -522,6 +540,16 @@ Scoring (same engine as legacy curation):
 
 Response `data` uses the same page shape as legacy `GET /api/v1/curation` (`CurationFlowerResponse`).
 
+Authentication is optional. If a valid Bearer token is included, the backend stores a user-owned curation result snapshot containing `flowVersion`, all six `selections`, and the ranked recommendation list returned at completion. Anonymous requests are not stored and keep the same response shape.
+
+> Future improvement note, not part of the current response contract:
+>
+> `POST /api/v1/curation/results` currently keeps the legacy page response shape even when the backend saves the authenticated user's result. The response does not include the newly saved curation result ID. Clients that need the saved result ID, such as the message creation flow, should keep using the current contract: call `GET /api/v1/users/me/curation-results/latest` after completion and use its `data.id`.
+>
+> A later backward-compatible improvement can add a saved-result identifier to the completion response, for example `curationResultId` or a metadata field, so the frontend can connect message generation to the just-created result without an extra `latest` request. For anonymous requests, the value would be `null` or omitted because no result is saved.
+>
+> If this improvement is implemented, preserve the existing page fields (`content`, `page`, `size`, `totalElements`, `totalPages`, `hasNext`) and add only optional metadata. Because the frontend is currently being built against the existing contract, this should be handled as a coordinated follow-up change with separate frontend/backend rollout notes.
+
 Wizard-specific errors (in addition to `TAG_NOT_FOUND`, `INVALID_PRICE_RANGE`):
 
 | HTTP | errorCode | When |
@@ -530,8 +558,93 @@ Wizard-specific errors (in addition to `TAG_NOT_FOUND`, `INVALID_PRICE_RANGE`):
 | 400 | `INVALID_CURATION_SELECTION` | Code not allowed for branch |
 | 400 | `INCOMPLETE_CURATION_SELECTION` | Not 6 steps on results |
 | 404 | `CURATION_FLOW_NOT_FOUND` | Bad `flowVersion` |
+| 404 | `CURATION_RESULT_NOT_FOUND` | User curation result missing or owned by another user |
 
-`GET /api/v1/curation/results` is not implemented; use `POST` only.
+#### Saved curation results
+
+All saved curation result APIs require `Authorization: Bearer {accessToken}` and return only the current user's data.
+
+```http
+GET /api/v1/users/me/curation-results
+GET /api/v1/users/me/curation-results/latest
+GET /api/v1/users/me/curation-results/{resultId}
+```
+
+`GET /api/v1/users/me/curation-results` returns a newest-first page of result summaries:
+
+```json
+{
+  "status": 200,
+  "message": "요청이 성공적으로 처리되었습니다.",
+  "data": {
+    "content": [
+      {
+        "id": 12,
+        "flowVersion": "2026-05-v1",
+        "selections": [
+          { "step": "OCCASION", "code": "BIRTHDAY", "label": "생일" },
+          { "step": "RECIPIENT", "code": "LOVER", "label": "연인" }
+        ],
+        "topFlowers": [
+          {
+            "rank": 1,
+            "flowerId": 1,
+            "name": "장미",
+            "imageUrl": "https://cdn.meanhwa.example/flowers/rose.jpg",
+            "coreMeaning": "사랑과 열정"
+          }
+        ],
+        "resultCount": 20,
+        "createdAt": "2026-05-22T14:00:00"
+      }
+    ],
+    "page": 0,
+    "size": 20,
+    "totalElements": 1,
+    "totalPages": 1,
+    "hasNext": false
+  }
+}
+```
+
+`GET /api/v1/users/me/curation-results/latest` and `GET /api/v1/users/me/curation-results/{resultId}` return the replay detail shape:
+
+```json
+{
+  "status": 200,
+  "message": "요청이 성공적으로 처리되었습니다.",
+  "data": {
+    "id": 12,
+    "flowVersion": "2026-05-v1",
+    "selections": [
+      { "step": "OCCASION", "code": "BIRTHDAY", "label": "생일" }
+    ],
+    "recommendations": [
+      {
+        "rank": 1,
+        "flowerId": 1,
+        "name": "장미",
+        "imageUrl": "https://cdn.meanhwa.example/flowers/rose.jpg",
+        "coreMeaning": "사랑과 열정",
+        "priceRange": "MEDIUM",
+        "isPetSafe": true,
+        "score": 10,
+        "recommendationReason": "연인 조건과 잘 맞고 5~10만원 예산대에 어울리는 추천입니다.",
+        "matchedTags": [
+          {
+            "id": 5,
+            "category": "RELATION",
+            "name": "연인"
+          }
+        ]
+      }
+    ],
+    "createdAt": "2026-05-22T14:00:00"
+  }
+}
+```
+
+If the user has no latest result, or the requested `resultId` is not owned by the current user, return `404 CURATION_RESULT_NOT_FOUND`. Saved `recommendations` are snapshots for replay and should not be recalculated from changed flower/tag data.
 
 Frontend flow:
 
@@ -577,6 +690,7 @@ Request:
 {
   "flowerId": 1,
   "selectedTagIds": [5, 9],
+  "curationResultId": 12,
   "senderName": "민수",
   "receiverName": "지은"
 }
@@ -589,11 +703,28 @@ Response:
   "status": 200,
   "message": "요청이 성공적으로 처리되었습니다.",
   "data": {
+    "id": 101,
     "flowerId": 1,
+    "flowerName": "장미",
+    "flowerImageUrl": "https://cdn.meanhwa.example/flowers/rose.jpg",
+    "coreMeaning": "사랑과 열정",
+    "selectedTags": [
+      {
+        "id": 5,
+        "category": "RELATION",
+        "name": "연인"
+      }
+    ],
+    "curationResultId": 12,
+    "senderName": "민수",
+    "receiverName": "지은",
+    "createdAt": "2026-05-22T14:30:00",
     "message": "지은님께..."
   }
 }
 ```
+
+`curationResultId` is optional. If supplied, it must belong to the authenticated user. The response keeps `data.flowerId` and `data.message` for existing clients and adds saved-message metadata. Successful generations are saved to the user's message list, including template fallback results.
 
 When `OPENAI_API_KEY` is configured, the backend tries OpenAI first. Missing key, timeout, non-2xx response, malformed response, or client exceptions fall back to the template generator and still return success. Rate limiting applies before generation regardless of whether OpenAI or the template is used.
 
@@ -604,13 +735,62 @@ Common errors:
 | 401 | `UNAUTHORIZED` | Missing or invalid Bearer token |
 | 404 | `FLOWER_NOT_FOUND` | Flower missing or soft-deleted |
 | 404 | `TAG_NOT_FOUND` | One or more `selectedTagIds` are invalid |
+| 404 | `CURATION_RESULT_NOT_FOUND` | `curationResultId` is missing or not owned by the current user |
 | 429 | `MESSAGE_GENERATION_RATE_LIMIT_EXCEEDED` | More than 10 generations in the current 1-hour window |
+
+### GET /api/v1/users/me/messages
+
+Returns saved generated messages for the current user, newest first.
+
+Query parameters:
+
+| Name | Type | Required | Default | Notes |
+| --- | --- | --- | --- | --- |
+| `page` | number | no | 0 | Zero-based |
+| `size` | number | no | 20 | Page size, max 100 |
+
+Response:
+
+```json
+{
+  "status": 200,
+  "message": "요청이 성공적으로 처리되었습니다.",
+  "data": {
+    "content": [
+      {
+        "id": 101,
+        "flowerId": 1,
+        "flowerName": "장미",
+        "flowerImageUrl": "https://cdn.meanhwa.example/flowers/rose.jpg",
+        "coreMeaning": "사랑과 열정",
+        "selectedTags": [
+          {
+            "id": 5,
+            "category": "RELATION",
+            "name": "연인"
+          }
+        ],
+        "curationResultId": 12,
+        "senderName": "민수",
+        "receiverName": "지은",
+        "message": "지은님께...",
+        "createdAt": "2026-05-22T14:30:00"
+      }
+    ],
+    "page": 0,
+    "size": 20,
+    "totalElements": 1,
+    "totalPages": 1,
+    "hasNext": false
+  }
+}
+```
 
 ## Personalization
 
 All personalization endpoints require `Authorization: Bearer {accessToken}` (see list under Authentication).
 
-Likes are idempotent and scoped by user. Histories are written by authenticated flower detail views, deduplicated by flower, sorted newest first, and capped at 50 items.
+Likes are idempotent and scoped by user. Histories are written by authenticated flower detail views, deduplicated by flower, sorted newest first, and capped at 50 items. Messages and saved curation results are user-owned and sorted newest first.
 
 `GET /likes` and `GET /histories` return arrays of `FlowerSummaryResponse`.
 
@@ -675,6 +855,11 @@ Creates a flower. The backend records the admin user id in `created_by` and `upd
   "name": "관리자테스트꽃",
   "imageUrl": "https://cdn.meanhwa.example/admin-test.jpg",
   "coreMeaning": "처음 의미",
+  "description": "꽃 자체에 대한 소개 문구",
+  "scientificName": "Rosa",
+  "origin": "아시아, 유럽",
+  "bloomingSeason": "봄~초여름",
+  "scent": "은은한 향",
   "managementLevel": "EASY",
   "managementInfo": "관리자 테스트 관리법",
   "isToxicToPets": false,
@@ -690,6 +875,11 @@ Response data uses `AdminFlowerDetailResponse`. It matches public flower detail 
   "name": "관리자테스트꽃",
   "imageUrl": "https://cdn.meanhwa.example/admin-test.jpg",
   "coreMeaning": "처음 의미",
+  "description": "꽃 자체에 대한 소개 문구",
+  "scientificName": "Rosa",
+  "origin": "아시아, 유럽",
+  "bloomingSeason": "봄~초여름",
+  "scent": "은은한 향",
   "managementLevel": "EASY",
   "managementInfo": "관리자 테스트 관리법",
   "isPetSafe": true,
@@ -953,6 +1143,8 @@ GET /api/v1/tags
 ```
 
 Cache behavior is transparent to the frontend. Admin flower/tag mutations evict related caches. Local/test use simple in-memory cache; prod can use Redis.
+
+`GET /api/v1/flowers` cache keys must include every query filter: normalized `keyword`, `priceRange`, `isPetSafe`, `managementLevel`, sorted `tagIds`, `page`, and `size`.
 
 Message generation rate limits also use Redis in prod (`app.message.rate-limit.store=redis`). Local/test keep counters in memory.
 

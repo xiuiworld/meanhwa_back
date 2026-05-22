@@ -25,10 +25,22 @@ public class FlowerController {
     @GetMapping
     public ApiResponse<PageResponse<FlowerSummaryResponse>> getFlowers(
             @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) String priceRange,
+            @RequestParam(required = false) String isPetSafe,
+            @RequestParam(required = false) String managementLevel,
+            @RequestParam(required = false) java.util.List<Long> tagIds,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size
     ) {
-        return ApiResponse.ok(flowerService.searchFlowers(keyword, page, size));
+        return ApiResponse.ok(flowerService.searchFlowers(
+                keyword,
+                priceRange,
+                isPetSafe,
+                managementLevel,
+                tagIds,
+                page,
+                size
+        ));
     }
 
     @GetMapping("/{flowerId}")

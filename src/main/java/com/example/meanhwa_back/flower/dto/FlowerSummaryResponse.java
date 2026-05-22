@@ -11,6 +11,7 @@ public record FlowerSummaryResponse(
         String name,
         String imageUrl,
         String coreMeaning,
+        String description,
         ManagementLevel managementLevel,
         boolean isPetSafe,
         PriceRange priceRange
@@ -21,6 +22,7 @@ public record FlowerSummaryResponse(
                 flower.getName(),
                 flower.getImageUrl(),
                 flower.getCoreMeaning(),
+                flower.getDescription(),
                 flower.getManagementLevel(),
                 !flower.isToxicToPets(),
                 flower.getPriceRange()

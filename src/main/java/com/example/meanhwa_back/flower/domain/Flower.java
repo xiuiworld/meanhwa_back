@@ -31,6 +31,21 @@ public class Flower {
     @Column(length = 100)
     private String coreMeaning;
 
+    @Column(columnDefinition = "TEXT")
+    private String description;
+
+    @Column(length = 150)
+    private String scientificName;
+
+    @Column(length = 100)
+    private String origin;
+
+    @Column(length = 100)
+    private String bloomingSeason;
+
+    @Column(length = 100)
+    private String scent;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private ManagementLevel managementLevel;
@@ -73,9 +88,44 @@ public class Flower {
             boolean isToxicToPets,
             PriceRange priceRange
     ) {
+        this(
+                name,
+                imageUrl,
+                coreMeaning,
+                null,
+                null,
+                null,
+                null,
+                null,
+                managementLevel,
+                managementInfo,
+                isToxicToPets,
+                priceRange
+        );
+    }
+
+    public Flower(
+            String name,
+            String imageUrl,
+            String coreMeaning,
+            String description,
+            String scientificName,
+            String origin,
+            String bloomingSeason,
+            String scent,
+            ManagementLevel managementLevel,
+            String managementInfo,
+            boolean isToxicToPets,
+            PriceRange priceRange
+    ) {
         this.name = name;
         this.imageUrl = imageUrl;
         this.coreMeaning = coreMeaning;
+        this.description = description;
+        this.scientificName = scientificName;
+        this.origin = origin;
+        this.bloomingSeason = bloomingSeason;
+        this.scent = scent;
         this.managementLevel = managementLevel;
         this.managementInfo = managementInfo;
         this.isToxicToPets = isToxicToPets;
@@ -96,6 +146,26 @@ public class Flower {
 
     public String getCoreMeaning() {
         return coreMeaning;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public String getScientificName() {
+        return scientificName;
+    }
+
+    public String getOrigin() {
+        return origin;
+    }
+
+    public String getBloomingSeason() {
+        return bloomingSeason;
+    }
+
+    public String getScent() {
+        return scent;
     }
 
     public ManagementLevel getManagementLevel() {
@@ -148,9 +218,44 @@ public class Flower {
             boolean isToxicToPets,
             PriceRange priceRange
     ) {
+        update(
+                name,
+                imageUrl,
+                coreMeaning,
+                null,
+                null,
+                null,
+                null,
+                null,
+                managementLevel,
+                managementInfo,
+                isToxicToPets,
+                priceRange
+        );
+    }
+
+    public void update(
+            String name,
+            String imageUrl,
+            String coreMeaning,
+            String description,
+            String scientificName,
+            String origin,
+            String bloomingSeason,
+            String scent,
+            ManagementLevel managementLevel,
+            String managementInfo,
+            boolean isToxicToPets,
+            PriceRange priceRange
+    ) {
         this.name = name;
         this.imageUrl = imageUrl;
         this.coreMeaning = coreMeaning;
+        this.description = description;
+        this.scientificName = scientificName;
+        this.origin = origin;
+        this.bloomingSeason = bloomingSeason;
+        this.scent = scent;
         this.managementLevel = managementLevel;
         this.managementInfo = managementInfo;
         this.isToxicToPets = isToxicToPets;

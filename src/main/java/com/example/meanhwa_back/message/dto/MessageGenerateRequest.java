@@ -8,6 +8,7 @@ import jakarta.validation.constraints.NotNull;
 public record MessageGenerateRequest(
         @NotNull Long flowerId,
         List<Long> selectedTagIds,
+        Long curationResultId,
         @NotBlank String senderName,
         @NotBlank String receiverName
 ) {

@@ -73,10 +73,14 @@ erDiagram
     users ||--o{ refresh_tokens : owns
     users ||--o{ user_likes : likes
     users ||--o{ user_histories : views
+    users ||--o{ user_curation_results : completes
+    users ||--o{ user_messages : writes
     flowers ||--o{ user_likes : liked
     flowers ||--o{ user_histories : viewed
+    flowers ||--o{ user_messages : referenced
     flowers ||--o{ flower_tag_mappings : mapped
     tags ||--o{ flower_tag_mappings : mapped
+    user_curation_results ||--o{ user_messages : linked
 
     users {
         bigint id PK
@@ -94,6 +98,11 @@ erDiagram
         varchar name
         varchar image_url
         varchar core_meaning
+        text description
+        varchar scientific_name
+        varchar origin
+        varchar blooming_season
+        varchar scent
         varchar management_level
         text management_info
         boolean is_toxic_to_pets
@@ -133,6 +142,31 @@ erDiagram
         datetime viewed_at
     }
 
+    user_curation_results {
+        bigint id PK
+        bigint user_id FK
+        varchar flow_version
+        text selections
+        text recommendations
+        int result_count
+        datetime created_at
+    }
+
+    user_messages {
+        bigint id PK
+        bigint user_id FK
+        bigint flower_id FK
+        bigint curation_result_id FK
+        varchar flower_name
+        varchar flower_image_url
+        varchar core_meaning
+        text selected_tags
+        varchar sender_name
+        varchar receiver_name
+        text message
+        datetime created_at
+    }
+
     refresh_tokens {
         bigint id PK
         bigint user_id FK
@@ -163,6 +197,11 @@ erDiagram
 | `name` | VARCHAR(100) | N | 식물명 |
 | `image_url` | VARCHAR(255) | Y | S3/CDN 이미지 URL |
 | `core_meaning` | VARCHAR(100) | Y | 대표 꽃말 |
+| `description` | TEXT | Y | 꽃/식물 자체 소개 및 특징 |
+| `scientific_name` | VARCHAR(150) | Y | 학명 |
+| `origin` | VARCHAR(100) | Y | 원산지 또는 주요 분포 |
+| `blooming_season` | VARCHAR(100) | Y | 개화 시기 |
+| `scent` | VARCHAR(100) | Y | 향 정보 |
 | `management_level` | VARCHAR(20) | N | 관리 난이도 |
 | `management_info` | TEXT | Y | 상세 관리 방법 |
 | `is_toxic_to_pets` | BOOLEAN | N | 반려동물 독성 여부 |
@@ -307,6 +346,52 @@ refresh API는 성공 시 토큰을 회전시키고 기존 refresh token을 폐�
 - 꽃 상세 조회 시 인증 사용자의 이력을 기록합니다.
 - 같은 식물을 다시 보면 row를 추가하지 않고 `viewed_at`을 갱신합니다.
 - 사용자별 최근 본 식물은 최대 50개로 유지합니다.
+
+## `user_curation_results`
+
+로그인 사용자의 큐레이션 완료 결과 snapshot 테이블입니다.
+
+| 컬럼 | 타입 | Null | 설명 |
+| --- | --- | --- | --- |
+| `id` | BIGINT | N | PK |
+| `user_id` | BIGINT | N | `users.id` 참조 |
+| `flow_version` | VARCHAR(50) | N | 큐레이션 플로우 버전 |
+| `selections` | TEXT | N | 6단계 선택값 JSON snapshot |
+| `recommendations` | TEXT | N | 추천 꽃 목록 JSON snapshot |
+| `result_count` | INT | N | 완료 시점 전체 추천 결과 수 |
+| `created_at` | DATETIME | N | 생성 일시 |
+
+인덱스:
+
+| 이름 | 컬럼 | 설명 |
+| --- | --- | --- |
+| `idx_user_curation_results_user_created` | `user_id`, `created_at` | 사용자별 큐레이션 결과 최신순 조회 |
+
+## `user_messages`
+
+로그인 사용자의 메시지 생성 이력 테이블입니다. 꽃/태그/큐레이션 표시값은 생성 시점 snapshot으로 저장합니다.
+
+| 컬럼 | 타입 | Null | 설명 |
+| --- | --- | --- | --- |
+| `id` | BIGINT | N | PK |
+| `user_id` | BIGINT | N | `users.id` 참조 |
+| `flower_id` | BIGINT | N | `flowers.id` 참조 |
+| `curation_result_id` | BIGINT | Y | 연결된 `user_curation_results.id` |
+| `flower_name` | VARCHAR(100) | N | 생성 시점 꽃 이름 |
+| `flower_image_url` | VARCHAR(255) | Y | 생성 시점 꽃 이미지 |
+| `core_meaning` | VARCHAR(100) | Y | 생성 시점 대표 꽃말 |
+| `selected_tags` | TEXT | N | 메시지 생성에 사용한 태그 JSON snapshot |
+| `sender_name` | VARCHAR(50) | N | 보내는 사람 |
+| `receiver_name` | VARCHAR(50) | N | 받는 사람 |
+| `message` | TEXT | N | 생성된 메시지 본문 |
+| `created_at` | DATETIME | N | 생성 일시 |
+
+인덱스:
+
+| 이름 | 컬럼 | 설명 |
+| --- | --- | --- |
+| `idx_user_messages_user_created` | `user_id`, `created_at` | 사용자별 메시지 최신순 조회 |
+| `idx_user_messages_curation_result` | `curation_result_id` | 큐레이션 결과와 연결된 메시지 조회 |
 
 ## `action_logs`
 
