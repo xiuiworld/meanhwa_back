@@ -13,6 +13,7 @@ public enum ErrorCode {
     INVALID_OAUTH_TOKEN(HttpStatus.UNAUTHORIZED, "INVALID_OAUTH_TOKEN", "유효하지 않은 OAuth 토큰입니다."),
     FLOWER_NOT_FOUND(HttpStatus.NOT_FOUND, "FLOWER_NOT_FOUND", "꽃/식물 정보를 찾을 수 없습니다."),
     TAG_NOT_FOUND(HttpStatus.NOT_FOUND, "TAG_NOT_FOUND", "태그 정보를 찾을 수 없습니다."),
+    RESOURCE_NOT_FOUND(HttpStatus.NOT_FOUND, "RESOURCE_NOT_FOUND", "요청한 API를 찾을 수 없습니다."),
     CURATION_RESULT_NOT_FOUND(HttpStatus.NOT_FOUND, "CURATION_RESULT_NOT_FOUND", "큐레이션 결과를 찾을 수 없습니다."),
     INVALID_FLOWER_FILTER(HttpStatus.BAD_REQUEST, "INVALID_FLOWER_FILTER", "꽃 도감 필터가 올바르지 않습니다."),
     /** 위저드 step key가 enum에 없을 때. */

@@ -63,7 +63,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/v1/messages/generate").authenticated()
                         .requestMatchers("/api/v1/admin/**").hasAuthority(Role.ROLE_ADMIN.name())
                         .requestMatchers("/api/v1/users/**").authenticated()
-                        .anyRequest().permitAll()
+                        .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
