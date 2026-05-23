@@ -167,6 +167,9 @@ jobs:
             sudo docker network create meanhwa-net || true
             if ! sudo docker inspect meanhwa-redis > /dev/null 2>&1; then
               sudo docker run -d --restart unless-stopped --name meanhwa-redis --network meanhwa-net \
+                --log-driver json-file \
+                --log-opt max-size=50m \
+                --log-opt max-file=5 \
                 redis:alpine
             elif [ "$(sudo docker inspect -f '{{.State.Running}}' meanhwa-redis)" != "true" ]; then
               sudo docker start meanhwa-redis
@@ -176,8 +179,11 @@ jobs:
             sudo docker pull "$DOCKERHUB_USERNAME/meanhwa-back"
             sudo docker stop meanhwa-server || true
             sudo docker rm meanhwa-server || true
-            
+
             sudo docker run -d --restart unless-stopped --name meanhwa-server --network meanhwa-net -p 127.0.0.1:8080:8080 \
+              --log-driver json-file \
+              --log-opt max-size=50m \
+              --log-opt max-file=5 \
               -e SPRING_PROFILES_ACTIVE="prod" \
               -e CACHE_TYPE="$CACHE_TYPE" \
               -e REDIS_HOST="$REDIS_HOST" \
