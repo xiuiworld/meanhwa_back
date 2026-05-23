@@ -19,7 +19,10 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
-/** 로그인 사용자가 생성한 메시지 이력. 표시값은 생성 시점 snapshot으로 저장한다. */
+/**
+ * 사용자가 생성한 선물 메시지 저장 엔티티.
+ * 꽃과 큐레이션 결과의 주요 표시값을 스냅샷으로 저장해 과거 메시지를 안정적으로 보여준다.
+ */
 @Entity
 @Table(
         name = "user_messages",
@@ -28,10 +31,6 @@ import jakarta.persistence.Table;
                 @Index(name = "idx_user_messages_curation_result", columnList = "curation_result_id")
         }
 )
-/**
- * 사용자가 생성한 선물 메시지 저장 엔티티.
- * 꽃과 큐레이션 결과의 주요 표시값을 스냅샷으로 저장해 과거 메시지를 안정적으로 보여준다.
- */
 public class UserMessage {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

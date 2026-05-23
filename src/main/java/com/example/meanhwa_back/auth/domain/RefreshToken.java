@@ -17,7 +17,10 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
-/** DB에 저장되는 Refresh 토큰(해시·만료·revoke 시각). */
+/**
+ * 저장된 refresh token 해시와 만료 시각을 관리하는 인증 엔티티.
+ * 원문 토큰 대신 해시만 보관해 DB 유출 시 피해 범위를 줄인다.
+ */
 @Entity
 @Table(
         name = "refresh_tokens",
@@ -26,10 +29,6 @@ import jakarta.persistence.Table;
                 @Index(name = "idx_refresh_token_user", columnList = "user_id")
         }
 )
-/**
- * 저장된 refresh token 해시와 만료 시각을 관리하는 인증 엔티티.
- * 원문 토큰 대신 해시만 보관해 DB 유출 시 피해 범위를 줄인다.
- */
 public class RefreshToken {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

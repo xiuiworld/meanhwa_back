@@ -12,7 +12,10 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
-/** 꽃-태그 연관 및 큐레이션 가중치(weight). */
+/**
+ * 꽃과 태그의 다대다 관계와 추천 가중치를 담는 매핑 엔티티.
+ * 큐레이션 점수 계산은 이 엔티티의 weight를 기준으로 태그 매칭 강도를 반영한다.
+ */
 @Entity
 @Table(
         name = "flower_tag_mappings",
@@ -21,10 +24,6 @@ import jakarta.persistence.Table;
                 @Index(name = "idx_tag_flower", columnList = "tag_id, flower_id")
         }
 )
-/**
- * 꽃과 태그의 다대다 관계와 추천 가중치를 담는 매핑 엔티티.
- * 큐레이션 점수 계산은 이 엔티티의 weight를 기준으로 태그 매칭 강도를 반영한다.
- */
 public class FlowerTagMapping {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

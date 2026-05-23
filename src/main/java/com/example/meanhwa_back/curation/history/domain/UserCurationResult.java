@@ -17,16 +17,15 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
-/** 로그인 사용자의 큐레이션 완료 결과 snapshot. */
+/**
+ * 로그인 사용자가 저장한 큐레이션 결과 스냅샷 엔티티.
+ * 선택 항목과 추천 결과를 JSON으로 보존해 이후 태그나 꽃 데이터가 바뀌어도 당시 결과를 재현한다.
+ */
 @Entity
 @Table(
         name = "user_curation_results",
         indexes = @Index(name = "idx_user_curation_results_user_created", columnList = "user_id, created_at")
 )
-/**
- * 로그인 사용자가 저장한 큐레이션 결과 스냅샷 엔티티.
- * 선택 항목과 추천 결과를 JSON으로 보존해 이후 태그나 꽃 데이터가 바뀌어도 당시 결과를 재현한다.
- */
 public class UserCurationResult {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
