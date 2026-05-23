@@ -33,21 +33,20 @@ class FlywayMysqlMigrationIntegrationTest {
     @Test
     void flywayMigrationsCreateSchemaAndHibernateValidatesAgainstMysql() {
         try (ConfigurableApplicationContext context = new SpringApplicationBuilder(MeanhwaBackApplication.class)
-                .properties(
-                        "spring.datasource.url=" + mysql.getJdbcUrl(),
-                        "spring.datasource.username=" + mysql.getUsername(),
-                        "spring.datasource.password=" + mysql.getPassword(),
-                        "spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver",
-                        "spring.flyway.enabled=true",
-                        "spring.flyway.locations=classpath:db/migration/mysql",
-                        "spring.flyway.baseline-on-migrate=false",
-                        "spring.jpa.hibernate.ddl-auto=validate",
-                        "spring.sql.init.mode=never",
-                        "app.storage.type=fake",
-                        "app.message.rate-limit.store=memory",
-                        "app.jwt.secret=test-jwt-secret-for-meanhwa-mysql-flyway-validation"
-                )
-                .run()) {
+                .run(
+                        "--spring.datasource.url=" + mysql.getJdbcUrl(),
+                        "--spring.datasource.username=" + mysql.getUsername(),
+                        "--spring.datasource.password=" + mysql.getPassword(),
+                        "--spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver",
+                        "--spring.flyway.enabled=true",
+                        "--spring.flyway.locations=classpath:db/migration/mysql",
+                        "--spring.flyway.baseline-on-migrate=false",
+                        "--spring.jpa.hibernate.ddl-auto=validate",
+                        "--spring.sql.init.mode=never",
+                        "--app.storage.type=fake",
+                        "--app.message.rate-limit.store=memory",
+                        "--app.jwt.secret=test-jwt-secret-for-meanhwa-mysql-flyway-validation"
+                )) {
             JdbcTemplate jdbcTemplate = context.getBean(JdbcTemplate.class);
             Set<String> requiredScoringCodes = requiredScoringCodes();
 
@@ -62,7 +61,7 @@ class FlywayMysqlMigrationIntegrationTest {
                     requiredScoringCodes.toArray()
             );
 
-            assertThat(successfulMigrations).isGreaterThanOrEqualTo(2);
+            assertThat(successfulMigrations).isGreaterThanOrEqualTo(3);
             assertThat(activeRequiredTags).isEqualTo(requiredScoringCodes.size());
         }
     }
