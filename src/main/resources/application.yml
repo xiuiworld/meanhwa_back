@@ -14,7 +14,21 @@ spring:
 server:
   port: 8080
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
 app:
+  cors:
+    allowed-origins:
+      - http://localhost:3000
+      - http://localhost:5173
   jwt:
     secret: default-dev-jwt-secret-for-meanhwa-local-and-test-only
     access-token-validity-minutes: 30

@@ -15,11 +15,15 @@ import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /** OpenAI Chat Completions API로 메시지 생성 (실패 시 템플릿 fallback). */
 @Component
 @Primary
 public class OpenAiMessageGenerator implements MessageGenerator {
+    private static final Logger log = LoggerFactory.getLogger(OpenAiMessageGenerator.class);
+
     private final OpenAiProperties properties;
     private final TemplateMessageGenerator fallbackGenerator;
     private final ObjectMapper objectMapper;
@@ -55,10 +59,15 @@ public class OpenAiMessageGenerator implements MessageGenerator {
                     .body(String.class);
             String message = extractMessage(response);
             if (isBlank(message)) {
+                log.warn("OpenAI message generation returned an empty response; using template fallback. model={}",
+                        properties.getModel());
                 return fallbackGenerator.generate(context);
             }
             return message.trim();
         } catch (RestClientException | IllegalArgumentException exception) {
+            log.warn("OpenAI message generation failed; using template fallback. model={}, reason={}",
+                    properties.getModel(),
+                    exception.getClass().getSimpleName());
             return fallbackGenerator.generate(context);
         }
     }

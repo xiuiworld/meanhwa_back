@@ -6,6 +6,7 @@ import com.example.meanhwa_back.common.error.BusinessException;
 import com.example.meanhwa_back.common.error.ErrorCode;
 import com.example.meanhwa_back.common.response.PageResponse;
 import com.example.meanhwa_back.common.security.AuthenticatedUserProvider;
+import com.example.meanhwa_back.common.web.PageRequestUtils;
 import com.example.meanhwa_back.curation.history.domain.UserCurationResult;
 import com.example.meanhwa_back.curation.history.service.CurationResultHistoryService;
 import com.example.meanhwa_back.flower.domain.Flower;
@@ -117,11 +118,7 @@ public class MessageService {
     @Transactional(readOnly = true)
     public PageResponse<MessageGenerateResponse> getMyMessages(int page, int size) {
         User user = authenticatedUserProvider.getCurrentUser();
-        PageRequest pageRequest = PageRequest.of(
-                Math.max(page, 0),
-                size < 1 ? 20 : Math.min(size, 100),
-                Sort.by(Sort.Direction.DESC, "createdAt")
-        );
+        PageRequest pageRequest = PageRequestUtils.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
         return PageResponse.from(userMessageRepository.findByUserIdOrderByCreatedAtDesc(user.getId(), pageRequest)
                 .map(this::toResponse));
     }
@@ -146,9 +143,11 @@ public class MessageService {
         if (tagIds == null) {
             return List.of();
         }
+        if (tagIds.size() > 20 || tagIds.stream().anyMatch(id -> id == null || id <= 0)) {
+            throw new BusinessException(ErrorCode.INVALID_REQUEST, "selectedTagIds는 1 이상의 숫자 최대 20개까지 허용됩니다.");
+        }
 
         return tagIds.stream()
-                .filter(id -> id != null && id > 0)
                 .distinct()
                 .toList();
     }

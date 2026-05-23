@@ -7,6 +7,7 @@ import com.example.meanhwa_back.common.error.BusinessException;
 import com.example.meanhwa_back.common.error.ErrorCode;
 import com.example.meanhwa_back.common.response.PageResponse;
 import com.example.meanhwa_back.common.security.AuthenticatedUserProvider;
+import com.example.meanhwa_back.common.web.PageRequestUtils;
 import com.example.meanhwa_back.curation.dto.CurationFlowerResponse;
 import com.example.meanhwa_back.curation.history.domain.UserCurationResult;
 import com.example.meanhwa_back.curation.history.dto.CurationRecommendationSnapshot;
@@ -149,11 +150,7 @@ public class CurationResultHistoryService {
     }
 
     private PageRequest pageRequest(int page, int size) {
-        return PageRequest.of(
-                Math.max(page, 0),
-                size < 1 ? 20 : Math.min(size, 100),
-                Sort.by(Sort.Direction.DESC, "createdAt")
-        );
+        return PageRequestUtils.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
     }
 
     private List<CurationSelectionSnapshot> parseSelections(UserCurationResult result) {

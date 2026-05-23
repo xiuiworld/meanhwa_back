@@ -5,6 +5,7 @@ import java.util.List;
 import com.example.meanhwa_back.common.error.BusinessException;
 import com.example.meanhwa_back.common.error.ErrorCode;
 import com.example.meanhwa_back.common.response.PageResponse;
+import com.example.meanhwa_back.common.web.PageRequestUtils;
 import com.example.meanhwa_back.flower.domain.Flower;
 import com.example.meanhwa_back.flower.domain.ManagementLevel;
 import com.example.meanhwa_back.flower.domain.PriceRange;
@@ -58,14 +59,16 @@ public class FlowerService {
         Boolean resolvedIsPetSafe = parseBooleanFilter(isPetSafe);
         ManagementLevel resolvedManagementLevel = parseManagementLevel(managementLevel);
         List<Long> normalizedTagIds = normalizeTagIds(tagIds);
+        int normalizedPage = PageRequestUtils.normalizePage(page);
+        int normalizedSize = PageRequestUtils.normalizeSize(size);
         return flowerReadCacheService.searchFlowers(
                 normalizedKeyword,
                 resolvedPriceRange,
                 resolvedIsPetSafe,
                 resolvedManagementLevel,
                 normalizedTagIds,
-                page,
-                size
+                normalizedPage,
+                normalizedSize
         );
     }
 

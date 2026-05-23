@@ -19,7 +19,6 @@ import com.example.meanhwa_back.admin.dto.statistics.PopularTagResponse;
 import com.example.meanhwa_back.admin.dto.statistics.StatisticsSummaryResponse;
 import com.example.meanhwa_back.flower.domain.Flower;
 import com.example.meanhwa_back.flower.repository.FlowerRepository;
-import com.example.meanhwa_back.log.domain.ActionLog;
 import com.example.meanhwa_back.log.domain.ActionType;
 import com.example.meanhwa_back.log.repository.ActionLogRepository;
 import com.example.meanhwa_back.tag.domain.Tag;
@@ -96,7 +95,7 @@ public class AdminStatisticsService {
     public List<PopularTagResponse> getPopularTags(LocalDate from, LocalDate to, int limit) {
         Period period = resolvePeriod(from, to);
         Map<Long, Long> counts = new HashMap<>();
-        for (ActionLog log : actionLogRepository.findByActionTypeInAndCreatedAtBetween(
+        for (ActionLogRepository.ActionDataView log : actionLogRepository.findActionDataByActionTypeInAndCreatedAtBetween(
                 List.of(ActionType.CURATION_START),
                 period.fromDateTime(),
                 period.toDateTime()
@@ -130,7 +129,7 @@ public class AdminStatisticsService {
     public List<PopularFlowerResponse> getPopularFlowers(LocalDate from, LocalDate to, int limit) {
         Period period = resolvePeriod(from, to);
         Map<Long, Long> counts = new HashMap<>();
-        for (ActionLog log : actionLogRepository.findByActionTypeInAndCreatedAtBetween(
+        for (ActionLogRepository.ActionDataView log : actionLogRepository.findActionDataByActionTypeInAndCreatedAtBetween(
                 List.of(ActionType.FLOWER_DETAIL_VIEW, ActionType.CURATION_RESULT_CLICK),
                 period.fromDateTime(),
                 period.toDateTime()
@@ -170,11 +169,10 @@ public class AdminStatisticsService {
             cursor = cursor.plusDays(1);
         }
 
-        for (ActionLog log : actionLogRepository.findByCreatedAtBetween(period.fromDateTime(), period.toDateTime())) {
-            if (log.getUserId() != null) {
-                usersByDate.computeIfAbsent(log.getCreatedAt().toLocalDate(), ignored -> new HashSet<>())
-                        .add(log.getUserId());
-            }
+        for (ActionLogRepository.UserActivityView log :
+                actionLogRepository.findUserActivityByCreatedAtBetween(period.fromDateTime(), period.toDateTime())) {
+            usersByDate.computeIfAbsent(log.getCreatedAt().toLocalDate(), ignored -> new HashSet<>())
+                    .add(log.getUserId());
         }
 
         return usersByDate.entrySet()

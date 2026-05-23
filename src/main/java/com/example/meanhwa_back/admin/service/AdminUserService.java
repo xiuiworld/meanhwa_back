@@ -10,6 +10,7 @@ import com.example.meanhwa_back.common.error.BusinessException;
 import com.example.meanhwa_back.common.error.ErrorCode;
 import com.example.meanhwa_back.common.response.PageResponse;
 import com.example.meanhwa_back.common.security.AuthenticatedUserProvider;
+import com.example.meanhwa_back.common.web.PageRequestUtils;
 import com.example.meanhwa_back.log.domain.ActionType;
 import com.example.meanhwa_back.log.service.ActionLogService;
 import com.example.meanhwa_back.user.domain.Role;
@@ -66,7 +67,6 @@ public class AdminUserService {
             int page,
             int size
     ) {
-        validatePage(page, size);
         String normalizedKeyword = normalizeKeyword(keyword);
         Role role = parseRoleFilter(roleValue);
         OAuthProvider provider = parseProviderFilter(providerValue);
@@ -75,7 +75,7 @@ public class AdminUserService {
                 normalizedKeyword,
                 role,
                 provider,
-                PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"))
+                PageRequestUtils.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"))
         );
         return PageResponse.from(result.map(AdminUserSummaryResponse::from));
     }
@@ -134,15 +134,6 @@ public class AdminUserService {
     private User getUserOrThrow(Long userId) {
         return userRepository.findById(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
-    }
-
-    private void validatePage(int page, int size) {
-        if (page < 0 || size < 1) {
-            throw new BusinessException(ErrorCode.INVALID_REQUEST, "page는 0 이상, size는 1 이상이어야 합니다.");
-        }
-        if (size > 100) {
-            throw new BusinessException(ErrorCode.INVALID_REQUEST, "size는 최대 100까지 가능합니다.");
-        }
     }
 
     private String normalizeKeyword(String keyword) {

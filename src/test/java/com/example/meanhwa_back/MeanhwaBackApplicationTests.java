@@ -460,7 +460,7 @@ class MeanhwaBackApplicationTests {
                 "file",
                 "flower.png",
                 "image/png",
-                "fake-image".getBytes(StandardCharsets.UTF_8)
+                pngHeader()
         );
 
         mockMvc.perform(multipart("/api/v1/admin/uploads/images")
@@ -470,7 +470,14 @@ class MeanhwaBackApplicationTests {
                 .andExpect(jsonPath("$.data.imageUrl", containsString("https://fake.meanhwa.local/uploads/flowers/")))
                 .andExpect(jsonPath("$.data.originalFilename").value("flower.png"))
                 .andExpect(jsonPath("$.data.contentType").value("image/png"))
-                .andExpect(jsonPath("$.data.size").value(10));
+                .andExpect(jsonPath("$.data.size").value(8));
+    }
+
+    private byte[] pngHeader() {
+        return new byte[]{
+                (byte) 0x89, 0x50, 0x4E, 0x47,
+                0x0D, 0x0A, 0x1A, 0x0A
+        };
     }
 
     @Test
@@ -481,6 +488,23 @@ class MeanhwaBackApplicationTests {
                 "flower.txt",
                 "text/plain",
                 "not-image".getBytes(StandardCharsets.UTF_8)
+        );
+
+        mockMvc.perform(multipart("/api/v1/admin/uploads/images")
+                        .file(file)
+                        .header("Authorization", bearer(admin.accessToken())))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errorCode").value("INVALID_FILE_TYPE"));
+    }
+
+    @Test
+    void adminImageUploadRejectsContentTypeAndHeaderMismatch() throws Exception {
+        TokenPair admin = login("admin-upload-user-3", "ROLE_ADMIN");
+        MockMultipartFile file = new MockMultipartFile(
+                "file",
+                "flower.png",
+                "image/png",
+                "not-a-real-png".getBytes(StandardCharsets.UTF_8)
         );
 
         mockMvc.perform(multipart("/api/v1/admin/uploads/images")
