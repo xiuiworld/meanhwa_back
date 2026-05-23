@@ -428,6 +428,7 @@ refresh API는 성공 시 토큰을 회전시키고 기존 refresh token을 폐�
 
 ## 운영 DB 주의사항
 
-- 현재 prod profile은 `spring.jpa.hibernate.ddl-auto=${JPA_DDL_AUTO:update}` 기본값을 사용합니다.
-- 스키마 변경을 더 엄격히 관리하려면 운영에서는 `JPA_DDL_AUTO=validate`로 전환하고 Flyway/Liquibase 같은 migration 도구를 도입하는 것이 좋습니다.
+- 현재 prod profile은 `spring.jpa.hibernate.ddl-auto=${JPA_DDL_AUTO:validate}` 기본값을 사용합니다.
+- 운영 schema 변경은 Flyway migration(`src/main/resources/db/migration/mysql/V*.sql`)으로 관리합니다.
+- 기존 운영 DB처럼 이미 테이블이 있고 `flyway_schema_history`가 없는 DB는 `FLYWAY_BASELINE_ON_MIGRATE=true`로 V1 baseline을 기록합니다.
 - 운영 데이터 직접 수정 시에는 조건을 provider/email/oauth_id 등으로 충분히 좁히고, `SELECT`로 대상 row를 확인한 뒤 `UPDATE`를 실행해야 합니다.

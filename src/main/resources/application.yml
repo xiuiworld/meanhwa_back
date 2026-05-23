@@ -8,6 +8,8 @@ spring:
     cache-names:
       - flowers
       - tags
+  flyway:
+    enabled: false
 
 server:
   port: 8080

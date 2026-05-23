@@ -1,7 +1,9 @@
-# 운영 DB 마이그레이션 (큐레이션 위저드 v2)
+# 운영 DB 마이그레이션 이력 (큐레이션 위저드 v2)
+
+현재 운영 schema 변경은 Flyway migration(`src/main/resources/db/migration/mysql/V*.sql`)으로 관리합니다. 이 디렉터리의 SQL은 Flyway 도입 전 수동 적용 이력과 참고용으로 유지합니다.
 
 분기형 큐레이션(6단계 위저드)이 `tags.code`로 태그를 찾습니다.  
-운영 RDS에는 `data.sql`이 자동 실행되지 않으므로(`spring.sql.init.mode: never`) 아래 SQL을 **배포 전 또는 직후** 수동 적용합니다.
+Flyway 도입 이전 운영 RDS에는 `data.sql`이 자동 실행되지 않았으므로(`spring.sql.init.mode: never`) 아래 SQL을 **배포 전 또는 직후** 수동 적용했습니다.
 
 ## 파일
 

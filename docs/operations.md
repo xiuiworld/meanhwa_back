@@ -1,6 +1,6 @@
 # Meanhwa 운영 문서
 
-운영/배포/관리자/장애 확인에 필요한 절차만 모은 문서입니다. API 계약은 [api-contract.md](api-contract.md), DB 구조는 [database-schema.md](database-schema.md)를 봅니다.
+운영/배포/관리자/장애 확인에 필요한 절차만 모은 문서입니다. API 계약은 [api-contract.md](api-contract.md), DB 구조는 [database-schema.md](database-schema.md), 배포 후 확인은 [production-smoke-test.md](production-smoke-test.md)를 봅니다.
 
 ## 환경변수
 
@@ -46,7 +46,9 @@ Optional runtime settings:
 | `KAKAO_TIMEOUT_MILLIS` | `3000` |
 | `NAVER_TIMEOUT_MILLIS` | `3000` |
 | `STORAGE_MAX_FILE_SIZE_BYTES` | `5242880` |
-| `JPA_DDL_AUTO` | `update` |
+| `JPA_DDL_AUTO` | `validate` |
+| `FLYWAY_ENABLED` | `true` |
+| `FLYWAY_BASELINE_ON_MIGRATE` | `true` |
 | `CACHE_TTL_MILLIS` | `300000` |
 
 Local/test는 H2, fake storage, simple cache, in-memory message rate limit을 사용합니다. Prod는 MySQL/RDS, S3, Redis를 사용합니다.
@@ -67,6 +69,14 @@ EC2 private key
 ## 배포
 
 `.github/workflows/deploy.yml`은 `main` branch push에서 실행됩니다.
+
+배포 전 DB 안정화 확인:
+
+1. RDS snapshot 또는 `mysqldump`로 운영 DB를 백업합니다.
+2. 가능하면 staging 또는 운영 DB clone에서 같은 image/env로 먼저 기동합니다.
+3. `flyway_schema_history` 생성 또는 baseline 기록을 확인합니다.
+4. `JPA_DDL_AUTO=validate` 상태에서 Hibernate schema validation 실패가 없는지 확인합니다.
+5. Flyway/validate 실패 시 `JPA_DDL_AUTO=update`로 우회하지 말고 누락된 migration을 보완합니다.
 
 순서:
 
@@ -124,9 +134,19 @@ sudo docker inspect meanhwa-server \
 
 ## DB와 마이그레이션
 
-`prod`는 `spring.sql.init.mode=never`라서 `data.sql`을 자동 실행하지 않습니다. 운영 seed/migration은 별도로 적용합니다.
+`prod`는 `spring.sql.init.mode=never`라서 `data.sql`을 자동 실행하지 않습니다. 운영 DB schema는 Flyway로 관리하고, 운영 seed/content는 CMS 또는 별도 검증된 SQL로 관리합니다.
 
-큐레이션 위저드 운영 DB migration:
+현재 prod 기본값:
+
+- `spring.jpa.hibernate.ddl-auto=${JPA_DDL_AUTO:validate}`
+- `spring.flyway.enabled=${FLYWAY_ENABLED:true}`
+- `spring.flyway.locations=classpath:db/migration/mysql`
+- `spring.flyway.baseline-on-migrate=${FLYWAY_BASELINE_ON_MIGRATE:true}`
+- `spring.flyway.baseline-version=1`
+
+기존 운영 DB처럼 이미 테이블이 있고 `flyway_schema_history`가 없는 DB는 `baseline-on-migrate=true`로 V1 baseline을 기록합니다. 신규 빈 DB에서는 `V1__baseline_current_schema.sql`이 실행되어 현재 엔티티 기준 빈 schema를 생성합니다.
+
+과거 수동 운영 DB migration:
 
 - Guide: [migration/README.md](migration/README.md)
 - SQL: [migration/2026-05-curation-wizard-prod.sql](migration/2026-05-curation-wizard-prod.sql)
@@ -136,6 +156,8 @@ mysql -h {RDS_HOST} -P 3306 -u {DB_USERNAME} -p meanhwa < docs/migration/2026-05
 ```
 
 스크립트 마지막 `missing_wizard_code` 결과가 0행인지 확인합니다.
+
+위 수동 SQL들은 이미 운영에 적용한 이력과 참고용으로 유지합니다. 새 schema 변경은 `src/main/resources/db/migration/mysql/V2__...sql`부터 Flyway migration으로 추가합니다.
 
 RDS 접속:
 
@@ -228,6 +250,18 @@ Allowed: `image/jpeg`, `image/png`, `image/webp`
 
 Default max size: 5 MB
 
+꽃 등록/수정의 `imageUrl`은 CMS에서 직접 입력한 임의 URL이 아니라 `POST /api/v1/admin/uploads/images` 응답의 `data.imageUrl`만 사용합니다.
+
+운영 DB에 예전 더미 이미지 URL이 남아 있는지 점검:
+
+```sql
+SELECT id, name, image_url
+FROM flowers
+WHERE image_url LIKE 'https://cdn.meanhwa.example/%';
+```
+
+결과가 있으면 CMS에서 이미지를 다시 업로드하고 반환된 S3/CDN URL로 꽃 데이터를 수정합니다.
+
 ## 장애 확인
 
 ### 테스트가 `JAVA_HOME is not set`으로 실패
@@ -294,6 +328,28 @@ sudo docker inspect meanhwa-server \
   --format '{{range .Config.Env}}{{println .}}{{end}}' \
   | grep -E 'AWS_S3_BUCKET|AWS_REGION|AWS_S3_PUBLIC_BASE_URL|STORAGE'
 ```
+
+### Flyway 또는 schema validation 실패
+
+확인:
+
+```bash
+sudo docker logs --tail=200 meanhwa-server
+```
+
+자주 보는 원인:
+
+- 운영 DB에 아직 적용되지 않은 schema 변경이 있음
+- 기존 수동 변경과 JPA 엔티티가 불일치함
+- `flyway_schema_history` baseline이 없는 기존 DB에서 `FLYWAY_BASELINE_ON_MIGRATE=false`로 기동함
+
+대응:
+
+1. 운영 DB 백업이 있는지 확인합니다.
+2. 실패 로그의 table/column 이름을 확인합니다.
+3. 누락된 변경을 `V2__...sql` 같은 새 Flyway migration으로 추가합니다.
+4. staging 또는 DB clone에서 먼저 재기동해 확인합니다.
+5. `JPA_DDL_AUTO=update`로 우회하지 않습니다.
 
 ### 배포 후 health check 실패
 
