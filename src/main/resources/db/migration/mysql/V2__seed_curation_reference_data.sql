@@ -3,60 +3,6 @@
 
 SET @db := DATABASE();
 
-SET @has_code_col := (
-    SELECT COUNT(*)
-    FROM information_schema.COLUMNS
-    WHERE TABLE_SCHEMA = @db
-      AND TABLE_NAME = 'tags'
-      AND COLUMN_NAME = 'code'
-);
-SET @ddl := IF(
-    @has_code_col = 0,
-    'ALTER TABLE tags ADD COLUMN code VARCHAR(80) NULL',
-    'SELECT ''tags.code already exists'' AS info'
-);
-PREPARE stmt FROM @ddl;
-EXECUTE stmt;
-DEALLOCATE PREPARE stmt;
-
-UPDATE tags SET code = 'BIRTHDAY' WHERE category = 'EVENT' AND name = '생일' AND deleted_at IS NULL AND (code IS NULL OR code = '');
-UPDATE tags SET code = 'GRADUATION' WHERE category = 'EVENT' AND name = '졸업' AND deleted_at IS NULL AND (code IS NULL OR code = '');
-UPDATE tags SET code = 'HOUSEWARMING' WHERE category = 'EVENT' AND name = '집들이' AND deleted_at IS NULL AND (code IS NULL OR code = '');
-UPDATE tags SET code = 'PROMOTION' WHERE category = 'EVENT' AND name = '승진' AND deleted_at IS NULL AND (code IS NULL OR code = '');
-UPDATE tags SET code = 'LOVER' WHERE category = 'RELATION' AND name = '연인' AND deleted_at IS NULL AND (code IS NULL OR code = '');
-UPDATE tags SET code = 'FRIEND' WHERE category = 'RELATION' AND name = '친구' AND deleted_at IS NULL AND (code IS NULL OR code = '');
-UPDATE tags SET code = 'PARENT' WHERE category = 'RELATION' AND name = '부모님' AND deleted_at IS NULL AND (code IS NULL OR code = '');
-UPDATE tags SET code = 'COLLEAGUE' WHERE category = 'RELATION' AND name = '동료' AND deleted_at IS NULL AND (code IS NULL OR code = '');
-UPDATE tags SET code = 'LOVE' WHERE category = 'EMOTION' AND name = '사랑' AND deleted_at IS NULL AND (code IS NULL OR code = '');
-UPDATE tags SET code = 'GRATITUDE' WHERE category = 'EMOTION' AND name = '감사' AND deleted_at IS NULL AND (code IS NULL OR code = '');
-UPDATE tags SET code = 'COMFORT' WHERE category = 'EMOTION' AND name = '위로' AND deleted_at IS NULL AND (code IS NULL OR code = '');
-UPDATE tags SET code = 'SUPPORT' WHERE category = 'EMOTION' AND name = '응원' AND deleted_at IS NULL AND (code IS NULL OR code = '');
-UPDATE tags SET code = 'BALCONY_OUTDOOR' WHERE category = 'ENVIRONMENT' AND name = '실외' AND deleted_at IS NULL AND (code IS NULL OR code = '');
-UPDATE tags SET code = 'DESK_SMALL' WHERE category = 'ENVIRONMENT' AND name = '책상' AND deleted_at IS NULL AND (code IS NULL OR code = '');
-UPDATE tags SET code = 'LIVING_ROOM' WHERE category = 'ENVIRONMENT' AND name = '거실' AND deleted_at IS NULL AND (code IS NULL OR code = '');
-
-SET @has_code_uk := (
-    SELECT COUNT(*)
-    FROM (
-        SELECT INDEX_NAME
-        FROM information_schema.STATISTICS
-        WHERE TABLE_SCHEMA = @db
-          AND TABLE_NAME = 'tags'
-          AND NON_UNIQUE = 0
-        GROUP BY INDEX_NAME
-        HAVING COUNT(*) = 1
-           AND SUM(CASE WHEN COLUMN_NAME = 'code' THEN 1 ELSE 0 END) = 1
-    ) code_unique_indexes
-);
-SET @ddl := IF(
-    @has_code_uk = 0,
-    'CREATE UNIQUE INDEX uk_tags_code ON tags (code)',
-    'SELECT ''uk_tags_code already exists'' AS info'
-);
-PREPARE stmt FROM @ddl;
-EXECUTE stmt;
-DEALLOCATE PREPARE stmt;
-
 CREATE TEMPORARY TABLE curation_wizard_required_tags (
     category VARCHAR(50) NOT NULL,
     name VARCHAR(50) NOT NULL,
@@ -160,6 +106,192 @@ VALUES
     ('MEANING', '다시 찾은 활력', 'GET_WELL_2'),
     ('MEANING', '건강한 내일', 'GET_WELL_3'),
     ('MEANING', '희망의 빛', 'GET_WELL_4');
+
+CREATE TEMPORARY TABLE curation_wizard_tag_mapping_sources (
+    new_code VARCHAR(80) NOT NULL PRIMARY KEY,
+    source_code VARCHAR(80) NULL,
+    source_category VARCHAR(50) NOT NULL,
+    source_name VARCHAR(50) NOT NULL
+);
+
+INSERT INTO curation_wizard_tag_mapping_sources (new_code, source_code, source_category, source_name)
+VALUES
+    ('WEDDING', 'BIRTHDAY', 'EVENT', '생일'),
+    ('RECOVERY', 'COMFORT', 'EMOTION', '위로'),
+    ('FAMILY', 'PARENT', 'RELATION', '부모님'),
+    ('SENIOR_JUNIOR_MENTOR', 'COLLEAGUE', 'RELATION', '동료'),
+    ('COLLEAGUE_JUNIOR', 'COLLEAGUE', 'RELATION', '동료'),
+    ('BOSS_SENIOR', 'COLLEAGUE', 'RELATION', '동료'),
+    ('FRIEND_ACQUAINTANCE', 'FRIEND', 'RELATION', '친구'),
+    ('VIP_MENTOR', 'PARENT', 'RELATION', '부모님'),
+    ('CELEBRATION', 'SUPPORT', 'EMOTION', '응원'),
+    ('ENCOURAGEMENT', 'SUPPORT', 'EMOTION', '응원'),
+    ('LEAP', 'SUPPORT', 'EMOTION', '응원'),
+    ('RESPECT', 'GRATITUDE', 'EMOTION', '감사'),
+    ('PRIDE', 'SUPPORT', 'EMOTION', '응원'),
+    ('BLESSING', 'LOVE', 'EMOTION', '사랑'),
+    ('SINCERITY', 'LOVE', 'EMOTION', '사랑'),
+    ('ETERNITY', 'LOVE', 'EMOTION', '사랑'),
+    ('PEACE', 'LOVE', 'EMOTION', '사랑'),
+    ('PROSPERITY', 'SUPPORT', 'EMOTION', '응원'),
+    ('GET_WELL', 'COMFORT', 'EMOTION', '위로'),
+    ('WINDOW_BRIGHT', NULL, 'ENVIRONMENT', '실내'),
+    ('LOVE_1', 'LOVE', 'EMOTION', '사랑'),
+    ('LOVE_2', 'LOVE', 'EMOTION', '사랑'),
+    ('LOVE_3', 'LOVE', 'EMOTION', '사랑'),
+    ('LOVE_4', 'LOVE', 'EMOTION', '사랑'),
+    ('SUPPORT_1', 'SUPPORT', 'EMOTION', '응원'),
+    ('SUPPORT_2', 'SUPPORT', 'EMOTION', '응원'),
+    ('SUPPORT_3', 'SUPPORT', 'EMOTION', '응원'),
+    ('SUPPORT_4', 'SUPPORT', 'EMOTION', '응원'),
+    ('ENCOURAGEMENT_1', 'SUPPORT', 'EMOTION', '응원'),
+    ('ENCOURAGEMENT_2', 'SUPPORT', 'EMOTION', '응원'),
+    ('ENCOURAGEMENT_3', 'SUPPORT', 'EMOTION', '응원'),
+    ('ENCOURAGEMENT_4', 'SUPPORT', 'EMOTION', '응원'),
+    ('CELEBRATION_1', 'SUPPORT', 'EMOTION', '응원'),
+    ('CELEBRATION_2', 'SUPPORT', 'EMOTION', '응원'),
+    ('CELEBRATION_3', 'SUPPORT', 'EMOTION', '응원'),
+    ('CELEBRATION_4', 'SUPPORT', 'EMOTION', '응원'),
+    ('GRATITUDE_1', 'GRATITUDE', 'EMOTION', '감사'),
+    ('GRATITUDE_2', 'GRATITUDE', 'EMOTION', '감사'),
+    ('GRATITUDE_3', 'GRATITUDE', 'EMOTION', '감사'),
+    ('GRATITUDE_4', 'GRATITUDE', 'EMOTION', '감사'),
+    ('BLESSING_1', 'LOVE', 'EMOTION', '사랑'),
+    ('BLESSING_2', 'LOVE', 'EMOTION', '사랑'),
+    ('BLESSING_3', 'LOVE', 'EMOTION', '사랑'),
+    ('BLESSING_4', 'LOVE', 'EMOTION', '사랑'),
+    ('SINCERITY_1', 'LOVE', 'EMOTION', '사랑'),
+    ('SINCERITY_2', 'LOVE', 'EMOTION', '사랑'),
+    ('SINCERITY_3', 'LOVE', 'EMOTION', '사랑'),
+    ('SINCERITY_4', 'LOVE', 'EMOTION', '사랑'),
+    ('ETERNITY_1', 'LOVE', 'EMOTION', '사랑'),
+    ('ETERNITY_2', 'LOVE', 'EMOTION', '사랑'),
+    ('ETERNITY_3', 'LOVE', 'EMOTION', '사랑'),
+    ('ETERNITY_4', 'LOVE', 'EMOTION', '사랑'),
+    ('RESPECT_1', 'GRATITUDE', 'EMOTION', '감사'),
+    ('RESPECT_2', 'GRATITUDE', 'EMOTION', '감사'),
+    ('RESPECT_3', 'GRATITUDE', 'EMOTION', '감사'),
+    ('RESPECT_4', 'GRATITUDE', 'EMOTION', '감사'),
+    ('PRIDE_1', 'SUPPORT', 'EMOTION', '응원'),
+    ('PRIDE_2', 'SUPPORT', 'EMOTION', '응원'),
+    ('PRIDE_3', 'SUPPORT', 'EMOTION', '응원'),
+    ('PRIDE_4', 'SUPPORT', 'EMOTION', '응원'),
+    ('LEAP_1', 'SUPPORT', 'EMOTION', '응원'),
+    ('LEAP_2', 'SUPPORT', 'EMOTION', '응원'),
+    ('LEAP_3', 'SUPPORT', 'EMOTION', '응원'),
+    ('LEAP_4', 'SUPPORT', 'EMOTION', '응원'),
+    ('PEACE_1', 'LOVE', 'EMOTION', '사랑'),
+    ('PEACE_2', 'LOVE', 'EMOTION', '사랑'),
+    ('PEACE_3', 'LOVE', 'EMOTION', '사랑'),
+    ('PEACE_4', 'LOVE', 'EMOTION', '사랑'),
+    ('PROSPERITY_1', 'SUPPORT', 'EMOTION', '응원'),
+    ('PROSPERITY_2', 'SUPPORT', 'EMOTION', '응원'),
+    ('PROSPERITY_3', 'SUPPORT', 'EMOTION', '응원'),
+    ('PROSPERITY_4', 'SUPPORT', 'EMOTION', '응원'),
+    ('COMFORT_1', 'COMFORT', 'EMOTION', '위로'),
+    ('COMFORT_2', 'COMFORT', 'EMOTION', '위로'),
+    ('COMFORT_3', 'COMFORT', 'EMOTION', '위로'),
+    ('COMFORT_4', 'COMFORT', 'EMOTION', '위로'),
+    ('GET_WELL_1', 'COMFORT', 'EMOTION', '위로'),
+    ('GET_WELL_2', 'COMFORT', 'EMOTION', '위로'),
+    ('GET_WELL_3', 'COMFORT', 'EMOTION', '위로'),
+    ('GET_WELL_4', 'COMFORT', 'EMOTION', '위로');
+
+SET @existing_flower_mapping_count := (SELECT COUNT(*) FROM flower_tag_mappings);
+
+CREATE TEMPORARY TABLE curation_wizard_mapping_source_status AS
+SELECT
+    s.new_code,
+    COUNT(DISTINCT m_src.id) AS source_mapping_count,
+    COUNT(DISTINCT m_new.id) AS target_mapping_count
+FROM curation_wizard_tag_mapping_sources s
+INNER JOIN curation_wizard_required_tags req
+    ON req.code = s.new_code
+LEFT JOIN tags t_src
+    ON t_src.deleted_at IS NULL
+    AND t_src.category = s.source_category
+    AND t_src.name = s.source_name
+LEFT JOIN flower_tag_mappings m_src
+    ON m_src.tag_id = t_src.id
+LEFT JOIN tags t_new
+    ON t_new.deleted_at IS NULL
+    AND t_new.category = req.category
+    AND t_new.name = req.name
+LEFT JOIN flower_tag_mappings m_new
+    ON m_new.tag_id = t_new.id
+GROUP BY s.new_code;
+
+SET @missing_mapping_source_count := (
+    SELECT COUNT(*)
+    FROM curation_wizard_mapping_source_status
+    WHERE @existing_flower_mapping_count > 0
+      AND source_mapping_count = 0
+      AND target_mapping_count = 0
+);
+CREATE TEMPORARY TABLE curation_wizard_mapping_source_validation (
+    must_be_zero INT NOT NULL,
+    CONSTRAINT chk_curation_wizard_mapping_source_validation CHECK (must_be_zero = 0)
+);
+INSERT INTO curation_wizard_mapping_source_validation (must_be_zero)
+SELECT @missing_mapping_source_count
+WHERE @missing_mapping_source_count > 0;
+DROP TEMPORARY TABLE curation_wizard_mapping_source_validation;
+DROP TEMPORARY TABLE curation_wizard_mapping_source_status;
+
+SET @has_code_col := (
+    SELECT COUNT(*)
+    FROM information_schema.COLUMNS
+    WHERE TABLE_SCHEMA = @db
+      AND TABLE_NAME = 'tags'
+      AND COLUMN_NAME = 'code'
+);
+SET @ddl := IF(
+    @has_code_col = 0,
+    'ALTER TABLE tags ADD COLUMN code VARCHAR(80) NULL',
+    'SELECT ''tags.code already exists'' AS info'
+);
+PREPARE stmt FROM @ddl;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+UPDATE tags SET code = 'BIRTHDAY' WHERE category = 'EVENT' AND name = '생일' AND deleted_at IS NULL AND (code IS NULL OR code = '');
+UPDATE tags SET code = 'GRADUATION' WHERE category = 'EVENT' AND name = '졸업' AND deleted_at IS NULL AND (code IS NULL OR code = '');
+UPDATE tags SET code = 'HOUSEWARMING' WHERE category = 'EVENT' AND name = '집들이' AND deleted_at IS NULL AND (code IS NULL OR code = '');
+UPDATE tags SET code = 'PROMOTION' WHERE category = 'EVENT' AND name = '승진' AND deleted_at IS NULL AND (code IS NULL OR code = '');
+UPDATE tags SET code = 'LOVER' WHERE category = 'RELATION' AND name = '연인' AND deleted_at IS NULL AND (code IS NULL OR code = '');
+UPDATE tags SET code = 'FRIEND' WHERE category = 'RELATION' AND name = '친구' AND deleted_at IS NULL AND (code IS NULL OR code = '');
+UPDATE tags SET code = 'PARENT' WHERE category = 'RELATION' AND name = '부모님' AND deleted_at IS NULL AND (code IS NULL OR code = '');
+UPDATE tags SET code = 'COLLEAGUE' WHERE category = 'RELATION' AND name = '동료' AND deleted_at IS NULL AND (code IS NULL OR code = '');
+UPDATE tags SET code = 'LOVE' WHERE category = 'EMOTION' AND name = '사랑' AND deleted_at IS NULL AND (code IS NULL OR code = '');
+UPDATE tags SET code = 'GRATITUDE' WHERE category = 'EMOTION' AND name = '감사' AND deleted_at IS NULL AND (code IS NULL OR code = '');
+UPDATE tags SET code = 'COMFORT' WHERE category = 'EMOTION' AND name = '위로' AND deleted_at IS NULL AND (code IS NULL OR code = '');
+UPDATE tags SET code = 'SUPPORT' WHERE category = 'EMOTION' AND name = '응원' AND deleted_at IS NULL AND (code IS NULL OR code = '');
+UPDATE tags SET code = 'BALCONY_OUTDOOR' WHERE category = 'ENVIRONMENT' AND name = '실외' AND deleted_at IS NULL AND (code IS NULL OR code = '');
+UPDATE tags SET code = 'DESK_SMALL' WHERE category = 'ENVIRONMENT' AND name = '책상' AND deleted_at IS NULL AND (code IS NULL OR code = '');
+UPDATE tags SET code = 'LIVING_ROOM' WHERE category = 'ENVIRONMENT' AND name = '거실' AND deleted_at IS NULL AND (code IS NULL OR code = '');
+
+SET @has_code_uk := (
+    SELECT COUNT(*)
+    FROM (
+        SELECT INDEX_NAME
+        FROM information_schema.STATISTICS
+        WHERE TABLE_SCHEMA = @db
+          AND TABLE_NAME = 'tags'
+          AND NON_UNIQUE = 0
+        GROUP BY INDEX_NAME
+        HAVING COUNT(*) = 1
+           AND SUM(CASE WHEN COLUMN_NAME = 'code' THEN 1 ELSE 0 END) = 1
+    ) code_unique_indexes
+);
+SET @ddl := IF(
+    @has_code_uk = 0,
+    'CREATE UNIQUE INDEX uk_tags_code ON tags (code)',
+    'SELECT ''uk_tags_code already exists'' AS info'
+);
+PREPARE stmt FROM @ddl;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
 INSERT INTO tags (category, name, code)
 SELECT category, name, code
 FROM curation_wizard_required_tags
@@ -185,135 +317,6 @@ SELECT @missing_required_code_count
 WHERE @missing_required_code_count > 0;
 DROP TEMPORARY TABLE curation_wizard_required_code_validation;
 
-CREATE TEMPORARY TABLE curation_wizard_tag_mapping_sources (
-    new_code VARCHAR(80) NOT NULL PRIMARY KEY,
-    source_code VARCHAR(80) NULL,
-    source_category VARCHAR(50) NULL,
-    source_name VARCHAR(50) NULL
-);
-
-INSERT INTO curation_wizard_tag_mapping_sources (new_code, source_code, source_category, source_name)
-VALUES
-    ('WEDDING', 'BIRTHDAY', NULL, NULL),
-    ('RECOVERY', 'COMFORT', NULL, NULL),
-    ('FAMILY', 'PARENT', NULL, NULL),
-    ('SENIOR_JUNIOR_MENTOR', 'COLLEAGUE', NULL, NULL),
-    ('COLLEAGUE_JUNIOR', 'COLLEAGUE', NULL, NULL),
-    ('BOSS_SENIOR', 'COLLEAGUE', NULL, NULL),
-    ('FRIEND_ACQUAINTANCE', 'FRIEND', NULL, NULL),
-    ('VIP_MENTOR', 'PARENT', NULL, NULL),
-    ('CELEBRATION', 'SUPPORT', NULL, NULL),
-    ('ENCOURAGEMENT', 'SUPPORT', NULL, NULL),
-    ('LEAP', 'SUPPORT', NULL, NULL),
-    ('RESPECT', 'GRATITUDE', NULL, NULL),
-    ('PRIDE', 'SUPPORT', NULL, NULL),
-    ('BLESSING', 'LOVE', NULL, NULL),
-    ('SINCERITY', 'LOVE', NULL, NULL),
-    ('ETERNITY', 'LOVE', NULL, NULL),
-    ('PEACE', 'LOVE', NULL, NULL),
-    ('PROSPERITY', 'SUPPORT', NULL, NULL),
-    ('GET_WELL', 'COMFORT', NULL, NULL),
-    ('WINDOW_BRIGHT', NULL, 'ENVIRONMENT', '실내'),
-    ('LOVE_1', 'LOVE', NULL, NULL),
-    ('LOVE_2', 'LOVE', NULL, NULL),
-    ('LOVE_3', 'LOVE', NULL, NULL),
-    ('LOVE_4', 'LOVE', NULL, NULL),
-    ('SUPPORT_1', 'SUPPORT', NULL, NULL),
-    ('SUPPORT_2', 'SUPPORT', NULL, NULL),
-    ('SUPPORT_3', 'SUPPORT', NULL, NULL),
-    ('SUPPORT_4', 'SUPPORT', NULL, NULL),
-    ('ENCOURAGEMENT_1', 'SUPPORT', NULL, NULL),
-    ('ENCOURAGEMENT_2', 'SUPPORT', NULL, NULL),
-    ('ENCOURAGEMENT_3', 'SUPPORT', NULL, NULL),
-    ('ENCOURAGEMENT_4', 'SUPPORT', NULL, NULL),
-    ('CELEBRATION_1', 'SUPPORT', NULL, NULL),
-    ('CELEBRATION_2', 'SUPPORT', NULL, NULL),
-    ('CELEBRATION_3', 'SUPPORT', NULL, NULL),
-    ('CELEBRATION_4', 'SUPPORT', NULL, NULL),
-    ('GRATITUDE_1', 'GRATITUDE', NULL, NULL),
-    ('GRATITUDE_2', 'GRATITUDE', NULL, NULL),
-    ('GRATITUDE_3', 'GRATITUDE', NULL, NULL),
-    ('GRATITUDE_4', 'GRATITUDE', NULL, NULL),
-    ('BLESSING_1', 'LOVE', NULL, NULL),
-    ('BLESSING_2', 'LOVE', NULL, NULL),
-    ('BLESSING_3', 'LOVE', NULL, NULL),
-    ('BLESSING_4', 'LOVE', NULL, NULL),
-    ('SINCERITY_1', 'LOVE', NULL, NULL),
-    ('SINCERITY_2', 'LOVE', NULL, NULL),
-    ('SINCERITY_3', 'LOVE', NULL, NULL),
-    ('SINCERITY_4', 'LOVE', NULL, NULL),
-    ('ETERNITY_1', 'LOVE', NULL, NULL),
-    ('ETERNITY_2', 'LOVE', NULL, NULL),
-    ('ETERNITY_3', 'LOVE', NULL, NULL),
-    ('ETERNITY_4', 'LOVE', NULL, NULL),
-    ('RESPECT_1', 'GRATITUDE', NULL, NULL),
-    ('RESPECT_2', 'GRATITUDE', NULL, NULL),
-    ('RESPECT_3', 'GRATITUDE', NULL, NULL),
-    ('RESPECT_4', 'GRATITUDE', NULL, NULL),
-    ('PRIDE_1', 'SUPPORT', NULL, NULL),
-    ('PRIDE_2', 'SUPPORT', NULL, NULL),
-    ('PRIDE_3', 'SUPPORT', NULL, NULL),
-    ('PRIDE_4', 'SUPPORT', NULL, NULL),
-    ('LEAP_1', 'SUPPORT', NULL, NULL),
-    ('LEAP_2', 'SUPPORT', NULL, NULL),
-    ('LEAP_3', 'SUPPORT', NULL, NULL),
-    ('LEAP_4', 'SUPPORT', NULL, NULL),
-    ('PEACE_1', 'LOVE', NULL, NULL),
-    ('PEACE_2', 'LOVE', NULL, NULL),
-    ('PEACE_3', 'LOVE', NULL, NULL),
-    ('PEACE_4', 'LOVE', NULL, NULL),
-    ('PROSPERITY_1', 'SUPPORT', NULL, NULL),
-    ('PROSPERITY_2', 'SUPPORT', NULL, NULL),
-    ('PROSPERITY_3', 'SUPPORT', NULL, NULL),
-    ('PROSPERITY_4', 'SUPPORT', NULL, NULL),
-    ('COMFORT_1', 'COMFORT', NULL, NULL),
-    ('COMFORT_2', 'COMFORT', NULL, NULL),
-    ('COMFORT_3', 'COMFORT', NULL, NULL),
-    ('COMFORT_4', 'COMFORT', NULL, NULL),
-    ('GET_WELL_1', 'COMFORT', NULL, NULL),
-    ('GET_WELL_2', 'COMFORT', NULL, NULL),
-    ('GET_WELL_3', 'COMFORT', NULL, NULL),
-    ('GET_WELL_4', 'COMFORT', NULL, NULL);
-
-SET @existing_flower_mapping_count := (SELECT COUNT(*) FROM flower_tag_mappings);
-
-CREATE TEMPORARY TABLE curation_wizard_mapping_source_status AS
-SELECT
-    s.new_code,
-    COUNT(DISTINCT m_src.id) AS source_mapping_count,
-    COUNT(DISTINCT m_new.id) AS target_mapping_count
-FROM curation_wizard_tag_mapping_sources s
-INNER JOIN tags t_new
-    ON t_new.code = s.new_code
-    AND t_new.deleted_at IS NULL
-LEFT JOIN tags t_src
-    ON t_src.deleted_at IS NULL
-    AND (
-        (s.source_code IS NOT NULL AND t_src.code = s.source_code)
-        OR (s.source_code IS NULL AND t_src.category = s.source_category AND t_src.name = s.source_name)
-    )
-LEFT JOIN flower_tag_mappings m_src
-    ON m_src.tag_id = t_src.id
-LEFT JOIN flower_tag_mappings m_new
-    ON m_new.tag_id = t_new.id
-GROUP BY s.new_code;
-
-SET @missing_mapping_source_count := (
-    SELECT COUNT(*)
-    FROM curation_wizard_mapping_source_status
-    WHERE @existing_flower_mapping_count > 0
-      AND source_mapping_count = 0
-      AND target_mapping_count = 0
-);
-CREATE TEMPORARY TABLE curation_wizard_mapping_source_validation (
-    must_be_zero INT NOT NULL,
-    CONSTRAINT chk_curation_wizard_mapping_source_validation CHECK (must_be_zero = 0)
-);
-INSERT INTO curation_wizard_mapping_source_validation (must_be_zero)
-SELECT @missing_mapping_source_count
-WHERE @missing_mapping_source_count > 0;
-DROP TEMPORARY TABLE curation_wizard_mapping_source_validation;
-
 CREATE TEMPORARY TABLE curation_wizard_flower_tag_mappings AS
 SELECT m.flower_id, t_new.id AS tag_id, m.weight
 FROM curation_wizard_tag_mapping_sources s
@@ -324,7 +327,7 @@ INNER JOIN tags t_src
     ON t_src.deleted_at IS NULL
     AND (
         (s.source_code IS NOT NULL AND t_src.code = s.source_code)
-        OR (s.source_code IS NULL AND t_src.category = s.source_category AND t_src.name = s.source_name)
+        OR (t_src.category = s.source_category AND t_src.name = s.source_name)
     )
 INNER JOIN flower_tag_mappings m
     ON m.tag_id = t_src.id
@@ -366,6 +369,5 @@ DROP TEMPORARY TABLE curation_wizard_mapping_target_validation;
 
 DROP TEMPORARY TABLE curation_wizard_mapping_target_status;
 DROP TEMPORARY TABLE curation_wizard_flower_tag_mappings;
-DROP TEMPORARY TABLE curation_wizard_mapping_source_status;
 DROP TEMPORARY TABLE curation_wizard_tag_mapping_sources;
 DROP TEMPORARY TABLE curation_wizard_required_tags;

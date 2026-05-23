@@ -23,6 +23,11 @@ jobs:
       - name: Test and build with Gradle
         run: ./gradlew test bootJar
 
+      - name: Validate Flyway migrations against MySQL
+        env:
+          ENABLE_MYSQL_FLYWAY_TESTS: 'true'
+        run: ./gradlew test --tests "*FlywayMysqlMigrationIntegrationTest" --rerun-tasks
+
       - name: Validate deployment secrets
         env:
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
@@ -101,11 +106,14 @@ jobs:
           OPENAI_MODEL: ${{ secrets.OPENAI_MODEL }}
           OPENAI_TIMEOUT_MILLIS: ${{ secrets.OPENAI_TIMEOUT_MILLIS }}
           OPENAI_MAX_OUTPUT_TOKENS: ${{ secrets.OPENAI_MAX_OUTPUT_TOKENS }}
+          FLYWAY_ENABLED: ${{ secrets.FLYWAY_ENABLED }}
+          FLYWAY_BASELINE_ON_MIGRATE: ${{ secrets.FLYWAY_BASELINE_ON_MIGRATE }}
+          JPA_DDL_AUTO: ${{ secrets.JPA_DDL_AUTO }}
         with:
           host: ${{ secrets.AWS_EC2_HOST }}
           username: ubuntu
           key: ${{ secrets.AWS_EC2_PEM_KEY }}
-          envs: DOCKERHUB_USERNAME,DB_URL,DB_USERNAME,DB_PASSWORD,JWT_SECRET,JWT_ACCESS_TOKEN_VALIDITY_MINUTES,JWT_REFRESH_TOKEN_VALIDITY_DAYS,CORS_ALLOWED_ORIGINS,AWS_S3_BUCKET,AWS_REGION,AWS_S3_PUBLIC_BASE_URL,CACHE_TYPE,REDIS_HOST,REDIS_PORT,OPENAI_API_KEY,OPENAI_MODEL,OPENAI_TIMEOUT_MILLIS,OPENAI_MAX_OUTPUT_TOKENS
+          envs: DOCKERHUB_USERNAME,DB_URL,DB_USERNAME,DB_PASSWORD,JWT_SECRET,JWT_ACCESS_TOKEN_VALIDITY_MINUTES,JWT_REFRESH_TOKEN_VALIDITY_DAYS,CORS_ALLOWED_ORIGINS,AWS_S3_BUCKET,AWS_REGION,AWS_S3_PUBLIC_BASE_URL,CACHE_TYPE,REDIS_HOST,REDIS_PORT,OPENAI_API_KEY,OPENAI_MODEL,OPENAI_TIMEOUT_MILLIS,OPENAI_MAX_OUTPUT_TOKENS,FLYWAY_ENABLED,FLYWAY_BASELINE_ON_MIGRATE,JPA_DDL_AUTO
           script: |
             set -e
             test -n "$JWT_SECRET"
@@ -138,6 +146,9 @@ jobs:
               -e DB_URL="$DB_URL" \
               -e DB_USERNAME="$DB_USERNAME" \
               -e DB_PASSWORD="$DB_PASSWORD" \
+              -e FLYWAY_ENABLED="${FLYWAY_ENABLED:-true}" \
+              -e FLYWAY_BASELINE_ON_MIGRATE="${FLYWAY_BASELINE_ON_MIGRATE:-false}" \
+              -e JPA_DDL_AUTO="${JPA_DDL_AUTO:-validate}" \
               -e JWT_SECRET="$JWT_SECRET" \
               -e JWT_ACCESS_TOKEN_VALIDITY_MINUTES="${JWT_ACCESS_TOKEN_VALIDITY_MINUTES:-30}" \
               -e JWT_REFRESH_TOKEN_VALIDITY_DAYS="${JWT_REFRESH_TOKEN_VALIDITY_DAYS:-14}" \

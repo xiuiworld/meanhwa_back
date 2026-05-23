@@ -80,19 +80,22 @@ EC2 private key
 6. 첫 편입이 끝나면 `FLYWAY_BASELINE_ON_MIGRATE=false`로 되돌립니다.
 7. Flyway/validate 실패 시 `JPA_DDL_AUTO=update`로 우회하지 말고 누락된 migration을 보완합니다.
 
+GitHub Actions 배포는 `FLYWAY_ENABLED`, `FLYWAY_BASELINE_ON_MIGRATE`, `JPA_DDL_AUTO` secret을 컨테이너 env로 전달합니다. 첫 Flyway 편입 배포에서만 repository secret `FLYWAY_BASELINE_ON_MIGRATE=true`를 설정하고, 성공 후 바로 `false` 또는 미설정 상태로 되돌립니다.
+
 순서:
 
 1. JDK 21 설정
 2. `./gradlew test bootJar`
-3. 배포 secret 검증
-4. Docker image build/push
-5. EC2 SSH 접속
-6. `meanhwa-net` 생성/연결
-7. `meanhwa-redis` 확인/시작
-8. `meanhwa-server` 컨테이너 교체
-9. `GET http://localhost:8080/api/v1/flowers` health check
+3. Testcontainers 기반 MySQL Flyway migration 검증
+4. 배포 secret 검증
+5. Docker image build/push
+6. EC2 SSH 접속
+7. `meanhwa-net` 생성/연결
+8. `meanhwa-redis` 확인/시작
+9. `meanhwa-server` 컨테이너 교체
+10. `GET http://localhost:8080/api/v1/flowers` health check
 
-CI는 별도 `mysql-flyway` job에서 Docker/Testcontainers 기반 MySQL 검증 테스트를 실행합니다. 로컬에서 같은 검증을 실행할 때는 Docker가 켜진 상태에서 아래 명령을 사용합니다.
+CI는 별도 `mysql-flyway` job에서, 배포 workflow는 Docker image build 전에 Testcontainers 기반 MySQL 검증 테스트를 실행합니다. 로컬에서 같은 검증을 실행할 때는 Docker가 켜진 상태에서 아래 명령을 사용합니다.
 
 ```powershell
 $env:ENABLE_MYSQL_FLYWAY_TESTS='true'
@@ -347,14 +350,16 @@ sudo docker logs --tail=200 meanhwa-server
 - 운영 DB에 아직 적용되지 않은 schema 변경이 있음
 - 기존 수동 변경과 JPA 엔티티가 불일치함
 - `flyway_schema_history` baseline이 없는 기존 DB에서 `FLYWAY_BASELINE_ON_MIGRATE=false`로 기동함
+- V2 참조 데이터 migration 전 검증에서 기존 태그/매핑 source가 누락됨
 
 대응:
 
 1. 운영 DB 백업이 있는지 확인합니다.
 2. 실패 로그의 table/column 이름을 확인합니다.
 3. 누락된 변경을 `V3__...sql` 같은 새 Flyway migration으로 추가합니다.
-4. staging 또는 DB clone에서 먼저 재기동해 확인합니다.
-5. `JPA_DDL_AUTO=update`로 우회하지 않습니다.
+4. 실패한 migration이 `flyway_schema_history`에 남았으면 원인 수정 후 `flyway repair`를 적용합니다.
+5. staging 또는 DB clone에서 먼저 재기동해 확인합니다.
+6. `JPA_DDL_AUTO=update`로 우회하지 않습니다.
 
 ### 배포 후 health check 실패
 
