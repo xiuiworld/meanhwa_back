@@ -114,6 +114,7 @@ type CurationStepKey =
 | `FORBIDDEN` | 403 | 권한 부족 |
 | `FLOWER_NOT_FOUND` | 404 | 꽃/식물 없음 또는 soft delete |
 | `TAG_NOT_FOUND` | 404 | 태그 없음 또는 soft delete |
+| `RESOURCE_NOT_FOUND` | 404 | 요청 경로에 매핑된 API 없음 |
 | `USER_NOT_FOUND` | 404 | 회원 없음 |
 | `CURATION_RESULT_NOT_FOUND` | 404 | 내 큐레이션 결과 없음 또는 소유자 불일치 |
 | `CURATION_FLOW_NOT_FOUND` | 404 | 알 수 없는 `flowVersion` |

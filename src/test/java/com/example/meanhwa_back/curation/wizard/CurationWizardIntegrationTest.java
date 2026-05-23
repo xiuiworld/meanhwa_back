@@ -48,6 +48,19 @@ class CurationWizardIntegrationTest {
     }
 
     @Test
+    void removedCurationGetApisRequireAuthenticationBeforeMvcNotFound() throws Exception {
+        mockMvc.perform(get("/api/v1/curation"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.errorCode").value("UNAUTHORIZED"));
+        mockMvc.perform(get("/api/v1/curation/flow"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.errorCode").value("UNAUTHORIZED"));
+        mockMvc.perform(get("/api/v1/curation/steps/RECIPIENT/options"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.errorCode").value("UNAUTHORIZED"));
+    }
+
+    @Test
     void postResultsReturnsScoredFlowers() throws Exception {
         String body = """
                 {
