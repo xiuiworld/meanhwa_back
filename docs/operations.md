@@ -15,7 +15,6 @@ Production runtime 필수값:
 | `AWS_S3_BUCKET` | S3 bucket |
 | `AWS_REGION` | AWS region, 기본 `ap-northeast-2` |
 | `AWS_S3_PUBLIC_BASE_URL` | 업로드 이미지 public base URL |
-| `OPENAI_API_KEY` | 메시지 생성용 OpenAI API key |
 | `CACHE_TYPE` | `redis` 권장 |
 | `REDIS_HOST` | Docker network 안의 Redis host, 보통 `meanhwa-redis` |
 | `REDIS_PORT` | Redis port, 보통 `6379` |
@@ -37,6 +36,7 @@ Optional runtime settings:
 | `JWT_ACCESS_TOKEN_VALIDITY_MINUTES` | `30` |
 | `JWT_REFRESH_TOKEN_VALIDITY_DAYS` | `14` |
 | `CORS_ALLOWED_ORIGINS` | `http://localhost:3000,http://localhost:5173` |
+| `OPENAI_API_KEY` | blank, 템플릿 메시지 fallback |
 | `OPENAI_BASE_URL` | `https://api.openai.com` |
 | `OPENAI_MODEL` | `gpt-5.4-mini` |
 | `OPENAI_TIMEOUT_MILLIS` | `5000` |

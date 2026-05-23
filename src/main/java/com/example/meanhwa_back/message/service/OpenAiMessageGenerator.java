@@ -18,7 +18,7 @@ import org.springframework.web.client.RestClientException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/** OpenAI Chat Completions API로 메시지 생성 (실패 시 템플릿 fallback). */
+/** OpenAI Responses API로 선물 메시지를 생성하고 실패 시 템플릿 생성기로 fallback한다. */
 @Component
 @Primary
 public class OpenAiMessageGenerator implements MessageGenerator {

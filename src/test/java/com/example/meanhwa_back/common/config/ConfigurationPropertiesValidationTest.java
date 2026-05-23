@@ -56,6 +56,14 @@ class ConfigurationPropertiesValidationTest {
     }
 
     @Test
+    void openAiApiKeyMayBeBlankForTemplateFallback() {
+        OpenAiProperties properties = new OpenAiProperties();
+        properties.setApiKey("");
+
+        assertThat(propertyPaths(validator.validate(properties))).doesNotContain("apiKey");
+    }
+
+    @Test
     void corsOriginsCannotUseWildcardWhenCredentialsAreEnabled() {
         CorsProperties properties = new CorsProperties();
         properties.setAllowedOrigins(List.of("*"));

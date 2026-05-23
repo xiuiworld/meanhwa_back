@@ -37,7 +37,6 @@ jobs:
           CACHE_TYPE: ${{ secrets.CACHE_TYPE }}
           REDIS_HOST: ${{ secrets.REDIS_HOST }}
           REDIS_PORT: ${{ secrets.REDIS_PORT }}
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: |
           if [ -z "$JWT_SECRET" ]; then
             echo "JWT_SECRET GitHub Actions secret is required for prod deployment."
@@ -71,11 +70,6 @@ jobs:
             echo "REDIS_PORT GitHub Actions secret is required for prod cache."
             exit 1
           fi
-          if [ -z "$OPENAI_API_KEY" ]; then
-            echo "OPENAI_API_KEY GitHub Actions secret is required for Phase 10 message generation."
-            exit 1
-          fi
-
       - name: Docker build & push
         env:
           DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
@@ -123,7 +117,6 @@ jobs:
             test -n "$CACHE_TYPE"
             test -n "$REDIS_HOST"
             test -n "$REDIS_PORT"
-            test -n "$OPENAI_API_KEY"
 
             sudo docker network create meanhwa-net || true
             if ! sudo docker inspect meanhwa-redis > /dev/null 2>&1; then
