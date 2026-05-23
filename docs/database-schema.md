@@ -35,6 +35,7 @@ PREMIUM
 EVENT
 RELATION
 EMOTION
+MEANING
 STYLE
 CARE
 SEASON
@@ -118,6 +119,7 @@ erDiagram
         bigint id PK
         varchar category
         varchar name
+        varchar code
         datetime deleted_at
     }
 
@@ -272,7 +274,7 @@ erDiagram
 | --- | --- | --- |
 | `uk_users_provider_oauth_id` | `provider`, `oauth_id` | 같은 provider 안에서 소셜 계정 중복 방지 |
 
-운영에서 특정 사용자를 관리자로 승격할 때는 `role`을 `ROLE_ADMIN`으로 변경합니다.
+운영에서 관리자 권한을 변경할 때는 가능하면 백오피스 API(`PUT /api/v1/admin/users/{userId}/role`)를 사용합니다. 최초 관리자 계정 bootstrap처럼 API를 호출할 수 없는 경우에만 DB를 직접 수정합니다.
 
 예시:
 
@@ -419,8 +421,8 @@ refresh API는 성공 시 토큰을 회전시키고 기존 refresh token을 폐�
 `src/main/resources/data.sql`은 테스트/local 초기 데이터를 제공합니다.
 
 - `flowers`: 20종
-- `tags`: 24개
-- `flower_tag_mappings`: 146개
+- `tags`: 104개 (`code`가 있는 위저드 태그 포함)
+- `flower_tag_mappings`: 기본 매핑 146개와 위저드 태그용 복제 매핑
 
 테스트 프로필에서는 `spring.sql.init.mode=always`와 H2 in-memory DB를 사용해 seed 데이터가 매번 초기화됩니다.
 

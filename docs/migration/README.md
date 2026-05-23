@@ -17,23 +17,23 @@
 ## 실행 방법
 
 1. RDS 백업(스냅샷) 또는 `tags`, `flower_tag_mappings` 테이블 덤프
-2. [deployment.md](../deployment.md) 의 RDS 접속 절차로 `mysql` 접속
+2. [operations.md](../operations.md) 의 RDS 접속 절차로 `mysql` 접속
 3. 스크립트 실행:
 
 ```bash
 mysql -h {RDS_HOST} -P 3306 -u {DB_USERNAME} -p meanhwa < docs/migration/2026-05-curation-wizard-prod.sql
 ```
 
-4. 스크립트 말미 **검증 SELECT** 결과 확인 (`missing_wizard_codes` 가 0건)
+4. 스크립트 말미 **검증 SELECT** 결과 확인 (`missing_wizard_code` 결과가 0행)
 
 ## 스크립트가 하는 일
 
 1. `tags.code` 컬럼 추가 (없을 때만)
 2. 기존 태그(생일·연인·사랑 등)에 `code` 백필 — **이름·카테고리** 기준
-3. 위저드용 신규 태그 INSERT (`code` 중복 시 스킵, PDF 2026-05 꽃말 표시명)
-3b. 이미 INSERT 된 DB용 `UPDATE tags SET name=...` (MEANING 표시명만 PDF 문구로 갱신)
-4. `flower_tag_mappings` — 신규 태그에 대해 유사 기존 태그 weight **복제** (로컬 `data.sql` 과 동일 전략)
-5. 검증 쿼리
+3. 위저드용 신규 태그 INSERT (`code` 중복 시 스킵)
+4. 이미 INSERT 된 DB의 `MEANING` 표시명 갱신
+5. `flower_tag_mappings` — 신규 태그에 대해 유사 기존 태그 weight **복제** (로컬 `data.sql` 과 동일 전략)
+6. 검증 쿼리
 
 ## 주의
 

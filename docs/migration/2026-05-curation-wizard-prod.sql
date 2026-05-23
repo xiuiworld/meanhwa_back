@@ -126,7 +126,7 @@ INSERT INTO tags (category, name, code)
 SELECT 'ENVIRONMENT', '창가·밝은 실내', 'WINDOW_BRIGHT' FROM DUAL
 WHERE NOT EXISTS (SELECT 1 FROM tags WHERE code = 'WINDOW_BRIGHT' AND deleted_at IS NULL);
 
--- MEANING (꽃말 결) — 표시명은 flow-2026-05-v1.yml / data.sql 과 동일 (PDF 2026-05)
+-- MEANING (꽃말 결) — 표시명은 flow-2026-05-v1.yml / data.sql 과 동일
 INSERT INTO tags (category, name, code) SELECT 'MEANING', '변함없는 마음', 'LOVE_1' FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM tags WHERE code = 'LOVE_1' AND deleted_at IS NULL);
 INSERT INTO tags (category, name, code) SELECT 'MEANING', '첫사랑의 설렘', 'LOVE_2' FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM tags WHERE code = 'LOVE_2' AND deleted_at IS NULL);
 INSERT INTO tags (category, name, code) SELECT 'MEANING', '소중한 당신', 'LOVE_3' FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM tags WHERE code = 'LOVE_3' AND deleted_at IS NULL);
@@ -188,7 +188,7 @@ INSERT INTO tags (category, name, code) SELECT 'MEANING', '다시 찾은 활력'
 INSERT INTO tags (category, name, code) SELECT 'MEANING', '건강한 내일', 'GET_WELL_3' FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM tags WHERE code = 'GET_WELL_3' AND deleted_at IS NULL);
 INSERT INTO tags (category, name, code) SELECT 'MEANING', '희망의 빛', 'GET_WELL_4' FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM tags WHERE code = 'GET_WELL_4' AND deleted_at IS NULL);
 
--- 이미 마이그레이션을 실행한 DB: MEANING 표시명만 PDF 문구로 갱신 (code 유지)
+-- 이미 마이그레이션을 실행한 DB: MEANING 표시명만 현재 카탈로그 문구로 갱신 (code 유지)
 UPDATE tags SET name = '변함없는 마음' WHERE code = 'LOVE_1' AND deleted_at IS NULL;
 UPDATE tags SET name = '진실한 사랑' WHERE code = 'LOVE_4' AND deleted_at IS NULL;
 UPDATE tags SET name = '변치 않는 우정' WHERE code = 'SUPPORT_2' AND deleted_at IS NULL;
@@ -329,7 +329,7 @@ WHERE NOT EXISTS (
 DROP PROCEDURE IF EXISTS clone_mapping_by_code;
 
 -- -----------------------------------------------------------------------------
--- 5) 검증 — missing_wizard_codes 가 0건이어야 함
+-- 5) 검증 — missing_wizard_code 결과가 0행이어야 함
 -- -----------------------------------------------------------------------------
 SELECT req.code AS missing_wizard_code
 FROM (
