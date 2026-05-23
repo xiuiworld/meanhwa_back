@@ -23,3 +23,23 @@ jobs:
 
       - name: Test and build
         run: ./gradlew test bootJar
+
+  mysql-flyway:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Validate Flyway migrations against MySQL
+        env:
+          ENABLE_MYSQL_FLYWAY_TESTS: 'true'
+        run: ./gradlew test --tests "*FlywayMysqlMigrationIntegrationTest" --rerun-tasks

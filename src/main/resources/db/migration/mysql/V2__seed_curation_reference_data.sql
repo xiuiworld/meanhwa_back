@@ -37,10 +37,16 @@ UPDATE tags SET code = 'LIVING_ROOM' WHERE category = 'ENVIRONMENT' AND name = '
 
 SET @has_code_uk := (
     SELECT COUNT(*)
-    FROM information_schema.STATISTICS
-    WHERE TABLE_SCHEMA = @db
-      AND TABLE_NAME = 'tags'
-      AND INDEX_NAME = 'uk_tags_code'
+    FROM (
+        SELECT INDEX_NAME
+        FROM information_schema.STATISTICS
+        WHERE TABLE_SCHEMA = @db
+          AND TABLE_NAME = 'tags'
+          AND NON_UNIQUE = 0
+        GROUP BY INDEX_NAME
+        HAVING COUNT(*) = 1
+           AND SUM(CASE WHEN COLUMN_NAME = 'code' THEN 1 ELSE 0 END) = 1
+    ) code_unique_indexes
 );
 SET @ddl := IF(
     @has_code_uk = 0,
@@ -51,7 +57,13 @@ PREPARE stmt FROM @ddl;
 EXECUTE stmt;
 DEALLOCATE PREPARE stmt;
 
-INSERT INTO tags (category, name, code)
+CREATE TEMPORARY TABLE curation_wizard_required_tags (
+    category VARCHAR(50) NOT NULL,
+    name VARCHAR(50) NOT NULL,
+    code VARCHAR(80) NOT NULL PRIMARY KEY
+);
+
+INSERT INTO curation_wizard_required_tags (category, name, code)
 VALUES
     ('EVENT', '생일', 'BIRTHDAY'),
     ('EVENT', '졸업', 'GRADUATION'),
@@ -147,11 +159,31 @@ VALUES
     ('MEANING', '빠른 회복', 'GET_WELL_1'),
     ('MEANING', '다시 찾은 활력', 'GET_WELL_2'),
     ('MEANING', '건강한 내일', 'GET_WELL_3'),
-    ('MEANING', '희망의 빛', 'GET_WELL_4')
+    ('MEANING', '희망의 빛', 'GET_WELL_4');
+INSERT INTO tags (category, name, code)
+SELECT category, name, code
+FROM curation_wizard_required_tags
 ON DUPLICATE KEY UPDATE
     category = VALUES(category),
     name = VALUES(name),
     deleted_at = NULL;
+
+SET @missing_required_code_count := (
+    SELECT COUNT(*)
+    FROM curation_wizard_required_tags req
+    LEFT JOIN tags t
+        ON t.code = req.code
+        AND t.deleted_at IS NULL
+    WHERE t.id IS NULL
+);
+CREATE TEMPORARY TABLE curation_wizard_required_code_validation (
+    must_be_zero INT NOT NULL,
+    CONSTRAINT chk_curation_wizard_required_code_validation CHECK (must_be_zero = 0)
+);
+INSERT INTO curation_wizard_required_code_validation (must_be_zero)
+SELECT @missing_required_code_count
+WHERE @missing_required_code_count > 0;
+DROP TEMPORARY TABLE curation_wizard_required_code_validation;
 
 CREATE TEMPORARY TABLE curation_wizard_tag_mapping_sources (
     new_code VARCHAR(80) NOT NULL PRIMARY KEY,
@@ -243,6 +275,45 @@ VALUES
     ('GET_WELL_3', 'COMFORT', NULL, NULL),
     ('GET_WELL_4', 'COMFORT', NULL, NULL);
 
+SET @existing_flower_mapping_count := (SELECT COUNT(*) FROM flower_tag_mappings);
+
+CREATE TEMPORARY TABLE curation_wizard_mapping_source_status AS
+SELECT
+    s.new_code,
+    COUNT(DISTINCT m_src.id) AS source_mapping_count,
+    COUNT(DISTINCT m_new.id) AS target_mapping_count
+FROM curation_wizard_tag_mapping_sources s
+INNER JOIN tags t_new
+    ON t_new.code = s.new_code
+    AND t_new.deleted_at IS NULL
+LEFT JOIN tags t_src
+    ON t_src.deleted_at IS NULL
+    AND (
+        (s.source_code IS NOT NULL AND t_src.code = s.source_code)
+        OR (s.source_code IS NULL AND t_src.category = s.source_category AND t_src.name = s.source_name)
+    )
+LEFT JOIN flower_tag_mappings m_src
+    ON m_src.tag_id = t_src.id
+LEFT JOIN flower_tag_mappings m_new
+    ON m_new.tag_id = t_new.id
+GROUP BY s.new_code;
+
+SET @missing_mapping_source_count := (
+    SELECT COUNT(*)
+    FROM curation_wizard_mapping_source_status
+    WHERE @existing_flower_mapping_count > 0
+      AND source_mapping_count = 0
+      AND target_mapping_count = 0
+);
+CREATE TEMPORARY TABLE curation_wizard_mapping_source_validation (
+    must_be_zero INT NOT NULL,
+    CONSTRAINT chk_curation_wizard_mapping_source_validation CHECK (must_be_zero = 0)
+);
+INSERT INTO curation_wizard_mapping_source_validation (must_be_zero)
+SELECT @missing_mapping_source_count
+WHERE @missing_mapping_source_count > 0;
+DROP TEMPORARY TABLE curation_wizard_mapping_source_validation;
+
 CREATE TEMPORARY TABLE curation_wizard_flower_tag_mappings AS
 SELECT m.flower_id, t_new.id AS tag_id, m.weight
 FROM curation_wizard_tag_mapping_sources s
@@ -266,5 +337,35 @@ INSERT INTO flower_tag_mappings (flower_id, tag_id, weight)
 SELECT flower_id, tag_id, weight
 FROM curation_wizard_flower_tag_mappings;
 
+CREATE TEMPORARY TABLE curation_wizard_mapping_target_status AS
+SELECT
+    s.new_code,
+    COUNT(DISTINCT m_new.id) AS target_mapping_count
+FROM curation_wizard_tag_mapping_sources s
+INNER JOIN tags t_new
+    ON t_new.code = s.new_code
+    AND t_new.deleted_at IS NULL
+LEFT JOIN flower_tag_mappings m_new
+    ON m_new.tag_id = t_new.id
+GROUP BY s.new_code;
+
+SET @missing_mapping_target_count := (
+    SELECT COUNT(*)
+    FROM curation_wizard_mapping_target_status
+    WHERE @existing_flower_mapping_count > 0
+      AND target_mapping_count = 0
+);
+CREATE TEMPORARY TABLE curation_wizard_mapping_target_validation (
+    must_be_zero INT NOT NULL,
+    CONSTRAINT chk_curation_wizard_mapping_target_validation CHECK (must_be_zero = 0)
+);
+INSERT INTO curation_wizard_mapping_target_validation (must_be_zero)
+SELECT @missing_mapping_target_count
+WHERE @missing_mapping_target_count > 0;
+DROP TEMPORARY TABLE curation_wizard_mapping_target_validation;
+
+DROP TEMPORARY TABLE curation_wizard_mapping_target_status;
 DROP TEMPORARY TABLE curation_wizard_flower_tag_mappings;
+DROP TEMPORARY TABLE curation_wizard_mapping_source_status;
 DROP TEMPORARY TABLE curation_wizard_tag_mapping_sources;
+DROP TEMPORARY TABLE curation_wizard_required_tags;

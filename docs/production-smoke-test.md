@@ -50,6 +50,20 @@ WHERE code IN ('BIRTHDAY', 'FAMILY', 'WINDOW_BRIGHT', 'LOVE_1')
   AND deleted_at IS NULL;
 ```
 
+기존 꽃/태그 매핑이 있는 DB에서는 V2가 새 위저드 태그 매핑을 복제했는지도 확인합니다:
+
+```sql
+SELECT t.code, COUNT(m.id) AS mapping_count
+FROM tags t
+LEFT JOIN flower_tag_mappings m ON m.tag_id = t.id
+WHERE t.code IN ('WEDDING', 'RECOVERY', 'FAMILY', 'WINDOW_BRIGHT', 'LOVE_1', 'GET_WELL_4')
+  AND t.deleted_at IS NULL
+GROUP BY t.code
+ORDER BY t.code;
+```
+
+기존 운영 데이터가 있는 DB라면 각 `mapping_count`가 1 이상이어야 합니다. 신규 빈 DB는 CMS로 꽃과 매핑을 넣기 전까지 0일 수 있습니다.
+
 ## 3. Kakao/Naver Login
 
 Kakao:

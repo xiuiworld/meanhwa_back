@@ -92,7 +92,7 @@ EC2 private key
 8. `meanhwa-server` 컨테이너 교체
 9. `GET http://localhost:8080/api/v1/flowers` health check
 
-MySQL/Flyway migration을 로컬 또는 CI에서 자동 검증할 때는 Docker가 켜진 상태에서 아래 테스트를 별도로 실행합니다.
+CI는 별도 `mysql-flyway` job에서 Docker/Testcontainers 기반 MySQL 검증 테스트를 실행합니다. 로컬에서 같은 검증을 실행할 때는 Docker가 켜진 상태에서 아래 명령을 사용합니다.
 
 ```powershell
 $env:ENABLE_MYSQL_FLYWAY_TESTS='true'
@@ -157,18 +157,12 @@ sudo docker inspect meanhwa-server \
 
 신규 빈 DB에서는 `V1__baseline_current_schema.sql`이 현재 엔티티 기준 빈 schema를 만들고, `V2__seed_curation_reference_data.sql`이 큐레이션 위저드에 필요한 `tags.code` 참조 데이터를 넣습니다. V2는 이미지 URL이 있는 꽃 seed를 넣지 않습니다.
 
-과거 수동 운영 DB migration:
+과거 수동 운영 DB migration 이력:
 
 - Guide: [migration/README.md](migration/README.md)
 - SQL: [migration/2026-05-curation-wizard-prod.sql](migration/2026-05-curation-wizard-prod.sql)
 
-```bash
-mysql -h {RDS_HOST} -P 3306 -u {DB_USERNAME} -p meanhwa < docs/migration/2026-05-curation-wizard-prod.sql
-```
-
-스크립트 마지막 `missing_wizard_code` 결과가 0행인지 확인합니다.
-
-위 수동 SQL들은 이미 운영에 적용한 이력과 참고용으로 유지합니다. 새 schema 변경은 `src/main/resources/db/migration/mysql/V3__...sql`부터 Flyway migration으로 추가합니다.
+위 수동 SQL들은 Flyway 도입 전 운영 적용 이력과 참고용으로만 유지합니다. Flyway 관리 DB에는 이 SQL을 다시 직접 실행하지 않습니다. 새 schema 변경은 `src/main/resources/db/migration/mysql/V3__...sql`부터 Flyway migration으로 추가합니다.
 
 RDS 접속:
 
