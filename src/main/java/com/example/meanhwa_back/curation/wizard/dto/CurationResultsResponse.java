@@ -18,6 +18,9 @@ public record CurationResultsResponse(
         boolean hasNext,
         Long curationResultId
 ) {
+    /**
+     * 도메인 객체나 스냅샷을 이 API 응답 DTO로 변환한다.
+     */
     public static CurationResultsResponse from(
             PageResponse<CurationFlowerResponse> page,
             Long curationResultId

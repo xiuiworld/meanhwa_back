@@ -43,6 +43,9 @@ public class FlowerService {
         this.userHistoryService = userHistoryService;
         this.flowerReadCacheService = flowerReadCacheService;
     }
+/**
+ * 검색 필터를 정규화한 뒤 캐시 가능한 꽃 목록 페이지를 조회한다.
+ */
 
     @LogAction(value = ActionType.DICTIONARY_SEARCH, extractor = DictionarySearchPayloadExtractor.class)
     public PageResponse<FlowerSummaryResponse> searchFlowers(

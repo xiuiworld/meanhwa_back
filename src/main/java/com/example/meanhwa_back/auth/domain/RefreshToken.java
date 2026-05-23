@@ -60,6 +60,9 @@ public class RefreshToken {
         this.tokenHash = tokenHash;
         this.expiresAt = expiresAt;
     }
+/**
+ * refresh token을 폐기 상태로 변경해 재사용을 막는다.
+ */
 
     public void revoke(LocalDateTime revokedAt) {
         this.revokedAt = revokedAt;

@@ -20,6 +20,9 @@ public record FlowerSummaryResponse(
         boolean isPetSafe,
         PriceRange priceRange
 ) implements Serializable {
+    /**
+     * 도메인 객체나 스냅샷을 이 API 응답 DTO로 변환한다.
+     */
     public static FlowerSummaryResponse from(Flower flower) {
         return new FlowerSummaryResponse(
                 flower.getId(),

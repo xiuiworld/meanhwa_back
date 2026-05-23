@@ -21,6 +21,9 @@ public class AdminUploadController {
     public AdminUploadController(StorageService storageService) {
         this.storageService = storageService;
     }
+/**
+ * 검증된 이미지 파일을 저장소에 업로드하고 공개 접근 URL을 반환한다.
+ */
 
     @PostMapping("/images")
     public ResponseEntity<ApiResponse<ImageUploadResponse>> uploadImage(@RequestParam("file") MultipartFile file) {

@@ -31,6 +31,9 @@ public enum CurationBudgetCode {
     public PriceRange getPriceRange() {
         return priceRange;
     }
+/**
+ * 클라이언트가 보낸 예산 option code를 내부 예산 enum으로 변환한다.
+ */
 
     public static Optional<CurationBudgetCode> fromCode(String code) {
         if (code == null || code.isBlank()) {

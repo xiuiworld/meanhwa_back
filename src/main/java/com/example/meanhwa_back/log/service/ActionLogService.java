@@ -46,6 +46,9 @@ public class ActionLogService {
         this.transactionTemplate = new TransactionTemplate(transactionManager);
         this.transactionTemplate.setPropagationBehavior(Propagation.REQUIRES_NEW.value());
     }
+/**
+ * 사용자 행동 로그를 저장하되, 로깅 실패가 본 API 흐름을 깨지 않도록 격리한다.
+ */
 
     public void record(ActionType actionType, Map<String, Object> payload) {
         try {

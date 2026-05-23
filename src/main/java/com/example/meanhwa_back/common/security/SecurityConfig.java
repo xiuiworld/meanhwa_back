@@ -39,6 +39,9 @@ public class SecurityConfig {
         this.accessDeniedHandler = accessDeniedHandler;
         this.h2ConsoleEnabled = environment.acceptsProfiles(Profiles.of("local", "test"));
     }
+/**
+ * 공개 API, 인증 API, 관리자 API의 접근 정책과 JWT 필터를 구성한다.
+ */
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {

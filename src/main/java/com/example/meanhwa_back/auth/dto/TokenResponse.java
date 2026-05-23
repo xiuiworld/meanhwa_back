@@ -10,6 +10,9 @@ public record TokenResponse(
         String tokenType,
         long expiresInSeconds
 ) {
+    /**
+     * access token과 refresh token을 Bearer 응답 형식으로 포장한다.
+     */
     public static TokenResponse bearer(String accessToken, String refreshToken, long expiresInSeconds) {
         return new TokenResponse(accessToken, refreshToken, "Bearer", expiresInSeconds);
     }

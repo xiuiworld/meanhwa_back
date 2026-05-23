@@ -15,6 +15,9 @@ public class WebConfig implements WebMvcConfigurer {
     public WebConfig(CorsProperties corsProperties) {
         this.corsProperties = corsProperties;
     }
+/**
+ * /api/** 경로에 허용 origin과 HTTP method 기반 CORS 정책을 적용한다.
+ */
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {

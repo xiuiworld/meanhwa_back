@@ -46,6 +46,9 @@ public class TokenService {
         ));
         return TokenResponse.bearer(accessToken, refreshToken, jwtTokenProvider.getAccessTokenExpiresInSeconds());
     }
+/**
+ * 유효한 refresh token을 검증하고 새 access/refresh token 쌍을 발급한다.
+ */
 
     @Transactional
     public TokenResponse refresh(String refreshTokenValue) {
@@ -61,6 +64,9 @@ public class TokenService {
         refreshToken.revoke(now);
         return issue(refreshToken.getUser());
     }
+/**
+ * 저장된 refresh token을 폐기해 이후 토큰 재발급을 막는다.
+ */
 
     @Transactional
     public void logout(String refreshTokenValue) {

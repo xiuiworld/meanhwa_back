@@ -12,6 +12,9 @@ public record AdminTagResponse(
         TagCategory category,
         String name
 ) {
+    /**
+     * 도메인 객체나 스냅샷을 이 API 응답 DTO로 변환한다.
+     */
     public static AdminTagResponse from(Tag tag) {
         return new AdminTagResponse(tag.getId(), tag.getCategory(), tag.getName());
     }

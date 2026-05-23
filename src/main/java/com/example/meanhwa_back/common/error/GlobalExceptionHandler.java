@@ -14,6 +14,9 @@ import org.springframework.web.servlet.resource.NoResourceFoundException;
 /** API 전역 예외를 {@link ErrorResponse} 형식으로 변환한다. */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+/**
+ * 도메인 예외를 ErrorCode에 맞는 HTTP 오류 응답으로 변환한다.
+ */
 
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<ErrorResponse> handleBusinessException(BusinessException exception) {
@@ -22,6 +25,9 @@ public class GlobalExceptionHandler {
                 .status(errorCode.getStatus())
                 .body(ErrorResponse.of(errorCode, exception.getMessage()));
     }
+/**
+ * Bean Validation 실패 내용을 필드별 메시지로 묶어 400 응답으로 반환한다.
+ */
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleMethodArgumentNotValidException(
@@ -43,6 +49,9 @@ public class GlobalExceptionHandler {
             MethodArgumentTypeMismatchException.class,
             IllegalArgumentException.class
     })
+    /**
+     * 요청 파라미터 누락, 타입 불일치, 잘못된 인자를 400 응답으로 정리한다.
+     */
     public ResponseEntity<ErrorResponse> handleBadRequest(Exception exception) {
         return ResponseEntity
                 .badRequest()
@@ -53,11 +62,17 @@ public class GlobalExceptionHandler {
             NoHandlerFoundException.class,
             NoResourceFoundException.class
     })
+    /**
+     * 존재하지 않는 경로나 정적 리소스 요청을 공통 404 응답으로 변환한다.
+     */
     public ResponseEntity<ErrorResponse> handleNotFound() {
         return ResponseEntity
                 .status(ErrorCode.RESOURCE_NOT_FOUND.getStatus())
                 .body(ErrorResponse.from(ErrorCode.RESOURCE_NOT_FOUND));
     }
+/**
+ * 예상하지 못한 예외는 내부 구현을 숨기고 공통 500 응답으로 반환한다.
+ */
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleException(Exception exception) {

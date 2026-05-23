@@ -48,6 +48,9 @@ public class CurationResultHistoryService {
         this.authenticatedUserProvider = authenticatedUserProvider;
         this.objectMapper = objectMapper;
     }
+/**
+ * 로그인 사용자인 경우 큐레이션 결과를 스냅샷으로 저장하고, 비로그인 사용자는 저장하지 않는다.
+ */
 
     @Transactional
     public UserCurationResult saveIfAuthenticated(

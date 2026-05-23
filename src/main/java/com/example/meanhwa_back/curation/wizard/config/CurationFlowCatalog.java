@@ -108,6 +108,9 @@ public class CurationFlowCatalog {
         }
         return requireStep(stepKey).getDefaultQuestionTitle();
     }
+/**
+ * 현재 선택 경로에 맞는 위저드 질문 보조 문구를 계산한다.
+ */
 
     public String resolveQuestionSubtitle(CurationStepKey stepKey) {
         return requireStep(stepKey).getDefaultQuestionSubtitle();
@@ -163,6 +166,9 @@ public class CurationFlowCatalog {
         assertOptionAllowed(CurationStepKey.RECIPIENT, prior, recipientCode);
         assertOptionAllowed(CurationStepKey.EMOTION, prior, emotionCode);
     }
+/**
+ * 큐레이션 점수 계산에 참여하는 모든 option code를 flow 문서에서 추출한다.
+ */
 
     public Set<String> allScoringCodes(Map<CurationStepKey, String> completeSelections) {
         return completeSelections.entrySet().stream()

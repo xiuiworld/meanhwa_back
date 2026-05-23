@@ -41,6 +41,9 @@ public class UserLikeService {
                 .map(userLike -> FlowerSummaryResponse.from(userLike.getFlower()))
                 .toList();
     }
+/**
+ * 인증 사용자의 꽃 찜을 추가하고 결과 표시용 꽃 요약을 반환한다.
+ */
 
     @Transactional
     public FlowerSummaryResponse addLike(Long flowerId) {
@@ -52,6 +55,9 @@ public class UserLikeService {
         }
         return FlowerSummaryResponse.from(flower);
     }
+/**
+ * 인증 사용자의 꽃 찜을 해제한다.
+ */
 
     @Transactional
     public void deleteLike(Long flowerId) {

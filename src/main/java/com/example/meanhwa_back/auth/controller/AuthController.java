@@ -25,6 +25,9 @@ public class AuthController {
     public AuthController(AuthService authService) {
         this.authService = authService;
     }
+/**
+ * 로컬과 테스트에서 개발용 사용자를 만들고 토큰을 발급한다.
+ */
 
     @PostMapping("/login/dev")
     public ApiResponse<TokenResponse> devLogin(
@@ -32,6 +35,9 @@ public class AuthController {
     ) {
         return ApiResponse.ok(authService.devLogin(request));
     }
+/**
+ * OAuth provider 토큰을 검증해 사용자를 생성하거나 갱신하고 서비스 토큰을 발급한다.
+ */
 
     @PostMapping("/login/{provider}")
     public ApiResponse<TokenResponse> socialLogin(
@@ -40,11 +46,17 @@ public class AuthController {
     ) {
         return ApiResponse.ok(authService.socialLogin(provider, request));
     }
+/**
+ * 유효한 refresh token을 검증하고 새 access/refresh token 쌍을 발급한다.
+ */
 
     @PostMapping("/refresh")
     public ApiResponse<TokenResponse> refresh(@Valid @RequestBody TokenRefreshRequest request) {
         return ApiResponse.ok(authService.refresh(request));
     }
+/**
+ * 저장된 refresh token을 폐기해 이후 토큰 재발급을 막는다.
+ */
 
     @PostMapping("/logout")
     public ApiResponse<Void> logout(@Valid @RequestBody LogoutRequest request) {

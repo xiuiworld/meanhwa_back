@@ -20,6 +20,9 @@ public class RestAuthenticationEntryPoint implements AuthenticationEntryPoint {
     public RestAuthenticationEntryPoint(SecurityErrorWriter securityErrorWriter) {
         this.securityErrorWriter = securityErrorWriter;
     }
+/**
+ * 인증 실패 상황을 JSON 오류 응답으로 기록한다.
+ */
 
     @Override
     public void commence(

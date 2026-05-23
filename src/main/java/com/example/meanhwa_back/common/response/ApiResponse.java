@@ -10,10 +10,16 @@ public record ApiResponse<T>(
         T data
 ) {
     private static final String DEFAULT_SUCCESS_MESSAGE = "요청이 성공적으로 처리되었습니다.";
+/**
+ * 성공 응답 본문을 공통 ApiResponse 형태로 감싼다.
+ */
 
     public static <T> ApiResponse<T> ok(T data) {
         return new ApiResponse<>(200, DEFAULT_SUCCESS_MESSAGE, data);
     }
+/**
+ * 생성 성공 응답 본문을 공통 ApiResponse 형태로 감싼다.
+ */
 
     public static <T> ApiResponse<T> created(T data) {
         return new ApiResponse<>(201, DEFAULT_SUCCESS_MESSAGE, data);

@@ -67,6 +67,9 @@ public class User {
         this.nickname = nickname;
         this.role = role;
     }
+/**
+ * OAuth provider에서 받은 최신 프로필 값으로 사용자 정보를 갱신한다.
+ */
 
     public void updateProfile(String email, String nickname, Role role) {
         this.email = email;

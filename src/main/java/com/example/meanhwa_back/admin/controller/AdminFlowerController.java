@@ -28,6 +28,9 @@ public class AdminFlowerController {
     public AdminFlowerController(AdminFlowerService adminFlowerService) {
         this.adminFlowerService = adminFlowerService;
     }
+/**
+ * 관리자 요청을 검증한 뒤 새 꽃 데이터를 생성한다.
+ */
 
     @PostMapping
     public ResponseEntity<ApiResponse<AdminFlowerDetailResponse>> createFlower(@Valid @RequestBody AdminFlowerRequest request) {
@@ -40,6 +43,9 @@ public class AdminFlowerController {
     public ApiResponse<AdminFlowerDetailResponse> getFlower(@PathVariable Long flowerId) {
         return ApiResponse.ok(adminFlowerService.getFlower(flowerId));
     }
+/**
+ * 관리자 요청값으로 기존 꽃 데이터를 갱신한다.
+ */
 
     @PutMapping("/{flowerId}")
     public ApiResponse<AdminFlowerDetailResponse> updateFlower(
@@ -48,12 +54,18 @@ public class AdminFlowerController {
     ) {
         return ApiResponse.ok(adminFlowerService.updateFlower(flowerId, request));
     }
+/**
+ * 꽃을 물리 삭제하지 않고 soft delete 처리한다.
+ */
 
     @DeleteMapping("/{flowerId}")
     public ApiResponse<Void> deleteFlower(@PathVariable Long flowerId) {
         adminFlowerService.deleteFlower(flowerId);
         return ApiResponse.ok(null);
     }
+/**
+ * 특정 꽃의 태그 매핑을 요청 목록 기준으로 일괄 교체한다.
+ */
 
     @PutMapping("/{flowerId}/tags")
     public ApiResponse<AdminFlowerDetailResponse> replaceMappings(

@@ -12,6 +12,9 @@ public record TagItemResponse(
         Long id,
         String name
 ) implements Serializable {
+    /**
+     * 도메인 객체나 스냅샷을 이 API 응답 DTO로 변환한다.
+     */
     public static TagItemResponse from(Tag tag) {
         return new TagItemResponse(tag.getId(), tag.getName());
     }

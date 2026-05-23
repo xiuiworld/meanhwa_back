@@ -44,12 +44,18 @@ public class UserHistoryService {
                 .map(history -> FlowerSummaryResponse.from(history.getFlower()))
                 .toList();
     }
+/**
+ * 인증 사용자의 최근 본 꽃 이력을 모두 삭제한다.
+ */
 
     @Transactional
     public void deleteHistories() {
         User user = authenticatedUserProvider.getCurrentUser();
         userHistoryRepository.deleteByUserId(user.getId());
     }
+/**
+ * 로그인 사용자인 경우 꽃 상세 조회 이력을 저장하거나 조회 시각을 갱신한다.
+ */
 
     @Transactional
     public void recordViewIfAuthenticated(Long flowerId) {

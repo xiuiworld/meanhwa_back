@@ -7,6 +7,9 @@ import org.springframework.stereotype.Component;
 /** OpenAI 미사용·실패 시 사용하는 고정 템플릿 메시지 생성기. */
 @Component
 public class TemplateMessageGenerator implements MessageGenerator {
+/**
+ * 입력 컨텍스트를 바탕으로 선물 메시지를 생성한다.
+ */
 
     @Override
     public String generate(MessageContext context) {

@@ -12,6 +12,9 @@ public record TagSummaryResponse(
         TagCategory category,
         String name
 ) {
+    /**
+     * 도메인 객체나 스냅샷을 이 API 응답 DTO로 변환한다.
+     */
     public static TagSummaryResponse from(Tag tag) {
         return new TagSummaryResponse(tag.getId(), tag.getCategory(), tag.getName());
     }

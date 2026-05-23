@@ -48,6 +48,9 @@ public class AuthService {
         this.oauthClients = new EnumMap<>(OAuthProvider.class);
         oauthClients.forEach(client -> this.oauthClients.put(client.getProvider(), client));
     }
+/**
+ * 로컬과 테스트에서 개발용 사용자를 만들고 토큰을 발급한다.
+ */
 
     @Transactional
     public TokenResponse devLogin(DevLoginRequest request) {
@@ -67,6 +70,9 @@ public class AuthService {
 
         return tokenService.issue(user);
     }
+/**
+ * OAuth provider 토큰을 검증해 사용자를 생성하거나 갱신하고 서비스 토큰을 발급한다.
+ */
 
     public TokenResponse socialLogin(String providerValue, SocialLoginRequest request) {
         OAuthProvider provider = OAuthProvider.from(providerValue);
@@ -92,11 +98,17 @@ public class AuthService {
             return tokenService.issue(user);
         });
     }
+/**
+ * 유효한 refresh token을 검증하고 새 access/refresh token 쌍을 발급한다.
+ */
 
     @Transactional
     public TokenResponse refresh(TokenRefreshRequest request) {
         return tokenService.refresh(request.refreshToken());
     }
+/**
+ * 저장된 refresh token을 폐기해 이후 토큰 재발급을 막는다.
+ */
 
     @Transactional
     public void logout(LogoutRequest request) {

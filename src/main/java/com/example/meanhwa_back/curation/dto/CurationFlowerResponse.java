@@ -21,6 +21,9 @@ public record CurationFlowerResponse(
         String recommendationReason,
         List<TagSummaryResponse> matchedTags
 ) {
+    /**
+     * 도메인 값들을 조합해 이 API 응답 DTO를 만든다.
+     */
     public static CurationFlowerResponse of(Flower flower, int score, List<TagSummaryResponse> matchedTags) {
         boolean isPetSafe = !flower.isToxicToPets();
         return new CurationFlowerResponse(

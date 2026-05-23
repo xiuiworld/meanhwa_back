@@ -68,6 +68,9 @@ public class MessageService {
         this.curationResultHistoryService = curationResultHistoryService;
         this.objectMapper = objectMapper;
     }
+/**
+ * 입력 컨텍스트를 바탕으로 선물 메시지를 생성한다.
+ */
 
     @Transactional
     public MessageGenerateResponse generate(MessageGenerateRequest request) {

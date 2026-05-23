@@ -38,6 +38,9 @@ public class S3StorageService implements StorageService {
                 .region(Region.of(storageProperties.getS3().getRegion()))
                 .build();
     }
+/**
+ * 검증된 이미지 파일을 저장소에 업로드하고 공개 접근 URL을 반환한다.
+ */
 
     @Override
     public ImageUploadResponse uploadImage(MultipartFile file) {

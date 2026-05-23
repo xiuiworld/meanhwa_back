@@ -19,6 +19,9 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class DictionarySearchPayloadExtractor implements ActionLogPayloadExtractor {
+/**
+ * 컨트롤러 호출 인자를 행동 로그 actionData JSON으로 변환한다.
+ */
 
     @Override
     @SuppressWarnings("unchecked")

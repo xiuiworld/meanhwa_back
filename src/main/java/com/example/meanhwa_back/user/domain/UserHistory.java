@@ -51,6 +51,9 @@ public class UserHistory {
         this.flower = flower;
         this.viewedAt = viewedAt;
     }
+/**
+ * 최근 본 꽃 이력의 조회 시각을 현재 시간으로 갱신한다.
+ */
 
     public void updateViewedAt(LocalDateTime viewedAt) {
         this.viewedAt = viewedAt;

@@ -16,6 +16,9 @@ public record UserMeResponse(
         String nickname,
         Role role
 ) {
+    /**
+     * 도메인 객체나 스냅샷을 이 API 응답 DTO로 변환한다.
+     */
     public static UserMeResponse from(User user) {
         return new UserMeResponse(
                 user.getId(),

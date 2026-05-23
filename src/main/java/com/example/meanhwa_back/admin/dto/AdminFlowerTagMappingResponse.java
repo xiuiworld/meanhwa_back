@@ -14,6 +14,9 @@ public record AdminFlowerTagMappingResponse(
         String name,
         int weight
 ) {
+    /**
+     * 도메인 객체나 스냅샷을 이 API 응답 DTO로 변환한다.
+     */
     public static AdminFlowerTagMappingResponse from(FlowerTagMapping mapping) {
         Tag tag = mapping.getTag();
         return new AdminFlowerTagMappingResponse(

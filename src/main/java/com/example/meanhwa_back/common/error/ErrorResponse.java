@@ -9,6 +9,9 @@ public record ErrorResponse(
         String errorCode,
         String message
 ) {
+    /**
+     * ErrorCode 기본 메시지를 사용해 오류 응답을 만든다.
+     */
     public static ErrorResponse from(ErrorCode errorCode) {
         return new ErrorResponse(
                 errorCode.getStatus().value(),
@@ -16,6 +19,9 @@ public record ErrorResponse(
                 errorCode.getMessage()
         );
     }
+/**
+ * 지정한 메시지를 사용해 오류 응답을 만든다.
+ */
 
     public static ErrorResponse of(ErrorCode errorCode, String message) {
         return new ErrorResponse(

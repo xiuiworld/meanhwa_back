@@ -52,6 +52,9 @@ public class RedisMessageGenerationRateLimiter implements MessageGenerationRateL
         this.redisTemplate = redisTemplate;
         this.properties = properties;
     }
+/**
+ * 사용자별 메시지 생성 quota를 확인하고 허용되면 현재 요청을 차감한다.
+ */
 
     @Override
     public RateLimitDecision consume(Long userId) {

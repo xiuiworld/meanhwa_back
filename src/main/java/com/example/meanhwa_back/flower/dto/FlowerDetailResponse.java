@@ -21,6 +21,9 @@ public record FlowerDetailResponse(
         PriceRange priceRange,
         List<TagSummaryResponse> tags
 ) {
+    /**
+     * 도메인 값들을 조합해 이 API 응답 DTO를 만든다.
+     */
     public static FlowerDetailResponse of(Flower flower, List<TagSummaryResponse> tags) {
         return new FlowerDetailResponse(
                 flower.getId(),

@@ -48,6 +48,9 @@ public class CurationCodeResolver {
         }
         return scoringCodes.stream().map(tagIdByCode::get).distinct().toList();
     }
+/**
+ * 큐레이션 선택값에서 예산 단계를 찾아 꽃 가격대 필터로 변환한다.
+ */
 
     public PriceRange resolveBudgetPriceRange(String budgetCode) {
         return CurationBudgetCode.fromCode(budgetCode)
