@@ -123,7 +123,7 @@ values
     (97, 'MEANING', '따뜻한 위안', 'COMFORT_1'),
     (98, 'MEANING', '깊은 배려', 'COMFORT_2'),
     (99, 'MEANING', '평온한 휴식', 'COMFORT_3'),
-    (100, 'MEANING', '마음의 안계', 'COMFORT_4'),
+    (100, 'MEANING', '마음의 안식', 'COMFORT_4'),
     (101, 'MEANING', '빠른 회복', 'GET_WELL_1'),
     (102, 'MEANING', '다시 찾은 활력', 'GET_WELL_2'),
     (103, 'MEANING', '건강한 내일', 'GET_WELL_3'),

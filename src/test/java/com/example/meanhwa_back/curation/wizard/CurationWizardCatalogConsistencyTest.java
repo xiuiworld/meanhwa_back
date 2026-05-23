@@ -47,11 +47,10 @@ class CurationWizardCatalogConsistencyTest {
         assertThat(expectedLabelsByCode).hasSize(60);
         assertMeaningLabelsPresent(expectedLabelsByCode, read("src/main/resources/data.sql"),
                 "data.sql", (code, label) -> "'MEANING', '" + label + "', '" + code + "'");
-        assertMeaningLabelsPresent(expectedLabelsByCode,
-                read("src/main/resources/db/migration/mysql/V2__seed_curation_reference_data.sql"),
-                "flyway reference data migration", (code, label) -> "'MEANING', '" + label + "', '" + code + "'");
-        assertMeaningLabelsPresent(expectedLabelsByCode, read("docs/migration/2026-05-curation-wizard-prod.sql"),
-                "production migration", (code, label) -> "'MEANING', '" + label + "', '" + code + "'");
+        assertFlywayMeaningLabelsPresent(expectedLabelsByCode,
+                read("src/main/resources/db/migration/mysql/V2__seed_curation_reference_data.sql")
+                        + "\n"
+                        + read("src/main/resources/db/migration/mysql/V5__fix_comfort_4_label.sql"));
         assertMeaningLabelsPresent(expectedLabelsByCode, read("docs/curation-wizard-api.md"),
                 "curation wizard docs",
                 (code, label) -> "| `" + emotionCode(code) + "` | `" + code + "` | " + label + " |");
@@ -81,6 +80,33 @@ class CurationWizardCatalogConsistencyTest {
         assertThat(missing)
                 .as("%s must contain all Step4 flower meaning labels from YAML", sourceName)
                 .isEmpty();
+    }
+
+    private static void assertFlywayMeaningLabelsPresent(
+            Map<String, String> expectedLabelsByCode,
+            String source
+    ) {
+        List<String> missing = expectedLabelsByCode.entrySet().stream()
+                .filter(entry -> !containsMeaningSeed(source, entry.getKey(), entry.getValue())
+                        && !containsMeaningCorrection(source, entry.getKey(), entry.getValue()))
+                .map(entry -> entry.getKey() + "=" + entry.getValue())
+                .toList();
+
+        assertThat(missing)
+                .as("flyway reference data migrations must seed or correct all Step4 flower meaning labels from YAML")
+                .isEmpty();
+    }
+
+    private static boolean containsMeaningSeed(String source, String code, String label) {
+        return source.contains("'MEANING', '" + label + "', '" + code + "'");
+    }
+
+    private static boolean containsMeaningCorrection(String source, String code, String label) {
+        return source.contains("""
+                UPDATE tags
+                SET name = '%s'
+                WHERE code = '%s'
+                """.formatted(label, code));
     }
 
     private static String read(String relativePath) throws IOException {

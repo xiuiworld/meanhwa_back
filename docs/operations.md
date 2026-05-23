@@ -158,14 +158,14 @@ sudo docker inspect meanhwa-server \
 
 기존 운영 DB처럼 이미 테이블이 있고 `flyway_schema_history`가 없는 DB는 최초 편입 배포에서만 `FLYWAY_BASELINE_ON_MIGRATE=true`를 켜서 V1 baseline을 기록합니다. 이후 배포부터는 false가 기본입니다.
 
-신규 빈 DB에서는 `V1__baseline_current_schema.sql`이 기본 schema를 만들고, `V2__seed_curation_reference_data.sql`이 큐레이션 위저드에 필요한 `tags.code` 참조 데이터를 넣습니다. `V3__align_enum_column_types.sql`은 Hibernate 6 MySQL schema validation에 맞게 enum 컬럼을 native `ENUM` 타입으로 정렬합니다. V2는 이미지 URL이 있는 꽃 seed를 넣지 않습니다.
+신규 빈 DB에서는 `V1__baseline_current_schema.sql`이 기본 schema를 만들고, `V2__seed_curation_reference_data.sql`이 큐레이션 위저드에 필요한 `tags.code` 참조 데이터를 넣습니다. `V3__align_enum_column_types.sql`은 Hibernate 6 MySQL schema validation에 맞게 enum 컬럼을 native `ENUM` 타입으로 정렬합니다. `V4__drop_unused_flower_detail_columns.sql`은 사용하지 않는 꽃 상세 컬럼을 제거하고, `V5__fix_comfort_4_label.sql`은 `COMFORT_4` 라벨 오탈자를 보정합니다. V2는 이미지 URL이 있는 꽃 seed를 넣지 않습니다.
 
 과거 수동 운영 DB migration 이력:
 
 - Guide: [migration/README.md](migration/README.md)
 - SQL: [migration/2026-05-curation-wizard-prod.sql](migration/2026-05-curation-wizard-prod.sql)
 
-위 수동 SQL들은 Flyway 도입 전 운영 적용 이력과 참고용으로만 유지합니다. Flyway 관리 DB에는 이 SQL을 다시 직접 실행하지 않습니다. 새 schema 변경은 `src/main/resources/db/migration/mysql/V4__...sql`부터 Flyway migration으로 추가합니다.
+위 수동 SQL들은 Flyway 도입 전 운영 적용 이력과 참고용으로만 유지합니다. Flyway 관리 DB에는 이 SQL을 다시 직접 실행하지 않습니다. 새 schema 변경은 `src/main/resources/db/migration/mysql`에 다음 순번의 Flyway migration으로 추가합니다.
 
 RDS 접속:
 
@@ -357,7 +357,7 @@ sudo docker logs --tail=200 meanhwa-server
 
 1. 운영 DB 백업이 있는지 확인합니다.
 2. 실패 로그의 table/column 이름을 확인합니다.
-3. 누락된 변경을 `V3__...sql` 같은 새 Flyway migration으로 추가합니다.
+3. 누락된 변경을 다음 순번의 새 Flyway migration으로 추가합니다.
 4. 실패한 migration이 `flyway_schema_history`에 남았으면 원인 수정 후 `flyway repair`를 적용합니다.
 5. staging 또는 DB clone에서 먼저 재기동해 확인합니다.
 6. `JPA_DDL_AUTO=update`로 우회하지 않습니다.

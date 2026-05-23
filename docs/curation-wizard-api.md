@@ -1,8 +1,8 @@
 # 큐레이션 위저드 옵션 코드표
 
-6단계 큐레이션 위저드의 현재 `flowVersion`은 `2026-05-v1`입니다. 이 문서는 프론트에서 상태로 저장해야 하는 `code`와 화면 표시용 `label`을 정리합니다.
+6단계 큐레이션 위저드의 현재 `flowVersion`은 `2026-05-v1`입니다. 이 문서는 프론트와 백엔드가 함께 지켜야 하는 `step`/`code`/`label` 계약을 정리합니다.
 
-실제 런타임 소스는 `src/main/resources/curation/flow-2026-05-v1.yml`입니다. API 요청/응답 규칙은 [api-contract.md](api-contract.md)의 Curation 섹션을 봅니다.
+프론트는 로컬 플로우 데이터로 단계 화면을 구성하고, 백엔드는 `POST /curation/results` 요청 검증과 저장 snapshot 라벨 해석에 `src/main/resources/curation/flow-2026-05-v1.yml`을 사용합니다. API 요청/응답 규칙은 [api-contract.md](api-contract.md)의 Curation 섹션을 봅니다.
 
 ## 기본 규칙
 
@@ -133,7 +133,7 @@ Step4 code는 `{EMOTION}_{1..4}` 형식입니다.
 | `COMFORT` | `COMFORT_1` | 따뜻한 위안 |
 | `COMFORT` | `COMFORT_2` | 깊은 배려 |
 | `COMFORT` | `COMFORT_3` | 평온한 휴식 |
-| `COMFORT` | `COMFORT_4` | 마음의 안계 |
+| `COMFORT` | `COMFORT_4` | 마음의 안식 |
 | `GET_WELL` | `GET_WELL_1` | 빠른 회복 |
 | `GET_WELL` | `GET_WELL_2` | 다시 찾은 활력 |
 | `GET_WELL` | `GET_WELL_3` | 건강한 내일 |

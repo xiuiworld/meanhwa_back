@@ -64,7 +64,7 @@ All application APIs are under `/api/v1`.
 | Auth | `/auth/login/{provider}`, `/auth/refresh`, `/auth/logout` |
 | Flower dictionary | `/flowers`, `/flowers/{flowerId}` |
 | Tags | `/tags` |
-| Curation | `/curation`, `/curation/flow`, `/curation/steps/{stepKey}/options`, `/curation/results` |
+| Curation | `/curation/results` |
 | Messages | `/messages/generate`, `/users/me/messages` |
 | My page | `/users/me`, `/users/me/likes`, `/users/me/histories`, `/users/me/curation-results` |
 | Admin CMS | `/admin/flowers`, `/admin/tags`, `/admin/uploads/images`, `/admin/users`, `/admin/statistics` |

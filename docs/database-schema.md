@@ -218,7 +218,7 @@ erDiagram
 | `code` | VARCHAR(80) | Y | 위저드·API 공통 식별자 (예: `BIRTHDAY`, `LOVE_3`). UNIQUE. 레거시(스타일·계절 등)는 NULL 가능 |
 | `deleted_at` | DATETIME | Y | soft delete 일시 |
 
-인덱스: `uk_tags_code` (`code`) — 운영 마이그레이션 [migration/2026-05-curation-wizard-prod.sql](migration/2026-05-curation-wizard-prod.sql) 참고.
+인덱스: `uk_tags_code` (`code`) — 현재 운영 DB는 Flyway migration(`src/main/resources/db/migration/mysql`) 기준으로 관리합니다.
 
 중복 태그 검증은 서비스 계층에서 active tag 기준 `category + name` case-insensitive로 처리합니다.  
 분기형 큐레이션 v2는 `code`로 `tagId`를 조회합니다 (`CurationCodeResolver`).

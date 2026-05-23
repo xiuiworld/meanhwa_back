@@ -95,7 +95,64 @@ curl -fsS "$BASE_URL/api/v1/users/me" \
 - `/users/me`가 provider, oauthId, role을 반환함
 - `POST /api/v1/auth/login/dev`는 prod에서 실패함
 
-## 4. S3 Image Upload And CMS Reflection
+## 4. Curation Results
+
+익명 요청:
+
+```bash
+curl -fsS -X POST "$BASE_URL/api/v1/curation/results" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "flowVersion": "2026-05-v1",
+    "selections": [
+      { "step": "OCCASION", "code": "BIRTHDAY" },
+      { "step": "RECIPIENT", "code": "LOVER" },
+      { "step": "EMOTION", "code": "LOVE" },
+      { "step": "FLOWER_MEANING", "code": "LOVE_3" },
+      { "step": "SPACE", "code": "DESK_SMALL" },
+      { "step": "BUDGET", "code": "BUDGET_MEDIUM" }
+    ],
+    "page": 0,
+    "size": 5
+  }'
+```
+
+로그인 요청:
+
+```bash
+curl -fsS -X POST "$BASE_URL/api/v1/curation/results" \
+  -H "Authorization: Bearer <ACCESS_TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "flowVersion": "2026-05-v1",
+    "selections": [
+      { "step": "OCCASION", "code": "BIRTHDAY" },
+      { "step": "RECIPIENT", "code": "LOVER" },
+      { "step": "EMOTION", "code": "LOVE" },
+      { "step": "FLOWER_MEANING", "code": "LOVE_3" },
+      { "step": "SPACE", "code": "DESK_SMALL" },
+      { "step": "BUDGET", "code": "BUDGET_MEDIUM" }
+    ],
+    "page": 0,
+    "size": 5
+  }'
+```
+
+저장 결과 확인:
+
+```bash
+curl -fsS "$BASE_URL/api/v1/users/me/curation-results/latest" \
+  -H "Authorization: Bearer <ACCESS_TOKEN>"
+```
+
+기대 결과:
+
+- 두 요청 모두 HTTP 200
+- 응답 `data.content`가 배열이고 기존 page 필드가 있음
+- 익명 응답의 `data.curationResultId`는 `null`
+- 로그인 응답의 `data.curationResultId`는 숫자이고, latest 조회의 `data.id`와 같음
+
+## 5. S3 Image Upload And CMS Reflection
 
 이미지 업로드:
 
@@ -141,7 +198,7 @@ curl -fsS -X DELETE "$BASE_URL/api/v1/admin/flowers/<SMOKE_FLOWER_ID>" \
   -H "Authorization: Bearer <ADMIN_ACCESS_TOKEN>"
 ```
 
-## 5. OpenAI Message Generation
+## 6. OpenAI Message Generation
 
 ```bash
 curl -fsS -X POST "$BASE_URL/api/v1/messages/generate" \
@@ -162,13 +219,13 @@ curl -fsS -X POST "$BASE_URL/api/v1/messages/generate" \
 - 응답에 생성된 `message`가 있음
 - 서버 로그에 OpenAI 인증/timeout 오류가 반복되지 않음
 
-## 6. OpenAI Fallback
+## 7. OpenAI Fallback
 
 이 항목은 운영이 아니라 staging에서만 수행합니다.
 
 1. staging에서 `OPENAI_BASE_URL`을 실패 응답을 주는 endpoint로 바꾸거나 `OPENAI_API_KEY`를 제거합니다.
 2. 앱을 재기동합니다.
-3. 5번 메시지 생성 요청을 다시 보냅니다.
+3. 6번 메시지 생성 요청을 다시 보냅니다.
 
 기대 결과:
 
