@@ -9,6 +9,7 @@ version = '0.0.1-SNAPSHOT'
 
 ext {
 	flywayVersion = '12.6.2'
+	jjwtVersion = '0.13.0'
 }
 
 java {
@@ -32,13 +33,13 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-aop'
 	implementation "org.flywaydb:flyway-core:${flywayVersion}"
-	implementation 'io.jsonwebtoken:jjwt-api:0.12.6'
+	implementation "io.jsonwebtoken:jjwt-api:${jjwtVersion}"
 	implementation 'software.amazon.awssdk:s3'
 	compileOnly 'org.projectlombok:lombok'
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 	runtimeOnly 'com.h2database:h2'
-	runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.6'
-	runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.6'
+	runtimeOnly "io.jsonwebtoken:jjwt-impl:${jjwtVersion}"
+	runtimeOnly "io.jsonwebtoken:jjwt-jackson:${jjwtVersion}"
 	runtimeOnly 'com.mysql:mysql-connector-j'
 	runtimeOnly "org.flywaydb:flyway-mysql:${flywayVersion}"
 	annotationProcessor 'org.projectlombok:lombok'
