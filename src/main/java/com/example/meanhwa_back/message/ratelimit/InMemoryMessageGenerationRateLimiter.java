@@ -1,11 +1,14 @@
 package com.example.meanhwa_back.message.ratelimit;
 
+import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
 
 import com.example.meanhwa_back.message.config.MessageGenerationRateLimitProperties;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
@@ -31,13 +34,23 @@ import org.springframework.stereotype.Component;
         matchIfMissing = true
 )
 public class InMemoryMessageGenerationRateLimiter implements MessageGenerationRateLimiter {
+    private static final long CLEANUP_INTERVAL_REQUESTS = 256;
+
     private final MessageGenerationRateLimitProperties properties;
+    private final Clock clock;
+    private final AtomicLong requestCounter = new AtomicLong();
 
     /** userId → 현재 윈도우 상태. */
     private final ConcurrentHashMap<Long, Window> windows = new ConcurrentHashMap<>();
 
+    @Autowired
     public InMemoryMessageGenerationRateLimiter(MessageGenerationRateLimitProperties properties) {
+        this(properties, Clock.systemUTC());
+    }
+
+    InMemoryMessageGenerationRateLimiter(MessageGenerationRateLimitProperties properties, Clock clock) {
         this.properties = properties;
+        this.clock = clock;
     }
 
     /**
@@ -45,9 +58,10 @@ public class InMemoryMessageGenerationRateLimiter implements MessageGenerationRa
      */
     @Override
     public RateLimitDecision consume(Long userId) {
-        Instant now = Instant.now();
+        Instant now = clock.instant();
         Duration windowDuration = properties.getWindow();
         int limit = properties.getMaxRequests();
+        evictExpiredWindowsPeriodically(now);
 
         // 동일 userId에 대한 갱신은 compute로 원자적으로 처리
         Window window = windows.compute(userId, (id, current) -> {
@@ -67,6 +81,17 @@ public class InMemoryMessageGenerationRateLimiter implements MessageGenerationRa
             retryAfter = Duration.ZERO;
         }
         return new RateLimitDecision(allowed, limit, remaining, retryAfter);
+    }
+
+    private void evictExpiredWindowsPeriodically(Instant now) {
+        if (requestCounter.incrementAndGet() % CLEANUP_INTERVAL_REQUESTS != 0) {
+            return;
+        }
+        windows.entrySet().removeIf(entry -> now.isAfter(entry.getValue().expiresAt()));
+    }
+
+    boolean hasWindowForUser(Long userId) {
+        return windows.containsKey(userId);
     }
 
     /**

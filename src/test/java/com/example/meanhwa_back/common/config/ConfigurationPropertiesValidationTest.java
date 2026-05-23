@@ -4,6 +4,7 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Set;
 
+import com.example.meanhwa_back.auth.config.OAuthProperties;
 import com.example.meanhwa_back.common.security.JwtProperties;
 import com.example.meanhwa_back.message.config.MessageGenerationRateLimitProperties;
 import com.example.meanhwa_back.message.config.OpenAiProperties;
@@ -61,6 +62,22 @@ class ConfigurationPropertiesValidationTest {
         properties.setApiKey("");
 
         assertThat(propertyPaths(validator.validate(properties))).doesNotContain("apiKey");
+    }
+
+    @Test
+    void oauthProviderTimeoutMustBeOperationallyUsable() {
+        OAuthProperties properties = new OAuthProperties();
+        properties.getKakao().setTimeoutMillis(1);
+
+        assertThat(propertyPaths(validator.validate(properties))).contains("kakao.timeoutMillis");
+    }
+
+    @Test
+    void oauthProviderUserInfoUrlMustBeHttpUrl() {
+        OAuthProperties properties = new OAuthProperties();
+        properties.getNaver().setUserInfoUrl("file:///tmp/token");
+
+        assertThat(propertyPaths(validator.validate(properties))).contains("naver.userInfoUrlHttpUrl");
     }
 
     @Test
