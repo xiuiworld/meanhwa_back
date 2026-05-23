@@ -23,6 +23,10 @@ import jakarta.persistence.Table;
                 @Index(name = "idx_action_logs_user_created", columnList = "user_id, created_at")
         }
 )
+/**
+ * 사용자 행동과 비로그인 이벤트를 저장하는 로그 엔티티.
+ * 통계 집계를 위해 actionType, userId, JSON actionData, 발생 시각을 함께 남긴다.
+ */
 public class ActionLog {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

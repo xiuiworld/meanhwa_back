@@ -14,6 +14,10 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+/**
+ * 꽃 조회와 검색 쿼리를 담당하는 JPA 저장소.
+ * 삭제되지 않은 꽃만 노출하는 active 조회 메서드를 중심으로 공개 API와 관리자 통계를 지원한다.
+ */
 
 public interface FlowerRepository extends JpaRepository<Flower, Long> {
     @Query("""

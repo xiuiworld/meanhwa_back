@@ -9,6 +9,10 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+/**
+ * 카카오와 네이버 OAuth profile 파싱 로직을 검증하는 테스트.
+ * provider별 JSON 구조 차이가 내부 OAuthProfile로 안정적으로 정규화되는지 확인한다.
+ */
 
 class OAuthProfileParserTests {
 

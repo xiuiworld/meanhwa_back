@@ -15,6 +15,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+/**
+ * ActionLog AOP payload extractor들의 JSON 변환 규칙을 검증하는 테스트.
+ * 컨트롤러 요청이 통계용 actionData로 안정적으로 추출되는지 확인한다.
+ */
 
 @ExtendWith(MockitoExtension.class)
 class ActionLogPayloadExtractorTest {

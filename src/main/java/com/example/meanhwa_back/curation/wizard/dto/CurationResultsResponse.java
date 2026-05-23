@@ -4,6 +4,10 @@ import java.util.List;
 
 import com.example.meanhwa_back.common.response.PageResponse;
 import com.example.meanhwa_back.curation.dto.CurationFlowerResponse;
+/**
+ * 큐레이션 위저드 제출 결과 응답 DTO.
+ * 선택한 flowVersion, selections, 추천 결과 페이지를 한 번에 반환한다.
+ */
 
 public record CurationResultsResponse(
         List<CurationFlowerResponse> content,

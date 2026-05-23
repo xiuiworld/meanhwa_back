@@ -23,6 +23,10 @@ import jakarta.persistence.UniqueConstraint;
         uniqueConstraints = @UniqueConstraint(name = "uk_user_histories_user_flower", columnNames = {"user_id", "flower_id"}),
         indexes = @Index(name = "idx_user_histories_user_viewed", columnList = "user_id, viewed_at")
 )
+/**
+ * 사용자가 최근 본 꽃 기록 엔티티.
+ * 동일 꽃 조회는 viewedAt을 갱신하고 오래된 이력은 서비스 계층에서 제한 개수만 유지한다.
+ */
 public class UserHistory {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

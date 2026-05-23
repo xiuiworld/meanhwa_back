@@ -24,6 +24,10 @@ import jakarta.persistence.UniqueConstraint;
         uniqueConstraints = @UniqueConstraint(name = "uk_user_likes_user_flower", columnNames = {"user_id", "flower_id"}),
         indexes = @Index(name = "idx_user_likes_user_created", columnList = "user_id, created_at")
 )
+/**
+ * 사용자가 찜한 꽃을 저장하는 엔티티.
+ * 사용자와 꽃 조합의 중복 좋아요를 막는 고유 제약과 생성 시각을 가진다.
+ */
 public class UserLike {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

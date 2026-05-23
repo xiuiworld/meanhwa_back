@@ -23,6 +23,10 @@ import jakarta.persistence.UniqueConstraint;
         name = "users",
         uniqueConstraints = @UniqueConstraint(name = "uk_users_provider_oauth_id", columnNames = {"provider", "oauth_id"})
 )
+/**
+ * 소셜 로그인 사용자를 표현하는 회원 엔티티.
+ * provider와 oauthId 조합으로 사용자를 식별하고 JWT 권한 판단에 필요한 role을 보관한다.
+ */
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

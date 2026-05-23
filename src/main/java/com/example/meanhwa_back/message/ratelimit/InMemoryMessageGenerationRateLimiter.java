@@ -61,6 +61,10 @@ import org.springframework.stereotype.Component;
         matchIfMissing = true
 
 )
+/**
+ * 단일 JVM에서 동작하는 메시지 생성 고정 윈도우 Rate Limiter.
+ * 로컬과 테스트 환경에 적합하며 운영 다중 인스턴스에서는 Redis 구현을 사용한다.
+ */
 
 public class InMemoryMessageGenerationRateLimiter implements MessageGenerationRateLimiter {
 
