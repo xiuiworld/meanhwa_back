@@ -9,6 +9,9 @@ import com.example.meanhwa_back.user.service.UserHistoryService;
 import com.example.meanhwa_back.user.service.UserLikeService;
 import com.example.meanhwa_back.user.service.UserService;
 
+import jakarta.validation.constraints.Positive;
+
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -19,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 /** 로그인 사용자 프로필·좋아요·조회 이력 API. */
 @RestController
 @RequestMapping("/api/v1/users/me")
+@Validated
 public class UserController {
     private final UserService userService;
     private final UserLikeService userLikeService;
@@ -48,7 +52,7 @@ public class UserController {
      * 인증 사용자의 꽃 찜을 추가하고 결과 표시용 꽃 요약을 반환한다.
      */
     @PostMapping("/likes/{flowerId}")
-    public ApiResponse<FlowerSummaryResponse> addLike(@PathVariable Long flowerId) {
+    public ApiResponse<FlowerSummaryResponse> addLike(@PathVariable @Positive Long flowerId) {
         return ApiResponse.ok(userLikeService.addLike(flowerId));
     }
 
@@ -56,7 +60,7 @@ public class UserController {
      * 인증 사용자의 꽃 찜을 해제한다.
      */
     @DeleteMapping("/likes/{flowerId}")
-    public ApiResponse<Void> deleteLike(@PathVariable Long flowerId) {
+    public ApiResponse<Void> deleteLike(@PathVariable @Positive Long flowerId) {
         userLikeService.deleteLike(flowerId);
         return ApiResponse.ok(null);
     }

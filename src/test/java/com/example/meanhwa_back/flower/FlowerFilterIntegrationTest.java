@@ -60,4 +60,16 @@ class FlowerFilterIntegrationTest {
                 .andExpect(jsonPath("$.data.scent").doesNotExist())
                 .andExpect(jsonPath("$.data.managementInfo").doesNotExist());
     }
+
+    @Test
+    void nonPositiveFlowerIdsAndTagIdsReturnInvalidRequest() throws Exception {
+        mockMvc.perform(get("/api/v1/flowers/{flowerId}", 0))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errorCode").value("INVALID_REQUEST"));
+
+        mockMvc.perform(get("/api/v1/flowers")
+                        .param("tagIds", "-1"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errorCode").value("INVALID_REQUEST"));
+    }
 }

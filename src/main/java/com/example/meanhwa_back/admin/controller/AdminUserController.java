@@ -8,7 +8,9 @@ import com.example.meanhwa_back.common.response.ApiResponse;
 import com.example.meanhwa_back.common.response.PageResponse;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -24,6 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("/api/v1/admin/users")
+@Validated
 public class AdminUserController {
     private final AdminUserService adminUserService;
 
@@ -51,7 +54,7 @@ public class AdminUserController {
 
     /** 회원 상세 (찜·최근 본 건수 포함). */
     @GetMapping("/{userId}")
-    public ApiResponse<AdminUserDetailResponse> getUser(@PathVariable Long userId) {
+    public ApiResponse<AdminUserDetailResponse> getUser(@PathVariable @Positive Long userId) {
         return ApiResponse.ok(adminUserService.getUser(userId));
     }
 
@@ -61,7 +64,7 @@ public class AdminUserController {
      */
     @PutMapping("/{userId}/role")
     public ApiResponse<AdminUserDetailResponse> updateRole(
-            @PathVariable Long userId,
+            @PathVariable @Positive Long userId,
             @Valid @RequestBody AdminUserRoleUpdateRequest request
     ) {
         return ApiResponse.ok(adminUserService.updateRole(userId, request));

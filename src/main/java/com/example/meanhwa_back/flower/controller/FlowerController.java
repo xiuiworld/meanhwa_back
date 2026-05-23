@@ -1,11 +1,16 @@
 package com.example.meanhwa_back.flower.controller;
 
+import java.util.List;
+
 import com.example.meanhwa_back.common.response.ApiResponse;
 import com.example.meanhwa_back.common.response.PageResponse;
 import com.example.meanhwa_back.flower.dto.FlowerDetailResponse;
 import com.example.meanhwa_back.flower.dto.FlowerSummaryResponse;
 import com.example.meanhwa_back.flower.service.FlowerService;
 
+import jakarta.validation.constraints.Positive;
+
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 /** 꽃 사전 검색·상세 조회 API. */
 @RestController
 @RequestMapping("/api/v1/flowers")
+@Validated
 public class FlowerController {
     private final FlowerService flowerService;
 
@@ -28,7 +34,7 @@ public class FlowerController {
             @RequestParam(required = false) String priceRange,
             @RequestParam(required = false) String isPetSafe,
             @RequestParam(required = false) String managementLevel,
-            @RequestParam(required = false) java.util.List<Long> tagIds,
+            @RequestParam(required = false) List<@Positive Long> tagIds,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size
     ) {
@@ -44,7 +50,7 @@ public class FlowerController {
     }
 
     @GetMapping("/{flowerId}")
-    public ApiResponse<FlowerDetailResponse> getFlower(@PathVariable Long flowerId) {
+    public ApiResponse<FlowerDetailResponse> getFlower(@PathVariable @Positive Long flowerId) {
         return ApiResponse.ok(flowerService.getFlower(flowerId));
     }
 }

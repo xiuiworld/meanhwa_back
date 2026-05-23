@@ -10,7 +10,10 @@ import com.example.meanhwa_back.admin.dto.statistics.StatisticsSummaryResponse;
 import com.example.meanhwa_back.admin.service.AdminStatisticsService;
 import com.example.meanhwa_back.common.response.ApiResponse;
 
+import jakarta.validation.constraints.Positive;
+
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -19,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 /** 관리자 대시보드용 통계·인기 꽃/태그 API. */
 @RestController
 @RequestMapping("/api/v1/admin/statistics")
+@Validated
 public class AdminStatisticsController {
     private final AdminStatisticsService adminStatisticsService;
 
@@ -38,7 +42,7 @@ public class AdminStatisticsController {
     public ApiResponse<List<PopularTagResponse>> getPopularTags(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
-            @RequestParam(required = false) Integer limit
+            @RequestParam(required = false) @Positive Integer limit
     ) {
         return ApiResponse.ok(adminStatisticsService.getPopularTags(
                 from,
@@ -51,7 +55,7 @@ public class AdminStatisticsController {
     public ApiResponse<List<PopularFlowerResponse>> getPopularFlowers(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
-            @RequestParam(required = false) Integer limit
+            @RequestParam(required = false) @Positive Integer limit
     ) {
         return ApiResponse.ok(adminStatisticsService.getPopularFlowers(
                 from,
