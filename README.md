@@ -1,24 +1,21 @@
 # Meanhwa Backend
 
-Meanhwa backend is a Spring Boot REST API for flower dictionary search, six-step curation, message generation, social login, user personalization, admin CMS, action logging, image upload, caching, and deployment.
+꽃 도감, 큐레이션, 메시지 생성, 소셜 로그인, 마이페이지, 관리자 CMS를 제공하는 Spring Boot REST API입니다.
 
 ## Stack
 
-- Java 21
-- Spring Boot 3.5.14
-- Spring Web, Validation, Security, AOP
-- Spring Data JPA
-- MySQL in production, H2 for local/test
-- JWT access/refresh tokens
-- Kakao/Naver OAuth profile verification
-- OpenAI message generation with template fallback
-- Redis cache and rate-limit support
-- AWS S3 image storage support
-- Docker and GitHub Actions
+- Java 21, Gradle 8.14
+- Spring Boot 3.5, Web, Validation, Security, AOP, Actuator
+- Spring Data JPA, Flyway
+- H2(local/test), MySQL(prod)
+- JWT access/refresh token, Kakao/Naver OAuth
+- OpenAI 메시지 생성 + 템플릿 fallback
+- Redis cache/rate limit, AWS S3 image upload
+- Docker, GitHub Actions
 
-## Quick Start
+## Local Run
 
-Use JDK 21.
+기본 profile은 `local`입니다. 로컬은 H2, fake storage, simple cache, memory rate limit을 사용합니다.
 
 ```powershell
 $env:JAVA_HOME='C:\Users\xiuiw\.jdks\corretto-21.0.11'
@@ -26,63 +23,63 @@ $env:Path="$env:JAVA_HOME\bin;$env:Path"
 .\gradlew.bat bootRun
 ```
 
-The default profile is `local`, and the API starts on:
+API base URL:
 
 ```text
-http://localhost:8080
+http://localhost:8080/api/v1
 ```
 
-Run tests and build:
+테스트와 빌드:
 
 ```powershell
-.\gradlew.bat test --rerun-tasks
+.\gradlew.bat test
 .\gradlew.bat bootJar
 ```
 
-CI uses the Linux equivalent:
+MySQL Flyway 검증은 Docker가 켜진 상태에서 실행합니다.
 
-```bash
-./gradlew test bootJar
+```powershell
+$env:ENABLE_MYSQL_FLYWAY_TESTS='true'
+.\gradlew.bat test --tests "*FlywayMysqlMigrationIntegrationTest" --rerun-tasks
 ```
 
 ## Profiles
 
-| Profile | Purpose | Data/storage/cache |
-| --- | --- | --- |
-| `local` | Local development | H2, fake storage, simple cache, in-memory rate limit |
-| `test` | Automated tests | H2 in-memory, `data.sql`, fake storage, simple cache |
-| `prod` | Production runtime | MySQL/RDS, S3, Redis or simple cache, Redis rate limit |
+| Profile | DB | Storage | Cache | Rate limit |
+| --- | --- | --- | --- | --- |
+| `local` | H2 | fake | simple | memory |
+| `test` | H2 in-memory + `data.sql` | fake | simple | memory |
+| `prod` | MySQL + Flyway | S3 | simple/Redis | Redis |
 
-`Dockerfile` runs the application with `SPRING_PROFILES_ACTIVE=prod`.
+`Dockerfile`은 `SPRING_PROFILES_ACTIVE=prod`로 실행합니다.
 
 ## API Areas
 
-All application APIs are under `/api/v1`.
+모든 애플리케이션 API는 `/api/v1` 아래에 있습니다.
 
-| Area | Main paths |
+| Area | Paths |
 | --- | --- |
 | Auth | `/auth/login/{provider}`, `/auth/refresh`, `/auth/logout` |
-| Flower dictionary | `/flowers`, `/flowers/{flowerId}` |
+| Flowers | `/flowers`, `/flowers/{flowerId}` |
 | Tags | `/tags` |
 | Curation | `/curation/results` |
 | Messages | `/messages/generate`, `/users/me/messages` |
 | My page | `/users/me`, `/users/me/likes`, `/users/me/histories`, `/users/me/curation-results` |
-| Admin CMS | `/admin/flowers`, `/admin/tags`, `/admin/uploads/images`, `/admin/users`, `/admin/statistics` |
-| Action logs | `/action-logs/curation-result-click` |
+| Admin | `/admin/flowers`, `/admin/tags`, `/admin/uploads/images`, `/admin/users`, `/admin/statistics` |
+| Logs | `/action-logs/curation-result-click` |
 
-See [docs/api-contract.md](docs/api-contract.md) for the current frontend-facing contract.
+상세 계약은 [docs/api-contract.md](docs/api-contract.md)를 봅니다.
 
-## Documentation
+## Docs
 
-- [docs/api-contract.md](docs/api-contract.md): current API contract
-- [docs/curation-wizard-api.md](docs/curation-wizard-api.md): curation wizard option code table
-- [docs/operations.md](docs/operations.md): environment variables, deployment, admin operations, troubleshooting
-- [docs/database-schema.md](docs/database-schema.md): JPA-backed schema reference
-- [docs/migration/README.md](docs/migration/README.md): one-off production DB migration notes
+- [docs/api-contract.md](docs/api-contract.md): 프론트 연동용 API 계약
+- [docs/curation-wizard-api.md](docs/curation-wizard-api.md): 큐레이션 `flowVersion`, `step`, `code` 표
+- [docs/operations.md](docs/operations.md): 운영 env, 배포, Flyway, 장애 확인
 
-## Production Notes
+DB 스키마의 원본은 JPA 엔티티와 `src/main/resources/db/migration/mysql/V*.sql`입니다. 별도 장문 스키마 문서는 유지하지 않습니다.
 
-- `main` pushes run `.github/workflows/deploy.yml`.
-- Deployment runs `./gradlew test bootJar` before building and pushing the Docker image.
-- The backend container is `meanhwa-server`; Redis is `meanhwa-redis`.
-- Production secrets belong in GitHub Actions Secrets or server environment variables, never in source.
+## Production
+
+- `main` push 시 `.github/workflows/deploy.yml`이 테스트, Flyway MySQL 검증, Docker build/push, EC2 배포를 수행합니다.
+- prod는 `spring.sql.init.mode=never`, `spring.jpa.hibernate.ddl-auto=validate`, `spring.flyway.enabled=true`가 기본입니다.
+- 운영 secret은 GitHub Actions Secrets 또는 서버 env에만 둡니다.

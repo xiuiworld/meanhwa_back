@@ -1,10 +1,10 @@
-# Meanhwa Backend API Contract
+# API Contract
 
-현재 백엔드 코드 기준의 프론트엔드 API 계약입니다. 모든 경로는 `/api/v1` 아래에 있습니다.
+프론트 연동에 필요한 현재 백엔드 계약만 정리합니다. 모든 경로는 `/api/v1` 기준입니다.
 
-## 공통 응답
+## Common
 
-성공:
+성공 응답:
 
 ```json
 {
@@ -14,9 +14,9 @@
 }
 ```
 
-생성/업로드 API는 HTTP `201`과 body `status: 201`을 반환합니다.
+생성/업로드는 HTTP `201`, body `status: 201`입니다. `data`가 `null`이면 응답에서 생략됩니다.
 
-에러:
+에러 응답:
 
 ```json
 {
@@ -26,260 +26,108 @@
 }
 ```
 
-`data`는 `null`이면 응답에서 생략됩니다.
+페이지 응답:
 
-## 인증 규칙
+```json
+{
+  "content": [],
+  "page": 0,
+  "size": 20,
+  "totalElements": 0,
+  "totalPages": 0,
+  "hasNext": false
+}
+```
 
-Bearer 토큰:
+`page`는 0부터 시작합니다. `size` 기본값은 20이고 최대 100으로 제한됩니다.
+
+## Auth
+
+Bearer token:
 
 ```http
 Authorization: Bearer {accessToken}
 ```
 
-Public:
+| Access | Endpoints |
+| --- | --- |
+| Public | `GET /flowers`, `GET /flowers/{flowerId}`, `GET /tags`, `POST /curation/results`, `POST /auth/**`, `POST /action-logs/curation-result-click` |
+| Login | `POST /messages/generate`, `GET /users/**`, `POST /users/**`, `DELETE /users/**` |
+| Admin | `/admin/**` with `ROLE_ADMIN` |
 
-```http
-GET  /flowers
-GET  /flowers/{flowerId}
-GET  /tags
-POST /curation/results
-POST /auth/**
-POST /action-logs/curation-result-click
-```
+`GET /flowers/{flowerId}`, `POST /curation/results`, `POST /action-logs/curation-result-click`는 유효한 Bearer token이 있으면 사용자 ID를 함께 기록하고, 없어도 요청은 허용합니다.
 
-로그인 필요:
-
-```http
-POST   /messages/generate
-GET    /users/me
-GET    /users/me/messages
-GET    /users/me/curation-results
-GET    /users/me/curation-results/latest
-GET    /users/me/curation-results/{resultId}
-GET    /users/me/likes
-POST   /users/me/likes/{flowerId}
-DELETE /users/me/likes/{flowerId}
-GET    /users/me/histories
-DELETE /users/me/histories
-```
-
-관리자 필요:
-
-```http
-/admin/**
-```
-
-관리자 API는 JWT의 권한이 `ROLE_ADMIN`이어야 합니다.
-
-## Enum
+## Enums
 
 ```ts
 type ManagementLevel = "EASY" | "NORMAL" | "HARD";
 type PriceRange = "LOW" | "MEDIUM" | "HIGH" | "PREMIUM";
 type TagCategory =
-  | "EVENT"
-  | "RELATION"
-  | "EMOTION"
-  | "MEANING"
-  | "STYLE"
-  | "CARE"
-  | "SEASON"
-  | "ENVIRONMENT";
+  | "EVENT" | "RELATION" | "EMOTION" | "MEANING"
+  | "STYLE" | "CARE" | "SEASON" | "ENVIRONMENT";
 type Role = "ROLE_USER" | "ROLE_ADMIN";
 type OAuthProvider = "DEV" | "KAKAO" | "NAVER";
 type CurationStepKey =
-  | "OCCASION"
-  | "RECIPIENT"
-  | "EMOTION"
-  | "FLOWER_MEANING"
-  | "SPACE"
-  | "BUDGET";
+  | "OCCASION" | "RECIPIENT" | "EMOTION"
+  | "FLOWER_MEANING" | "SPACE" | "BUDGET";
 ```
 
-큐레이션 위저드의 `code`/`label` 전체 표는 [curation-wizard-api.md](curation-wizard-api.md)를 봅니다.
+큐레이션 code 표는 [curation-wizard-api.md](curation-wizard-api.md)를 봅니다.
 
-## 에러 코드
+## Endpoints
 
-| errorCode | HTTP | 의미 |
-| --- | ---: | --- |
-| `INVALID_REQUEST` | 400 | 요청 body, query, path 값 오류 |
-| `INVALID_PRICE_RANGE` | 400 | 큐레이션 `priceRange` 값 오류 |
-| `INVALID_FLOWER_FILTER` | 400 | 꽃 도감 필터 값 오류 |
-| `INVALID_CURATION_STEP` | 400 | 위저드 step key 오류 |
-| `INVALID_CURATION_SELECTION` | 400 | 위저드 code 또는 분기 조합 오류 |
-| `INCOMPLETE_CURATION_SELECTION` | 400 | 위저드 결과 요청에 6단계 선택 누락 |
-| `UNAUTHORIZED` | 401 | 로그인 필요 |
-| `INVALID_TOKEN` | 401 | 만료, 위조, 폐기, 타입 불일치 토큰 |
-| `INVALID_OAUTH_TOKEN` | 401 | Kakao/Naver 토큰 검증 실패 |
-| `FORBIDDEN` | 403 | 권한 부족 |
-| `FLOWER_NOT_FOUND` | 404 | 꽃/식물 없음 또는 soft delete |
-| `TAG_NOT_FOUND` | 404 | 태그 없음 또는 soft delete |
-| `RESOURCE_NOT_FOUND` | 404 | 요청 경로에 매핑된 API 없음 |
-| `USER_NOT_FOUND` | 404 | 회원 없음 |
-| `CURATION_RESULT_NOT_FOUND` | 404 | 내 큐레이션 결과 없음 또는 소유자 불일치 |
-| `CURATION_FLOW_NOT_FOUND` | 404 | 알 수 없는 `flowVersion` |
-| `DUPLICATE_TAG` | 409 | 활성 태그 중복 |
-| `INVALID_MAPPING` | 400 | 꽃-태그 매핑 요청 오류 |
-| `INVALID_FILE_TYPE` | 400 | jpeg/png/webp가 아닌 이미지 |
-| `FILE_TOO_LARGE` | 400 | 업로드 제한 초과 |
-| `UPLOAD_FAILED` | 500 | 스토리지 업로드 실패 |
-| `UNSUPPORTED_OAUTH_PROVIDER` | 400 | 지원하지 않는 provider 또는 prod dev login |
-| `CANNOT_CHANGE_OWN_ROLE` | 400 | 관리자가 자기 권한 변경 시도 |
-| `LAST_ADMIN_CANNOT_BE_DEMOTED` | 400 | 마지막 관리자 강등 시도 |
-| `MESSAGE_GENERATION_RATE_LIMIT_EXCEEDED` | 429 | 메시지 생성 quota 초과 |
-| `INTERNAL_SERVER_ERROR` | 500 | 서버 내부 오류 |
+### Auth
 
-## Auth
-
-### POST `/auth/login/{provider}`
-
-`provider`: `kakao`, `naver`
-
-Request:
-
-```json
-{
-  "accessToken": "{providerAccessToken}"
-}
-```
-
-Response `data`:
-
-```json
-{
-  "accessToken": "{meanhwaAccessToken}",
-  "refreshToken": "{meanhwaRefreshToken}",
-  "tokenType": "Bearer",
-  "expiresInSeconds": 1800
-}
-```
-
-### POST `/auth/login/dev`
-
-Local/test 개발용 로그인입니다. `prod` profile에서는 거부됩니다.
-
-```json
-{
-  "oauthId": "dev-user-1",
-  "email": "dev@example.com",
-  "nickname": "민화유저",
-  "role": "ROLE_USER"
-}
-```
-
-### POST `/auth/refresh`
-
-Refresh token은 성공 시 회전되고 기존 토큰은 폐기됩니다.
-
-```json
-{
-  "refreshToken": "{refreshToken}"
-}
-```
-
-### POST `/auth/logout`
-
-```json
-{
-  "refreshToken": "{refreshToken}"
-}
-```
-
-성공 시 `data` 없이 공통 성공 응답을 반환합니다.
-
-## Flower Dictionary
-
-### GET `/flowers`
-
-Query:
-
-| Name | Type | Default | 설명 |
+| Method | Path | Body | Data |
 | --- | --- | --- | --- |
-| `keyword` | string | null | `name`, `coreMeaning`, `description` 검색 |
-| `priceRange` | enum | null | `LOW`, `MEDIUM`, `HIGH`, `PREMIUM` |
-| `isPetSafe` | boolean string | null | `true`, `false`; 생략 시 전체 |
-| `managementLevel` | enum | null | `EASY`, `NORMAL`, `HARD` |
-| `tagIds` | number[] | empty | 반복 query. 여러 개면 AND 조건 |
-| `page` | number | 0 | zero-based |
-| `size` | number | 20 | page size |
+| `POST` | `/auth/login/kakao` | `{ "accessToken": string }` | `TokenResponse` |
+| `POST` | `/auth/login/naver` | `{ "accessToken": string }` | `TokenResponse` |
+| `POST` | `/auth/login/dev` | `{ "oauthId": string, "email"?: string, "nickname"?: string, "role"?: Role }` | `TokenResponse` |
+| `POST` | `/auth/refresh` | `{ "refreshToken": string }` | `TokenResponse` |
+| `POST` | `/auth/logout` | `{ "refreshToken": string }` | none |
 
-Response `data`:
+`/auth/login/dev`는 local/test용이며 prod에서는 거부됩니다. Refresh 성공 시 기존 refresh token은 폐기되고 새 token pair가 발급됩니다.
 
-```json
+`TokenResponse`:
+
+```ts
 {
-  "content": [
-    {
-      "id": 1,
-      "name": "장미",
-      "imageUrl": "https://cdn.meanhwa.example/flowers/rose.jpg",
-      "coreMeaning": "사랑과 열정",
-      "description": "선명한 색과 풍성한 꽃잎으로 마음을 직접적으로 전하기 좋은 대표적인 꽃입니다.",
-      "managementLevel": "NORMAL",
-      "isPetSafe": true,
-      "priceRange": "MEDIUM"
-    }
-  ],
-  "page": 0,
-  "size": 20,
-  "totalElements": 20,
-  "totalPages": 1,
-  "hasNext": false
+  accessToken: string;
+  refreshToken: string;
+  tokenType: "Bearer";
+  expiresInSeconds: number;
 }
 ```
 
-`keyword`가 있으면 `DICTIONARY_SEARCH` 로그가 기록됩니다. 꽃 목록 cache key에는 모든 필터, 정렬된 `tagIds`, `page`, `size`가 포함됩니다.
+### Flowers
 
-### GET `/flowers/{flowerId}`
+| Method | Path | Query | Data |
+| --- | --- | --- | --- |
+| `GET` | `/flowers` | `keyword`, `priceRange`, `isPetSafe`, `managementLevel`, `tagIds`, `page`, `size` | `PageResponse<FlowerSummary>` |
+| `GET` | `/flowers/{flowerId}` | - | `FlowerDetail` |
 
-Response `data`:
+`tagIds`는 반복 query입니다. 여러 개면 AND 조건으로 검색합니다.
 
-```json
-{
-  "id": 1,
-  "name": "장미",
-  "imageUrl": "https://cdn.meanhwa.example/flowers/rose.jpg",
-  "coreMeaning": "사랑과 열정",
-  "description": "선명한 색과 풍성한 꽃잎으로 마음을 직접적으로 전하기 좋은 대표적인 꽃입니다.",
-  "managementLevel": "NORMAL",
-  "isPetSafe": true,
-  "priceRange": "MEDIUM",
-  "tags": [
-    {
-      "id": 5,
-      "category": "RELATION",
-      "name": "연인"
-    }
-  ]
-}
+`FlowerSummary` fields:
+
+```ts
+id, name, imageUrl, coreMeaning, description,
+managementLevel, isPetSafe, priceRange
 ```
 
-항상 `FLOWER_DETAIL_VIEW` 로그를 기록합니다. 유효한 Bearer 토큰이 있으면 사용자 최근 본 식물도 저장합니다.
+`FlowerDetail`은 `FlowerSummary`에 `tags: { id, category, name }[]`가 추가됩니다.
 
-## Tags
+### Tags
 
-### GET `/tags`
+| Method | Path | Data |
+| --- | --- | --- |
+| `GET` | `/tags` | `{ category: TagCategory, tags: { id: number, name: string }[] }[]` |
 
-카테고리별 활성 태그를 반환합니다.
+### Curation
 
-```json
-[
-  {
-    "category": "EVENT",
-    "tags": [
-      {
-        "id": 1,
-        "name": "생일"
-      }
-    ]
-  }
-]
-```
-
-## Curation
-
-### POST `/curation/results`
-
-인증은 optional입니다. 프론트는 로컬 큐레이션 플로우에서 고른 `{ step, code }`를 전송합니다. 유효한 Bearer 토큰이 있으면 결과 snapshot을 사용자 이력으로 저장하고, 익명 요청은 저장하지 않습니다.
+| Method | Path | Auth | Data |
+| --- | --- | --- | --- |
+| `POST` | `/curation/results` | optional | `CurationResultsResponse` |
 
 Request:
 
@@ -299,55 +147,35 @@ Request:
 }
 ```
 
-규칙:
+Rules:
 
 - 정확히 6개 step이 필요합니다.
-- 순서는 무관하지만 step 중복은 허용하지 않습니다.
-- Step 1-5 `code`는 tag scoring에 사용됩니다.
-- Step 6 `BUDGET_*`는 `PriceRange` 필터로만 사용됩니다.
-- 정렬은 `score` desc, `name` asc입니다.
+- Step 중복은 허용하지 않습니다.
+- Step 1-5 code는 tag scoring에 사용합니다.
+- Step 6 `BUDGET_*`는 `PriceRange` 필터로만 사용합니다.
+- 정렬은 `score desc`, `name asc`입니다.
+- 로그인 요청이면 결과 snapshot을 저장하고 `curationResultId`를 반환합니다.
+- 익명 요청이면 저장하지 않고 `curationResultId`는 `null`입니다.
 
-Response `data`:
+`CurationResultsResponse` fields:
 
-```json
-{
-  "content": [
-    {
-      "flowerId": 1,
-      "name": "장미",
-      "imageUrl": "https://cdn.meanhwa.example/flowers/rose.jpg",
-      "coreMeaning": "사랑과 열정",
-      "priceRange": "MEDIUM",
-      "isPetSafe": true,
-      "score": 10,
-      "recommendationReason": "연인 조건과 잘 맞고 5~10만원 예산대에 어울리는 추천입니다.",
-      "matchedTags": [
-        {
-          "id": 5,
-          "category": "RELATION",
-          "name": "연인"
-        }
-      ]
-    }
-  ],
-  "page": 0,
-  "size": 20,
-  "totalElements": 1,
-  "totalPages": 1,
-  "hasNext": false,
-  "curationResultId": 12
-}
+```ts
+content: {
+  flowerId, name, imageUrl, coreMeaning, priceRange,
+  isPetSafe, score, recommendationReason,
+  matchedTags: { id, category, name }[]
+}[];
+page, size, totalElements, totalPages, hasNext, curationResultId
 ```
 
-로그인 사용자로 저장에 성공하면 `curationResultId`는 저장된 결과 ID입니다. 익명 요청이면 저장하지 않으며 `curationResultId`는 `null`입니다.
+### Messages
 
-## Messages
+| Method | Path | Auth | Data |
+| --- | --- | --- | --- |
+| `POST` | `/messages/generate` | login | `MessageGenerateResponse` |
+| `GET` | `/users/me/messages` | login | `PageResponse<MessageGenerateResponse>` |
 
-### POST `/messages/generate`
-
-로그인 필요. 사용자별 rate limit 기본값은 1시간 10회입니다.
-
-Request:
+Generate request:
 
 ```json
 {
@@ -359,127 +187,39 @@ Request:
 }
 ```
 
-`curationResultId`는 optional이며, 전달하면 현재 로그인 사용자의 결과여야 합니다.
+`selectedTagIds`와 `curationResultId`는 optional입니다. `senderName`, `receiverName`은 최대 30자입니다. 사용자별 메시지 생성 기본 제한은 1시간 10회입니다.
 
-Response `data`:
+`MessageGenerateResponse` fields:
 
-```json
-{
-  "id": 101,
-  "flowerId": 1,
-  "flowerName": "장미",
-  "flowerImageUrl": "https://cdn.meanhwa.example/flowers/rose.jpg",
-  "coreMeaning": "사랑과 열정",
-  "selectedTags": [
-    {
-      "id": 5,
-      "category": "RELATION",
-      "name": "연인"
-    }
-  ],
-  "curationResultId": 12,
-  "senderName": "민수",
-  "receiverName": "지은",
-  "message": "지은님께...",
-  "createdAt": "2026-05-22T14:30:00"
-}
+```ts
+id, flowerId, flowerName, flowerImageUrl, coreMeaning,
+selectedTags, curationResultId, senderName, receiverName,
+createdAt, message
 ```
 
-`OPENAI_API_KEY`가 있으면 OpenAI를 먼저 시도합니다. 키 없음, timeout, non-2xx, 응답 파싱 실패, client exception은 template fallback으로 성공 처리됩니다. 성공한 생성 결과는 fallback 여부와 관계없이 저장됩니다.
+OpenAI 호출 실패 또는 키 없음은 사용자 API 실패로 전파하지 않고 템플릿 fallback으로 저장합니다.
 
-### GET `/users/me/messages`
+### My Page
 
-로그인 사용자의 메시지 이력을 최신순으로 반환합니다.
+| Method | Path | Data |
+| --- | --- | --- |
+| `GET` | `/users/me` | `{ id, provider, oauthId, email, nickname, role }` |
+| `GET` | `/users/me/likes` | `FlowerSummary[]` |
+| `POST` | `/users/me/likes/{flowerId}` | `FlowerSummary` |
+| `DELETE` | `/users/me/likes/{flowerId}` | none |
+| `GET` | `/users/me/histories` | `FlowerSummary[]` |
+| `DELETE` | `/users/me/histories` | none |
+| `GET` | `/users/me/curation-results` | `PageResponse<CurationResultSummary>` |
+| `GET` | `/users/me/curation-results/latest` | `CurationResultDetail` |
+| `GET` | `/users/me/curation-results/{resultId}` | `CurationResultDetail` |
 
-Query: `page=0`, `size=20` 기본값. `size`는 100으로 cap 됩니다.
+최근 본 식물은 인증 사용자의 꽃 상세 조회 때 저장됩니다. 같은 꽃은 `viewedAt`만 갱신하고 최대 50개를 유지합니다.
 
-## My Page
+### Action Logs
 
-### GET `/users/me`
-
-Response `data`:
-
-```json
-{
-  "id": 1,
-  "provider": "KAKAO",
-  "oauthId": "123456789",
-  "email": "user@example.com",
-  "nickname": "민화유저",
-  "role": "ROLE_USER"
-}
-```
-
-### Likes
-
-```http
-GET    /users/me/likes
-POST   /users/me/likes/{flowerId}
-DELETE /users/me/likes/{flowerId}
-```
-
-Likes are idempotent and scoped to the current user. List responses are arrays of `FlowerSummaryResponse`.
-
-### Histories
-
-```http
-GET    /users/me/histories
-DELETE /users/me/histories
-```
-
-Authenticated flower detail views update history. The same flower is deduplicated by updating `viewedAt`, and histories are capped at 50.
-
-### Saved curation results
-
-```http
-GET /users/me/curation-results
-GET /users/me/curation-results/latest
-GET /users/me/curation-results/{resultId}
-```
-
-List response item:
-
-```json
-{
-  "id": 12,
-  "flowVersion": "2026-05-v1",
-  "selections": [
-    { "step": "OCCASION", "code": "BIRTHDAY", "label": "생일" }
-  ],
-  "topFlowers": [
-    {
-      "rank": 1,
-      "flowerId": 1,
-      "name": "장미",
-      "imageUrl": "https://cdn.meanhwa.example/flowers/rose.jpg",
-      "coreMeaning": "사랑과 열정"
-    }
-  ],
-  "resultCount": 20,
-  "createdAt": "2026-05-22T14:00:00"
-}
-```
-
-`latest`와 `{resultId}`는 저장된 `recommendations` snapshot 전체를 반환합니다. 소유자가 다르면 `CURATION_RESULT_NOT_FOUND`입니다.
-
-## Action Logs
-
-서버 자동 로그는 성공 응답 후 best-effort로 저장됩니다.
-
-| ActionType | Trigger |
-| --- | --- |
-| `CURATION_START` | `POST /curation/results` |
-| `DICTIONARY_SEARCH` | `GET /flowers?keyword=...` |
-| `FLOWER_DETAIL_VIEW` | `GET /flowers/{flowerId}` |
-| `ADMIN_USER_ROLE_CHANGE` | `PUT /admin/users/{userId}/role` |
-
-프론트 클릭 로그:
-
-```http
-POST /action-logs/curation-result-click
-```
-
-Request:
+| Method | Path | Auth | Body |
+| --- | --- | --- | --- |
+| `POST` | `/action-logs/curation-result-click` | optional | `CurationResultClickRequest` |
 
 ```json
 {
@@ -495,142 +235,89 @@ Request:
 }
 ```
 
-인증은 optional입니다. 유효한 Bearer 토큰이 있으면 `userId`가 저장되고, 없으면 anonymous 로그로 저장됩니다.
+서버 자동 로그:
 
-## Admin
+| ActionType | Trigger |
+| --- | --- |
+| `CURATION_START` | `POST /curation/results` |
+| `DICTIONARY_SEARCH` | `GET /flowers?keyword=...` |
+| `FLOWER_DETAIL_VIEW` | `GET /flowers/{flowerId}` |
+| `ADMIN_USER_ROLE_CHANGE` | `PUT /admin/users/{userId}/role` |
+
+### Admin
 
 모든 admin endpoint는 `ROLE_ADMIN`이 필요합니다.
 
-### Flowers
+| Method | Path | Body/Query | Data |
+| --- | --- | --- | --- |
+| `POST` | `/admin/flowers` | `AdminFlowerRequest` | `AdminFlowerDetail` |
+| `GET` | `/admin/flowers/{flowerId}` | - | `AdminFlowerDetail` |
+| `PUT` | `/admin/flowers/{flowerId}` | `AdminFlowerRequest` | `AdminFlowerDetail` |
+| `DELETE` | `/admin/flowers/{flowerId}` | - | none |
+| `PUT` | `/admin/flowers/{flowerId}/tags` | `{ "tags": [{ "tagId": number, "weight": 1..5 }] }` | `AdminFlowerDetail` |
+| `POST` | `/admin/tags` | `{ "category": TagCategory, "name": string }` | `AdminTag` |
+| `PUT` | `/admin/tags/{tagId}` | `{ "category": TagCategory, "name": string }` | `AdminTag` |
+| `DELETE` | `/admin/tags/{tagId}` | - | none |
+| `POST` | `/admin/uploads/images` | multipart `file` | `ImageUploadResponse` |
+| `GET` | `/admin/users` | `keyword`, `provider`, `role`, `page`, `size` | `PageResponse<AdminUserSummary>` |
+| `GET` | `/admin/users/{userId}` | - | `AdminUserDetail` |
+| `PUT` | `/admin/users/{userId}/role` | `{ "role": Role }` | `AdminUserDetail` |
+| `GET` | `/admin/statistics/summary` | `from`, `to` | `StatisticsSummary` |
+| `GET` | `/admin/statistics/popular-tags` | `from`, `to`, `limit` | `PopularTag[]` |
+| `GET` | `/admin/statistics/popular-flowers` | `from`, `to`, `limit` | `PopularFlower[]` |
+| `GET` | `/admin/statistics/daily-active-users` | `from`, `to` | `DailyActiveUser[]` |
 
-```http
-POST   /admin/flowers
-GET    /admin/flowers/{flowerId}
-PUT    /admin/flowers/{flowerId}
-DELETE /admin/flowers/{flowerId}
-PUT    /admin/flowers/{flowerId}/tags
-```
-
-Create/update request:
+`AdminFlowerRequest`:
 
 ```json
 {
-  "name": "관리자테스트꽃",
-  "imageUrl": "https://cdn.meanhwa.example/admin-test.jpg",
-  "coreMeaning": "처음 의미",
-  "description": "꽃 상세정보 문구",
+  "name": "꽃 이름",
+  "imageUrl": "https://...",
+  "coreMeaning": "대표 의미",
+  "description": "상세 설명",
   "managementLevel": "EASY",
   "isToxicToPets": false,
   "priceRange": "LOW"
 }
 ```
 
-`POST /admin/flowers`는 HTTP `201`입니다. 삭제는 soft delete입니다. 관리자 생성/수정/삭제 시 `created_by`, `updated_by`가 기록됩니다.
+Admin rules:
 
-Replace mappings:
-
-```json
-{
-  "tags": [
-    {
-      "tagId": 1,
-      "weight": 5
-    }
-  ]
-}
-```
-
-`weight`는 1-5입니다. 요청은 기존 매핑 전체를 교체합니다.
-
-### Tags
-
-```http
-POST   /admin/tags
-PUT    /admin/tags/{tagId}
-DELETE /admin/tags/{tagId}
-```
-
-Request:
-
-```json
-{
-  "category": "EVENT",
-  "name": "기념일"
-}
-```
-
-`POST /admin/tags`는 HTTP `201`입니다. Admin tag API는 `code`를 받지 않습니다. 위저드용 `tags.code`는 로컬 `data.sql`과 Flyway `V2__seed_curation_reference_data.sql`로 관리합니다.
-
-### Uploads
-
-```http
-POST /admin/uploads/images
-Content-Type: multipart/form-data
-```
-
-Field: `file`
-
-허용 content type: `image/jpeg`, `image/png`, `image/webp`
-
-기본 최대 크기: 5 MB
-
-성공 응답: HTTP `201`
-
-### Users
-
-```http
-GET /admin/users?keyword=&provider=&role=&page=0&size=20
-GET /admin/users/{userId}
-PUT /admin/users/{userId}/role
-```
-
-Role update request:
-
-```json
-{
-  "role": "ROLE_ADMIN"
-}
-```
-
-규칙:
-
+- 꽃/태그 삭제는 soft delete입니다.
+- 꽃-태그 매핑 수정은 기존 매핑 전체 교체입니다.
+- Admin tag API는 `code`를 받지 않습니다. 위저드용 `tags.code`는 seed/Flyway로 관리합니다.
 - 본인 role은 변경할 수 없습니다.
-- 마지막 남은 `ROLE_ADMIN`은 `ROLE_USER`로 내릴 수 없습니다.
-- 변경 후 대상 사용자는 다시 로그인해야 새 JWT에 role이 반영됩니다.
+- 마지막 `ROLE_ADMIN`은 강등할 수 없습니다.
+- role 변경 후 대상 사용자는 다시 로그인해야 새 JWT에 반영됩니다.
+- 이미지 업로드 허용 타입은 `image/jpeg`, `image/png`, `image/webp`이고 기본 최대 크기는 5 MB입니다.
 
-### Statistics
+## Error Codes
 
-```http
-GET /admin/statistics/summary
-GET /admin/statistics/popular-tags
-GET /admin/statistics/popular-flowers
-GET /admin/statistics/daily-active-users
-```
-
-Query:
-
-| Param | Format | Default |
-| --- | --- | --- |
-| `from` | `yyyy-MM-dd` | `to` 기준 29일 전 |
-| `to` | `yyyy-MM-dd` | 오늘 |
-| `limit` | number | 10, max 100 for popular APIs |
-
-## Cache and Rate Limit
-
-Cached endpoints:
-
-```http
-GET /flowers
-GET /tags
-```
-
-Admin flower/tag mutations evict related caches. Local/test use simple cache. Prod can use Redis through `CACHE_TYPE=redis`.
-
-Message generation rate limit:
-
-| Setting | Default |
-| --- | --- |
-| `app.message.rate-limit.enabled` | `true` |
-| `app.message.rate-limit.max-requests` | `10` |
-| `app.message.rate-limit.window` | `1h` |
-| `app.message.rate-limit.store` | `memory` local/test, `redis` prod |
+| Code | HTTP |
+| --- | ---: |
+| `INVALID_REQUEST` | 400 |
+| `INVALID_PRICE_RANGE` | 400 |
+| `INVALID_FLOWER_FILTER` | 400 |
+| `INVALID_CURATION_STEP` | 400 |
+| `INVALID_CURATION_SELECTION` | 400 |
+| `INCOMPLETE_CURATION_SELECTION` | 400 |
+| `UNSUPPORTED_OAUTH_PROVIDER` | 400 |
+| `INVALID_MAPPING` | 400 |
+| `INVALID_FILE_TYPE` | 400 |
+| `FILE_TOO_LARGE` | 400 |
+| `CANNOT_CHANGE_OWN_ROLE` | 400 |
+| `LAST_ADMIN_CANNOT_BE_DEMOTED` | 400 |
+| `UNAUTHORIZED` | 401 |
+| `INVALID_TOKEN` | 401 |
+| `INVALID_OAUTH_TOKEN` | 401 |
+| `FORBIDDEN` | 403 |
+| `FLOWER_NOT_FOUND` | 404 |
+| `TAG_NOT_FOUND` | 404 |
+| `USER_NOT_FOUND` | 404 |
+| `CURATION_RESULT_NOT_FOUND` | 404 |
+| `CURATION_FLOW_NOT_FOUND` | 404 |
+| `RESOURCE_NOT_FOUND` | 404 |
+| `DUPLICATE_TAG` | 409 |
+| `MESSAGE_GENERATION_RATE_LIMIT_EXCEEDED` | 429 |
+| `UPLOAD_FAILED` | 500 |
+| `INTERNAL_SERVER_ERROR` | 500 |
