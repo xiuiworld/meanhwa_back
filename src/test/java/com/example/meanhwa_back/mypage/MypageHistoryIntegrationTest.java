@@ -54,6 +54,14 @@ class MypageHistoryIntegrationTest {
                 .andExpect(jsonPath("$.data.selections[0].label").value("생일"))
                 .andExpect(jsonPath("$.data.recommendations[0].rank").value(1));
 
+        mockMvc.perform(get("/api/v1/users/me/curation-results")
+                        .header("Authorization", bearer(token)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.content[0].id").value(resultId))
+                .andExpect(jsonPath("$.data.content[0].topFlowers", hasSize(4)))
+                .andExpect(jsonPath("$.data.content[0].topFlowers[3].rank").value(4))
+                .andExpect(jsonPath("$.data.content[0].resultCount", greaterThan(3)));
+
         mockMvc.perform(get("/api/v1/users/me/curation-results"))
                 .andExpect(status().isUnauthorized());
 

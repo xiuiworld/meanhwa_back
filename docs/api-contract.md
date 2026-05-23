@@ -215,6 +215,17 @@ OpenAI 호출 실패 또는 키 없음은 사용자 API 실패로 전파하지 �
 
 최근 본 식물은 인증 사용자의 꽃 상세 조회 때 저장됩니다. 같은 꽃은 `viewedAt`만 갱신하고 최대 50개를 유지합니다.
 
+`CurationResultSummary` fields:
+
+```ts
+id, flowVersion,
+selections: { step, code, label }[],
+topFlowers: { rank, flowerId, name, imageUrl, coreMeaning }[], // up to 4
+resultCount, createdAt
+```
+
+`topFlowers`는 저장된 추천 스냅샷의 앞 4개까지 내려줍니다. 저장된 `recommendations` 자체가 4개보다 적으면 저장된 개수만 반환합니다. 전체 저장 추천 목록이 필요하면 `/users/me/curation-results/{resultId}`의 `recommendations`를 사용합니다.
+
 ### Action Logs
 
 | Method | Path | Auth | Body |

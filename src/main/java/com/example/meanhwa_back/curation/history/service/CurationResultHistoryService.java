@@ -34,6 +34,7 @@ public class CurationResultHistoryService {
     private static final TypeReference<List<CurationRecommendationSnapshot>> RECOMMENDATION_LIST_TYPE =
             new TypeReference<>() {
             };
+    private static final int SUMMARY_TOP_FLOWER_LIMIT = 4;
 
     private final UserCurationResultRepository curationResultRepository;
     private final AuthenticatedUserProvider authenticatedUserProvider;
@@ -109,7 +110,7 @@ public class CurationResultHistoryService {
     private CurationResultSummaryResponse toSummaryResponse(UserCurationResult result) {
         List<CurationRecommendationSnapshot> recommendations = parseRecommendations(result);
         List<CurationTopFlowerResponse> topFlowers = recommendations.stream()
-                .limit(3)
+                .limit(SUMMARY_TOP_FLOWER_LIMIT)
                 .map(CurationTopFlowerResponse::from)
                 .toList();
         return new CurationResultSummaryResponse(
