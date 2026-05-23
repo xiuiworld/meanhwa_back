@@ -35,6 +35,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 /**
  * 주요 API 흐름을 test profile과 MockMvc로 검증하는 애플리케이션 통합 테스트.
  * 인증, 꽃, 큐레이션, 관리자, 업로드 기능이 같은 컨텍스트에서 함께 동작하는지 확인한다.

@@ -26,6 +26,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 /**
  * OAuth와 OpenAI 외부 연동을 로컬 HTTP 서버로 대체해 검증하는 통합 테스트.
  * 성공, 실패, fallback 흐름을 실제 네트워크 없이 재현한다.

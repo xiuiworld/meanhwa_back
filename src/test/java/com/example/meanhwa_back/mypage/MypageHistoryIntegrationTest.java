@@ -18,6 +18,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 /**
  * 마이페이지 최근 본 꽃 이력 API를 검증하는 통합 테스트.
  * 인증 사용자별 이력 저장, 조회, 삭제 흐름이 서로 격리되는지 확인한다.

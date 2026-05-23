@@ -1,4 +1,5 @@
 package com.example.meanhwa_back.common.error;
+
 /**
  * API 오류 응답의 공통 JSON 형태.
  * 상태 코드, 내부 오류 코드, 사용자 메시지를 일관된 필드명으로 전달한다.

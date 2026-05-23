@@ -3,6 +3,7 @@ package com.example.meanhwa_back.admin.dto;
 import com.example.meanhwa_back.flower.domain.FlowerTagMapping;
 import com.example.meanhwa_back.tag.domain.Tag;
 import com.example.meanhwa_back.tag.domain.TagCategory;
+
 /**
  * 관리자 꽃 상세에서 특정 꽃에 연결된 태그와 가중치를 표현하는 응답 DTO.
  * 프론트가 매핑 편집 UI를 복원할 수 있도록 태그 식별자와 표시 정보를 함께 담는다.

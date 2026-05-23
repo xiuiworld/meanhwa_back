@@ -5,6 +5,7 @@ import java.util.List;
 import com.example.meanhwa_back.flower.domain.Flower;
 import com.example.meanhwa_back.flower.domain.PriceRange;
 import com.example.meanhwa_back.flower.dto.TagSummaryResponse;
+
 /**
  * 큐레이션 결과 목록에 표시할 추천 꽃 응답 DTO.
  * 추천 점수, 추천 사유, 매칭 태그를 함께 담아 결과 화면의 설명력을 높인다.
