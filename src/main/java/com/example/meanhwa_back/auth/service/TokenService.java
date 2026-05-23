@@ -54,7 +54,7 @@ public class TokenService {
     public TokenResponse refresh(String refreshTokenValue) {
         validateRefreshJwt(refreshTokenValue);
 
-        RefreshToken refreshToken = refreshTokenRepository.findByTokenHash(tokenHashService.hash(refreshTokenValue))
+        RefreshToken refreshToken = refreshTokenRepository.findByTokenHashForUpdate(tokenHashService.hash(refreshTokenValue))
                 .orElseThrow(() -> new BusinessException(ErrorCode.INVALID_TOKEN));
         LocalDateTime now = LocalDateTime.now();
         if (!refreshToken.isActive(now)) {
@@ -72,7 +72,7 @@ public class TokenService {
     public void logout(String refreshTokenValue) {
         validateRefreshJwt(refreshTokenValue);
 
-        refreshTokenRepository.findByTokenHash(tokenHashService.hash(refreshTokenValue))
+        refreshTokenRepository.findByTokenHashForUpdate(tokenHashService.hash(refreshTokenValue))
                 .filter(refreshToken -> refreshToken.isActive(LocalDateTime.now()))
                 .ifPresent(refreshToken -> refreshToken.revoke(LocalDateTime.now()));
     }
