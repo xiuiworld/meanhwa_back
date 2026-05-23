@@ -5,6 +5,8 @@
 분기형 큐레이션(6단계 위저드)이 `tags.code`로 태그를 찾습니다.  
 Flyway 도입 이전 운영 RDS에는 `data.sql`이 자동 실행되지 않았으므로(`spring.sql.init.mode: never`) 아래 SQL을 **배포 전 또는 직후** 수동 적용했습니다.
 
+현재는 같은 역할을 `src/main/resources/db/migration/mysql/V2__seed_curation_reference_data.sql`이 수행합니다. 신규 환경이나 Flyway 편입 이후 운영 변경에는 이 디렉터리의 SQL을 다시 적용하지 않습니다.
+
 ## 파일
 
 | 파일 | 용도 |

@@ -639,7 +639,7 @@ Request:
 }
 ```
 
-`POST /admin/tags`는 HTTP `201`입니다. Admin tag API는 `code`를 받지 않습니다. 위저드용 `tags.code`는 seed/migration으로 관리합니다.
+`POST /admin/tags`는 HTTP `201`입니다. Admin tag API는 `code`를 받지 않습니다. 위저드용 `tags.code`는 로컬 `data.sql`과 Flyway `V2__seed_curation_reference_data.sql`로 관리합니다.
 
 ### Uploads
 

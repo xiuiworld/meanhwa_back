@@ -36,9 +36,19 @@ ORDER BY installed_rank;
 
 기대 결과:
 
-- 기존 운영 DB: baseline version `1` 기록이 있음
-- 신규 빈 DB: `V1__baseline_current_schema.sql` 성공 기록이 있음
+- 기존 운영 DB 최초 편입 배포: baseline version `1` 기록이 있음. 이후 배포에서는 `FLYWAY_BASELINE_ON_MIGRATE=false` 상태로 기동함
+- 신규 빈 DB: `V1__baseline_current_schema.sql`, `V2__seed_curation_reference_data.sql` 성공 기록이 있음
+- `tags`에 `WINDOW_BRIGHT` 등 위저드용 code가 active 상태로 존재함
 - 앱 로그에 Hibernate schema validation 실패가 없음
+
+확인 SQL:
+
+```sql
+SELECT code, name
+FROM tags
+WHERE code IN ('BIRTHDAY', 'FAMILY', 'WINDOW_BRIGHT', 'LOVE_1')
+  AND deleted_at IS NULL;
+```
 
 ## 3. Kakao/Naver Login
 

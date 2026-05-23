@@ -47,10 +47,14 @@ class CurationWizardCatalogConsistencyTest {
         assertThat(expectedLabelsByCode).hasSize(60);
         assertMeaningLabelsPresent(expectedLabelsByCode, read("src/main/resources/data.sql"),
                 "data.sql", (code, label) -> "'MEANING', '" + label + "', '" + code + "'");
+        assertMeaningLabelsPresent(expectedLabelsByCode,
+                read("src/main/resources/db/migration/mysql/V2__seed_curation_reference_data.sql"),
+                "flyway reference data migration", (code, label) -> "'MEANING', '" + label + "', '" + code + "'");
         assertMeaningLabelsPresent(expectedLabelsByCode, read("docs/migration/2026-05-curation-wizard-prod.sql"),
                 "production migration", (code, label) -> "'MEANING', '" + label + "', '" + code + "'");
         assertMeaningLabelsPresent(expectedLabelsByCode, read("docs/curation-wizard-api.md"),
-                "curation wizard docs", (code, label) -> "| `" + code + "` | " + label + " |");
+                "curation wizard docs",
+                (code, label) -> "| `" + emotionCode(code) + "` | `" + code + "` | " + label + " |");
     }
 
     private static Map<String, String> expectedFlowerMeaningLabelsByCode() {
@@ -81,5 +85,9 @@ class CurationWizardCatalogConsistencyTest {
 
     private static String read(String relativePath) throws IOException {
         return Files.readString(ROOT.resolve(relativePath));
+    }
+
+    private static String emotionCode(String meaningCode) {
+        return meaningCode.substring(0, meaningCode.lastIndexOf('_'));
     }
 }

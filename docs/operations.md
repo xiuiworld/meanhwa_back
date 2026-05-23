@@ -48,7 +48,7 @@ Optional runtime settings:
 | `STORAGE_MAX_FILE_SIZE_BYTES` | `5242880` |
 | `JPA_DDL_AUTO` | `validate` |
 | `FLYWAY_ENABLED` | `true` |
-| `FLYWAY_BASELINE_ON_MIGRATE` | `true` |
+| `FLYWAY_BASELINE_ON_MIGRATE` | `false` |
 | `CACHE_TTL_MILLIS` | `300000` |
 
 Local/test는 H2, fake storage, simple cache, in-memory message rate limit을 사용합니다. Prod는 MySQL/RDS, S3, Redis를 사용합니다.
@@ -74,9 +74,11 @@ EC2 private key
 
 1. RDS snapshot 또는 `mysqldump`로 운영 DB를 백업합니다.
 2. 가능하면 staging 또는 운영 DB clone에서 같은 image/env로 먼저 기동합니다.
-3. `flyway_schema_history` 생성 또는 baseline 기록을 확인합니다.
-4. `JPA_DDL_AUTO=validate` 상태에서 Hibernate schema validation 실패가 없는지 확인합니다.
-5. Flyway/validate 실패 시 `JPA_DDL_AUTO=update`로 우회하지 말고 누락된 migration을 보완합니다.
+3. 기존 DB를 처음 Flyway에 편입하는 배포에서만 `FLYWAY_BASELINE_ON_MIGRATE=true`를 설정합니다.
+4. `flyway_schema_history` 생성 또는 baseline 기록을 확인합니다.
+5. `JPA_DDL_AUTO=validate` 상태에서 Hibernate schema validation 실패가 없는지 확인합니다.
+6. 첫 편입이 끝나면 `FLYWAY_BASELINE_ON_MIGRATE=false`로 되돌립니다.
+7. Flyway/validate 실패 시 `JPA_DDL_AUTO=update`로 우회하지 말고 누락된 migration을 보완합니다.
 
 순서:
 
@@ -89,6 +91,13 @@ EC2 private key
 7. `meanhwa-redis` 확인/시작
 8. `meanhwa-server` 컨테이너 교체
 9. `GET http://localhost:8080/api/v1/flowers` health check
+
+MySQL/Flyway migration을 로컬 또는 CI에서 자동 검증할 때는 Docker가 켜진 상태에서 아래 테스트를 별도로 실행합니다.
+
+```powershell
+$env:ENABLE_MYSQL_FLYWAY_TESTS='true'
+.\gradlew.bat test --tests "*FlywayMysqlMigrationIntegrationTest"
+```
 
 운영 구성:
 
@@ -141,10 +150,12 @@ sudo docker inspect meanhwa-server \
 - `spring.jpa.hibernate.ddl-auto=${JPA_DDL_AUTO:validate}`
 - `spring.flyway.enabled=${FLYWAY_ENABLED:true}`
 - `spring.flyway.locations=classpath:db/migration/mysql`
-- `spring.flyway.baseline-on-migrate=${FLYWAY_BASELINE_ON_MIGRATE:true}`
+- `spring.flyway.baseline-on-migrate=${FLYWAY_BASELINE_ON_MIGRATE:false}`
 - `spring.flyway.baseline-version=1`
 
-기존 운영 DB처럼 이미 테이블이 있고 `flyway_schema_history`가 없는 DB는 `baseline-on-migrate=true`로 V1 baseline을 기록합니다. 신규 빈 DB에서는 `V1__baseline_current_schema.sql`이 실행되어 현재 엔티티 기준 빈 schema를 생성합니다.
+기존 운영 DB처럼 이미 테이블이 있고 `flyway_schema_history`가 없는 DB는 최초 편입 배포에서만 `FLYWAY_BASELINE_ON_MIGRATE=true`를 켜서 V1 baseline을 기록합니다. 이후 배포부터는 false가 기본입니다.
+
+신규 빈 DB에서는 `V1__baseline_current_schema.sql`이 현재 엔티티 기준 빈 schema를 만들고, `V2__seed_curation_reference_data.sql`이 큐레이션 위저드에 필요한 `tags.code` 참조 데이터를 넣습니다. V2는 이미지 URL이 있는 꽃 seed를 넣지 않습니다.
 
 과거 수동 운영 DB migration:
 
@@ -157,7 +168,7 @@ mysql -h {RDS_HOST} -P 3306 -u {DB_USERNAME} -p meanhwa < docs/migration/2026-05
 
 스크립트 마지막 `missing_wizard_code` 결과가 0행인지 확인합니다.
 
-위 수동 SQL들은 이미 운영에 적용한 이력과 참고용으로 유지합니다. 새 schema 변경은 `src/main/resources/db/migration/mysql/V2__...sql`부터 Flyway migration으로 추가합니다.
+위 수동 SQL들은 이미 운영에 적용한 이력과 참고용으로 유지합니다. 새 schema 변경은 `src/main/resources/db/migration/mysql/V3__...sql`부터 Flyway migration으로 추가합니다.
 
 RDS 접속:
 
@@ -233,7 +244,7 @@ Content-Type: application/json
 
 - 꽃과 태그 삭제는 soft delete입니다.
 - 삭제된 꽃은 public list/detail/curation/message generation에서 숨겨집니다.
-- Admin tag API는 `code`를 받지 않습니다. 위저드용 `tags.code`는 seed/migration으로 관리합니다.
+- Admin tag API는 `code`를 받지 않습니다. 위저드용 `tags.code`는 로컬 `data.sql`과 Flyway `V2__seed_curation_reference_data.sql`로 관리합니다.
 - 꽃-태그 매핑 `PUT /admin/flowers/{flowerId}/tags`는 전체 교체입니다.
 - 매핑 `weight`는 1-5입니다.
 
@@ -347,7 +358,7 @@ sudo docker logs --tail=200 meanhwa-server
 
 1. 운영 DB 백업이 있는지 확인합니다.
 2. 실패 로그의 table/column 이름을 확인합니다.
-3. 누락된 변경을 `V2__...sql` 같은 새 Flyway migration으로 추가합니다.
+3. 누락된 변경을 `V3__...sql` 같은 새 Flyway migration으로 추가합니다.
 4. staging 또는 DB clone에서 먼저 재기동해 확인합니다.
 5. `JPA_DDL_AUTO=update`로 우회하지 않습니다.
 

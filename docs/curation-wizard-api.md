@@ -11,7 +11,7 @@
 - `flowVersion`이 바뀌면 저장해 둔 위저드 상태를 폐기하고 1단계부터 다시 시작합니다.
 - Step 1-5의 `code`는 `tags.code`로 tag id를 찾고 추천 점수에 반영합니다.
 - Step 6 `BUDGET_*`는 태그가 아니라 `PriceRange` 필터로만 사용합니다.
-- `tags.code`와 신규 위저드 태그는 `data.sql` 및 운영 DB migration으로 관리합니다.
+- `tags.code`와 신규 위저드 태그는 로컬 seed `data.sql` 및 Flyway `V2__seed_curation_reference_data.sql`로 관리합니다.
 
 ## Step
 
@@ -26,9 +26,11 @@
 
 Step4 질문 title은 Step2 수신자에 따라 일부 바뀝니다.
 
-Step3 copy: 어떤 **마음**을 전하고 싶나요? 선물에 담을 감정을 골라주세요.
-Step4 copy: 어떤 **꽃말의 결**에 가까운가요? 전하고 싶은 마음을 조금 더 구체적으로 들려주세요.
-Branch copy example: `RECIPIENT=FAMILY` -> "가족에게 전달하고 싶은 꽃말은 무엇인가요?"
+| 상황 | 문구 |
+| --- | --- |
+| Step3 기본 | 어떤 **마음**을 전하고 싶나요? 선물에 담을 감정을 골라주세요. |
+| Step4 기본 | 어떤 **꽃말의 결**에 가까운가요? 전하고 싶은 마음을 조금 더 구체적으로 들려주세요. |
+| Step4 분기 예시 | `RECIPIENT=FAMILY` -> "가족에게 전달하고 싶은 꽃말은 무엇인가요?" |
 
 | Recipient code | Step4 questionTitle |
 | --- | --- |
@@ -74,68 +76,68 @@ Branch copy example: `RECIPIENT=FAMILY` -> "가족에게 전달하고 싶은 꽃
 
 Step4 code는 `{EMOTION}_{1..4}` 형식입니다.
 
-| code | label |
-| --- | --- |
-| `LOVE_1` | 변함없는 마음 |
-| `LOVE_2` | 첫사랑의 설렘 |
-| `LOVE_3` | 소중한 당신 |
-| `LOVE_4` | 진실한 사랑 |
-| `SUPPORT_1` | 언제나 응원해 |
-| `SUPPORT_2` | 변치 않는 우정 |
-| `SUPPORT_3` | 찬란한 미소 |
-| `SUPPORT_4` | 매일의 행복 |
-| `ENCOURAGEMENT_1` | 용기와 자신감 |
-| `ENCOURAGEMENT_2` | 새로운 도전 |
-| `ENCOURAGEMENT_3` | 당당한 발걸음 |
-| `ENCOURAGEMENT_4` | 무한한 가능성 |
-| `CELEBRATION_1` | 화사한 축하 |
-| `CELEBRATION_2` | 빛나는 성취 |
-| `CELEBRATION_3` | 새로운 시작 |
-| `CELEBRATION_4` | 함께한 기쁨 |
-| `GRATITUDE_1` | 진심 어린 고마움 |
-| `GRATITUDE_2` | 함께해서 행복 |
-| `GRATITUDE_3` | 오래된 인연 |
-| `GRATITUDE_4` | 따뜻한 기억 |
-| `BLESSING_1` | 행복한 시작 |
-| `BLESSING_2` | 아름다운 인연 |
-| `BLESSING_3` | 아낌없는 축복 |
-| `BLESSING_4` | 조화와 화합 |
-| `SINCERITY_1` | 진심을 담아 |
-| `SINCERITY_2` | 소중한 인연 |
-| `SINCERITY_3` | 영원한 약속 |
-| `SINCERITY_4` | 고귀한 사랑 |
-| `ETERNITY_1` | 영원히 하나됨 |
-| `ETERNITY_2` | 영원한 사랑 |
-| `ETERNITY_3` | 아름다운 시작 |
-| `ETERNITY_4` | 고귀한 인연 |
-| `RESPECT_1` | 깊은 존경 |
-| `RESPECT_2` | 명예와 인정 |
-| `RESPECT_3` | 굳건한 신뢰 |
-| `RESPECT_4` | 탄탄대로 |
-| `PRIDE_1` | 값진 노력 |
-| `PRIDE_2` | 빛나는 성공 |
-| `PRIDE_3` | 끊임없는 성장 |
-| `PRIDE_4` | 위풍당당 |
-| `LEAP_1` | 희망과 도약 |
-| `LEAP_2` | 밝은 앞날 |
-| `LEAP_3` | 무한한 가능성 |
-| `LEAP_4` | 꿈을 향해 |
-| `PEACE_1` | 평온한 일상 |
-| `PEACE_2` | 편안한 공간 |
-| `PEACE_3` | 마음의 안정 |
-| `PEACE_4` | 따뜻한 온기 |
-| `PROSPERITY_1` | 풍요와 번영 |
-| `PROSPERITY_2` | 피어나는 기쁨 |
-| `PROSPERITY_3` | 번창하는 일상 |
-| `PROSPERITY_4` | 가정의 행복 |
-| `COMFORT_1` | 따뜻한 위안 |
-| `COMFORT_2` | 깊은 배려 |
-| `COMFORT_3` | 평온한 휴식 |
-| `COMFORT_4` | 마음의 안계 |
-| `GET_WELL_1` | 빠른 회복 |
-| `GET_WELL_2` | 다시 찾은 활력 |
-| `GET_WELL_3` | 건강한 내일 |
-| `GET_WELL_4` | 희망의 빛 |
+| emotion | code | label |
+| --- | --- | --- |
+| `LOVE` | `LOVE_1` | 변함없는 마음 |
+| `LOVE` | `LOVE_2` | 첫사랑의 설렘 |
+| `LOVE` | `LOVE_3` | 소중한 당신 |
+| `LOVE` | `LOVE_4` | 진실한 사랑 |
+| `SUPPORT` | `SUPPORT_1` | 언제나 응원해 |
+| `SUPPORT` | `SUPPORT_2` | 변치 않는 우정 |
+| `SUPPORT` | `SUPPORT_3` | 찬란한 미소 |
+| `SUPPORT` | `SUPPORT_4` | 매일의 행복 |
+| `ENCOURAGEMENT` | `ENCOURAGEMENT_1` | 용기와 자신감 |
+| `ENCOURAGEMENT` | `ENCOURAGEMENT_2` | 새로운 도전 |
+| `ENCOURAGEMENT` | `ENCOURAGEMENT_3` | 당당한 발걸음 |
+| `ENCOURAGEMENT` | `ENCOURAGEMENT_4` | 무한한 가능성 |
+| `CELEBRATION` | `CELEBRATION_1` | 화사한 축하 |
+| `CELEBRATION` | `CELEBRATION_2` | 빛나는 성취 |
+| `CELEBRATION` | `CELEBRATION_3` | 새로운 시작 |
+| `CELEBRATION` | `CELEBRATION_4` | 함께한 기쁨 |
+| `GRATITUDE` | `GRATITUDE_1` | 진심 어린 고마움 |
+| `GRATITUDE` | `GRATITUDE_2` | 함께해서 행복 |
+| `GRATITUDE` | `GRATITUDE_3` | 오래된 인연 |
+| `GRATITUDE` | `GRATITUDE_4` | 따뜻한 기억 |
+| `BLESSING` | `BLESSING_1` | 행복한 시작 |
+| `BLESSING` | `BLESSING_2` | 아름다운 인연 |
+| `BLESSING` | `BLESSING_3` | 아낌없는 축복 |
+| `BLESSING` | `BLESSING_4` | 조화와 화합 |
+| `SINCERITY` | `SINCERITY_1` | 진심을 담아 |
+| `SINCERITY` | `SINCERITY_2` | 소중한 인연 |
+| `SINCERITY` | `SINCERITY_3` | 영원한 약속 |
+| `SINCERITY` | `SINCERITY_4` | 고귀한 사랑 |
+| `ETERNITY` | `ETERNITY_1` | 영원히 하나됨 |
+| `ETERNITY` | `ETERNITY_2` | 영원한 사랑 |
+| `ETERNITY` | `ETERNITY_3` | 아름다운 시작 |
+| `ETERNITY` | `ETERNITY_4` | 고귀한 인연 |
+| `RESPECT` | `RESPECT_1` | 깊은 존경 |
+| `RESPECT` | `RESPECT_2` | 명예와 인정 |
+| `RESPECT` | `RESPECT_3` | 굳건한 신뢰 |
+| `RESPECT` | `RESPECT_4` | 탄탄대로 |
+| `PRIDE` | `PRIDE_1` | 값진 노력 |
+| `PRIDE` | `PRIDE_2` | 빛나는 성공 |
+| `PRIDE` | `PRIDE_3` | 끊임없는 성장 |
+| `PRIDE` | `PRIDE_4` | 위풍당당 |
+| `LEAP` | `LEAP_1` | 희망과 도약 |
+| `LEAP` | `LEAP_2` | 밝은 앞날 |
+| `LEAP` | `LEAP_3` | 무한한 가능성 |
+| `LEAP` | `LEAP_4` | 꿈을 향해 |
+| `PEACE` | `PEACE_1` | 평온한 일상 |
+| `PEACE` | `PEACE_2` | 편안한 공간 |
+| `PEACE` | `PEACE_3` | 마음의 안정 |
+| `PEACE` | `PEACE_4` | 따뜻한 온기 |
+| `PROSPERITY` | `PROSPERITY_1` | 풍요와 번영 |
+| `PROSPERITY` | `PROSPERITY_2` | 피어나는 기쁨 |
+| `PROSPERITY` | `PROSPERITY_3` | 번창하는 일상 |
+| `PROSPERITY` | `PROSPERITY_4` | 가정의 행복 |
+| `COMFORT` | `COMFORT_1` | 따뜻한 위안 |
+| `COMFORT` | `COMFORT_2` | 깊은 배려 |
+| `COMFORT` | `COMFORT_3` | 평온한 휴식 |
+| `COMFORT` | `COMFORT_4` | 마음의 안계 |
+| `GET_WELL` | `GET_WELL_1` | 빠른 회복 |
+| `GET_WELL` | `GET_WELL_2` | 다시 찾은 활력 |
+| `GET_WELL` | `GET_WELL_3` | 건강한 내일 |
+| `GET_WELL` | `GET_WELL_4` | 희망의 빛 |
 
 ## Step5 `SPACE`
 
