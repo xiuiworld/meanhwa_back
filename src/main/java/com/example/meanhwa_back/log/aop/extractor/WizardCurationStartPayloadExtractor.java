@@ -5,10 +5,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import com.example.meanhwa_back.common.response.PageResponse;
 import com.example.meanhwa_back.curation.dto.CurationFlowerResponse;
 import com.example.meanhwa_back.curation.wizard.config.CurationFlowCatalog;
 import com.example.meanhwa_back.curation.wizard.domain.CurationStepKey;
+import com.example.meanhwa_back.curation.wizard.dto.CurationResultsResponse;
 import com.example.meanhwa_back.curation.wizard.dto.CurationSelectionDto;
 import com.example.meanhwa_back.curation.wizard.dto.CurationWizardResultsRequest;
 import com.example.meanhwa_back.curation.wizard.service.CurationCodeResolver;
@@ -21,8 +21,7 @@ import org.springframework.stereotype.Component;
 /**
  * 위저드 {@code POST /api/v1/curation/results} → {@code CurationWizardService#getResults} 용 payload.
  *
- * <p>레거시 큐레이션 로그({@link CurationStartPayloadExtractor})와 구분하기 위해
- * {@code source=curation-v2}, 6단계 {@code selections} 스냅샷을 함께 남긴다.
+ * <p>{@code source=curation-v2}, 6단계 {@code selections} 스냅샷을 함께 남긴다.
  */
 @Component
 public class WizardCurationStartPayloadExtractor implements ActionLogPayloadExtractor {
@@ -42,7 +41,7 @@ public class WizardCurationStartPayloadExtractor implements ActionLogPayloadExtr
     @SuppressWarnings("unchecked")
     public Optional<Map<String, Object>> extract(JoinPoint joinPoint, Object returnValue, LogAction logAction) {
         CurationWizardResultsRequest request = (CurationWizardResultsRequest) joinPoint.getArgs()[0];
-        PageResponse<CurationFlowerResponse> response = (PageResponse<CurationFlowerResponse>) returnValue;
+        CurationResultsResponse response = (CurationResultsResponse) returnValue;
 
         Map<CurationStepKey, String> selectionsByStep =
                 flowCatalog.validateCompleteSelections(request.selections());

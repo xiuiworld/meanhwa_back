@@ -16,7 +16,7 @@ Flyway 도입 이전 운영 RDS에는 `data.sql`이 자동 실행되지 않았�
 
 ## 적용 시점
 
-- 프론트가 `POST /api/v1/curation/results` 또는 `GET /curation/flow` 를 **운영**에서 쓰기 **전**
+- 프론트가 `POST /api/v1/curation/results`를 **운영**에서 쓰기 **전**
 - 백엔드 위저드 코드가 포함된 이미지 배포와 같은 릴리스 권장
 
 ## 실행 방법

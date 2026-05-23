@@ -42,9 +42,6 @@ Public:
 GET  /flowers
 GET  /flowers/{flowerId}
 GET  /tags
-GET  /curation
-GET  /curation/flow
-GET  /curation/steps/{stepKey}/options
 POST /curation/results
 POST /auth/**
 POST /action-logs/curation-result-click
@@ -279,109 +276,9 @@ Response `data`:
 
 ## Curation
 
-### GET `/curation`
-
-레거시 큐레이션 API입니다. 신규 UI는 위저드 API를 사용합니다.
-
-Query:
-
-| Name | Type | Default | 설명 |
-| --- | --- | --- | --- |
-| `tagIds` | number[] | empty | 반복 query |
-| `isPetSafe` | boolean | null | `true`면 반려동물 독성 식물 제외 |
-| `priceRange` | enum | null | `LOW`, `MEDIUM`, `HIGH`, `PREMIUM` |
-| `page` | number | 0 | zero-based |
-| `size` | number | 20 | page size |
-
-Response item:
-
-```json
-{
-  "flowerId": 1,
-  "name": "장미",
-  "imageUrl": "https://cdn.meanhwa.example/flowers/rose.jpg",
-  "coreMeaning": "사랑과 열정",
-  "priceRange": "MEDIUM",
-  "isPetSafe": true,
-  "score": 10,
-  "recommendationReason": "연인 조건과 잘 맞고 5~10만원 예산대에 어울리는 추천입니다.",
-  "matchedTags": [
-    {
-      "id": 5,
-      "category": "RELATION",
-      "name": "연인"
-    }
-  ]
-}
-```
-
-### GET `/curation/flow`
-
-Query: optional `flowVersion`. 생략하면 최신 버전입니다.
-
-Response `data`:
-
-```json
-{
-  "flowVersion": "2026-05-v1",
-  "totalSteps": 6,
-  "steps": [
-    {
-      "key": "OCCASION",
-      "order": 1,
-      "defaultQuestionTitle": "어떤 날인가요?",
-      "defaultQuestionSubtitle": "선물을 드리는 상황을 골라주세요.",
-      "selectionMode": "SINGLE",
-      "dependsOn": []
-    }
-  ]
-}
-```
-
-### GET `/curation/steps/{stepKey}/options`
-
-Path `stepKey`: `OCCASION`, `RECIPIENT`, `EMOTION`, `FLOWER_MEANING`, `SPACE`, `BUDGET`
-
-Query:
-
-| Name | Required | 설명 |
-| --- | --- | --- |
-| `flowVersion` | no | 생략 시 최신 |
-| `selections` | conditional | URL-encoded JSON array of prior `{ step, code }` |
-
-필수 prior selections:
-
-| stepKey | Required prior selections |
-| --- | --- |
-| `OCCASION` | 없음 |
-| `RECIPIENT` | `OCCASION` |
-| `EMOTION` | `OCCASION` |
-| `FLOWER_MEANING` | `OCCASION`, `RECIPIENT`, `EMOTION` |
-| `SPACE`, `BUDGET` | 없음 |
-
-Response `data`:
-
-```json
-{
-  "flowVersion": "2026-05-v1",
-  "step": "RECIPIENT",
-  "order": 2,
-  "questionTitle": "누구에게 전하는 선물인가요?",
-  "questionSubtitle": "받으실 분을 선택해 주세요.",
-  "options": [
-    {
-      "code": "LOVER",
-      "label": "연인",
-      "tagId": 5,
-      "description": null
-    }
-  ]
-}
-```
-
 ### POST `/curation/results`
 
-인증은 optional입니다. 유효한 Bearer 토큰이 있으면 결과 snapshot을 사용자 이력으로 저장하고, 익명 요청은 저장하지 않습니다.
+인증은 optional입니다. 프론트는 로컬 큐레이션 플로우에서 고른 `{ step, code }`를 전송합니다. 유효한 Bearer 토큰이 있으면 결과 snapshot을 사용자 이력으로 저장하고, 익명 요청은 저장하지 않습니다.
 
 Request:
 
@@ -409,7 +306,39 @@ Request:
 - Step 6 `BUDGET_*`는 `PriceRange` 필터로만 사용됩니다.
 - 정렬은 `score` desc, `name` asc입니다.
 
-Response `data`는 레거시 `/curation`과 같은 page shape입니다. 저장된 `curationResultId`는 이 응답에 포함되지 않으므로, 필요하면 `GET /users/me/curation-results/latest`를 호출합니다.
+Response `data`:
+
+```json
+{
+  "content": [
+    {
+      "flowerId": 1,
+      "name": "장미",
+      "imageUrl": "https://cdn.meanhwa.example/flowers/rose.jpg",
+      "coreMeaning": "사랑과 열정",
+      "priceRange": "MEDIUM",
+      "isPetSafe": true,
+      "score": 10,
+      "recommendationReason": "연인 조건과 잘 맞고 5~10만원 예산대에 어울리는 추천입니다.",
+      "matchedTags": [
+        {
+          "id": 5,
+          "category": "RELATION",
+          "name": "연인"
+        }
+      ]
+    }
+  ],
+  "page": 0,
+  "size": 20,
+  "totalElements": 1,
+  "totalPages": 1,
+  "hasNext": false,
+  "curationResultId": 12
+}
+```
+
+로그인 사용자로 저장에 성공하면 `curationResultId`는 저장된 결과 ID입니다. 익명 요청이면 저장하지 않으며 `curationResultId`는 `null`입니다.
 
 ## Messages
 
@@ -538,7 +467,7 @@ List response item:
 
 | ActionType | Trigger |
 | --- | --- |
-| `CURATION_START` | `GET /curation`, `POST /curation/results` |
+| `CURATION_START` | `POST /curation/results` |
 | `DICTIONARY_SEARCH` | `GET /flowers?keyword=...` |
 | `FLOWER_DETAIL_VIEW` | `GET /flowers/{flowerId}` |
 | `ADMIN_USER_ROLE_CHANGE` | `PUT /admin/users/{userId}/role` |

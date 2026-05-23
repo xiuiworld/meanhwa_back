@@ -143,62 +143,6 @@ class MeanhwaBackApplicationTests {
     }
 
     @Test
-    void curateReturnsScoreSortedAndFilteredFlowers() throws Exception {
-        mockMvc.perform(get("/api/v1/curation")
-                        .param("tagIds", "5", "9")
-                        .param("isPetSafe", "true")
-                        .param("priceRange", "MEDIUM"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.status").value(200))
-                .andExpect(jsonPath("$.data.content[0].flowerId").value(1))
-                .andExpect(jsonPath("$.data.content[0].score").value(10))
-                .andExpect(jsonPath("$.data.content[0].isPetSafe").value(true))
-                .andExpect(jsonPath("$.data.content[0].priceRange").value("MEDIUM"))
-                .andExpect(jsonPath("$.data.content[0].recommendationReason").isNotEmpty())
-                .andExpect(jsonPath("$.data.content[0].matchedTags", hasSize(2)));
-    }
-
-    @Test
-    void curateUsesSeasonAndEnvironmentTags() throws Exception {
-        mockMvc.perform(get("/api/v1/curation")
-                        .param("tagIds", "18", "22"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.content[0].flowerId").value(2))
-                .andExpect(jsonPath("$.data.content[0].score").value(10))
-                .andExpect(jsonPath("$.data.content[0].recommendationReason").isNotEmpty())
-                .andExpect(jsonPath("$.data.content[0].matchedTags[*].name", hasItem("여름")))
-                .andExpect(jsonPath("$.data.content[0].matchedTags[*].name", hasItem("실외")));
-    }
-
-    @Test
-    void curationRecordsActionLog() throws Exception {
-        long beforeCount = actionLogRepository.countByActionType(ActionType.CURATION_START);
-
-        mockMvc.perform(get("/api/v1/curation")
-                        .param("tagIds", "5", "9")
-                        .param("isPetSafe", "true")
-                        .param("priceRange", "MEDIUM"))
-                .andExpect(status().isOk());
-
-        List<ActionLog> logs = actionLogRepository.findByActionTypeOrderByIdDesc(ActionType.CURATION_START);
-        org.assertj.core.api.Assertions.assertThat(logs).hasSize((int) beforeCount + 1);
-        org.assertj.core.api.Assertions.assertThat(logs.get(0).getUserId()).isNull();
-        org.assertj.core.api.Assertions.assertThat(logs.get(0).getActionData())
-                .contains("\"tagIds\":[5,9]")
-                .contains("\"priceRange\":\"MEDIUM\"")
-                .contains("\"resultFlowerIds\":[1]");
-    }
-
-    @Test
-    void curateReturnsInvalidPriceRangeError() throws Exception {
-        mockMvc.perform(get("/api/v1/curation")
-                        .param("priceRange", "UNKNOWN"))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.status").value(400))
-                .andExpect(jsonPath("$.errorCode").value("INVALID_PRICE_RANGE"));
-    }
-
-    @Test
     void generateMessageReturnsTemplateMessage() throws Exception {
         TokenPair tokenPair = login("message-user-1", "ROLE_USER");
 
@@ -329,20 +273,6 @@ class MeanhwaBackApplicationTests {
                 .andExpect(jsonPath("$.data.oauthId").value("me-user-1"))
                 .andExpect(jsonPath("$.data.nickname").value("민화유저"))
                 .andExpect(jsonPath("$.data.role").value("ROLE_USER"));
-    }
-
-    @Test
-    void authenticatedCurationActionLogStoresUserId() throws Exception {
-        TokenPair tokenPair = login("log-user-1", "ROLE_USER");
-        Long userId = extractUserId(tokenPair.accessToken());
-
-        mockMvc.perform(get("/api/v1/curation")
-                        .header("Authorization", bearer(tokenPair.accessToken()))
-                        .param("tagIds", "5", "9"))
-                .andExpect(status().isOk());
-
-        List<ActionLog> logs = actionLogRepository.findByActionTypeOrderByIdDesc(ActionType.CURATION_START);
-        org.assertj.core.api.Assertions.assertThat(logs.get(0).getUserId()).isEqualTo(userId);
     }
 
     @Test
@@ -499,10 +429,9 @@ class MeanhwaBackApplicationTests {
                         .header("Authorization", bearer(admin.accessToken())))
                 .andExpect(status().isOk());
 
-        mockMvc.perform(get("/api/v1/curation")
-                        .param("tagIds", tagId.toString()))
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.errorCode").value("TAG_NOT_FOUND"));
+        mockMvc.perform(get("/api/v1/tags"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data[*].tags[*].id", not(hasItem(tagId))));
     }
 
     @Test

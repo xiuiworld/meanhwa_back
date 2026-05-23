@@ -232,7 +232,7 @@ public class CurationFlowCatalog {
         List<CurationWizardOptionDto> options = new ArrayList<>(4);
         for (int index = 0; index < labels.size(); index++) {
             String code = emotionCode + "_" + (index + 1);
-            options.add(new CurationWizardOptionDto(code, labels.get(index), null, null));
+            options.add(new CurationWizardOptionDto(code, labels.get(index)));
         }
         return options;
     }
@@ -262,7 +262,7 @@ public class CurationFlowCatalog {
 
     private List<CurationWizardOptionDto> toOptions(List<CurationFlowDocument.OptionDocument> source) {
         return source.stream()
-                .map(option -> new CurationWizardOptionDto(option.getCode(), option.getLabel(), null, null))
+                .map(option -> new CurationWizardOptionDto(option.getCode(), option.getLabel()))
                 .toList();
     }
 

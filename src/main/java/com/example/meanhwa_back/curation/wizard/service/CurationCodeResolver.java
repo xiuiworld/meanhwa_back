@@ -5,12 +5,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import com.example.meanhwa_back.common.error.BusinessException;
 import com.example.meanhwa_back.common.error.ErrorCode;
 import com.example.meanhwa_back.curation.wizard.domain.CurationBudgetCode;
-import com.example.meanhwa_back.curation.wizard.dto.CurationWizardOptionDto;
 import com.example.meanhwa_back.flower.domain.PriceRange;
 import com.example.meanhwa_back.tag.domain.Tag;
 import com.example.meanhwa_back.tag.repository.TagRepository;
@@ -30,20 +28,6 @@ public class CurationCodeResolver {
 
     public CurationCodeResolver(TagRepository tagRepository) {
         this.tagRepository = tagRepository;
-    }
-
-    /**
-     * 옵션 목록에 DB tagId를 채운다. 매핑이 없으면 tagId는 null(P1 Mock 호환).
-     */
-    public List<CurationWizardOptionDto> enrichWithTagIds(List<CurationWizardOptionDto> options) {
-        if (options.isEmpty()) {
-            return options;
-        }
-        Set<String> codes = options.stream().map(CurationWizardOptionDto::code).collect(Collectors.toSet());
-        Map<String, Long> tagIdByCode = loadTagIds(codes);
-        return options.stream()
-                .map(option -> option.withTagId(tagIdByCode.get(option.code())))
-                .toList();
     }
 
     /**
@@ -69,10 +53,6 @@ public class CurationCodeResolver {
         return CurationBudgetCode.fromCode(budgetCode)
                 .map(CurationBudgetCode::getPriceRange)
                 .orElseThrow(() -> new BusinessException(ErrorCode.INVALID_CURATION_SELECTION));
-    }
-
-    public boolean isBudgetCode(String code) {
-        return CurationBudgetCode.fromCode(code).isPresent();
     }
 
     private Map<String, Long> loadTagIds(Collection<String> codes) {

@@ -5,19 +5,15 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
-import com.example.meanhwa_back.common.error.BusinessException;
-import com.example.meanhwa_back.common.error.ErrorCode;
 import com.example.meanhwa_back.common.response.PageResponse;
 import com.example.meanhwa_back.curation.dto.CurationFlowerResponse;
+import com.example.meanhwa_back.curation.history.domain.UserCurationResult;
 import com.example.meanhwa_back.curation.history.dto.CurationSelectionSnapshot;
 import com.example.meanhwa_back.curation.history.service.CurationResultHistoryService;
 import com.example.meanhwa_back.curation.service.CurationService;
 import com.example.meanhwa_back.curation.wizard.config.CurationFlowCatalog;
-import com.example.meanhwa_back.curation.wizard.config.CurationFlowDocument;
 import com.example.meanhwa_back.curation.wizard.domain.CurationStepKey;
-import com.example.meanhwa_back.curation.wizard.dto.CurationFlowResponse;
-import com.example.meanhwa_back.curation.wizard.dto.CurationFlowStepResponse;
-import com.example.meanhwa_back.curation.wizard.dto.CurationStepOptionsResponse;
+import com.example.meanhwa_back.curation.wizard.dto.CurationResultsResponse;
 import com.example.meanhwa_back.curation.wizard.dto.CurationWizardOptionDto;
 import com.example.meanhwa_back.curation.wizard.dto.CurationWizardResultsRequest;
 import com.example.meanhwa_back.flower.domain.PriceRange;
@@ -32,8 +28,8 @@ import org.springframework.transaction.annotation.Transactional;
  * 분기형 큐레이션 위저드 API 오케스트레이션.
  *
  * <ul>
- *   <li>P1: {@link CurationFlowCatalog} YAML 기반 flow·options</li>
- *   <li>P2: {@link CurationCodeResolver}로 code→tagId 후 {@link CurationService} 점수 합산 재사용</li>
+ *   <li>{@link CurationFlowCatalog} YAML 기반 selection 검증</li>
+ *   <li>{@link CurationCodeResolver}로 code→tagId 후 {@link CurationService} 점수 합산 재사용</li>
  * </ul>
  */
 @Service
@@ -41,64 +37,19 @@ import org.springframework.transaction.annotation.Transactional;
 public class CurationWizardService {
     private final CurationFlowCatalog flowCatalog;
     private final CurationCodeResolver codeResolver;
-    private final CurationSelectionParser selectionParser;
     private final CurationService curationService;
     private final CurationResultHistoryService curationResultHistoryService;
 
     public CurationWizardService(
             CurationFlowCatalog flowCatalog,
             CurationCodeResolver codeResolver,
-            CurationSelectionParser selectionParser,
             CurationService curationService,
             CurationResultHistoryService curationResultHistoryService
     ) {
         this.flowCatalog = flowCatalog;
         this.codeResolver = codeResolver;
-        this.selectionParser = selectionParser;
         this.curationService = curationService;
         this.curationResultHistoryService = curationResultHistoryService;
-    }
-
-    /** 플로우 메타 전체 (오프라인 캐시·스토리북용). */
-    public CurationFlowResponse getFlow(String requestedFlowVersion) {
-        String flowVersion = flowCatalog.resolveFlowVersion(requestedFlowVersion);
-        CurationFlowDocument document = flowCatalog.getDocument();
-        List<CurationFlowStepResponse> steps = document.getSteps().stream()
-                .map(step -> new CurationFlowStepResponse(
-                        step.getKey(),
-                        step.getOrder(),
-                        step.getDefaultQuestionTitle(),
-                        step.getDefaultQuestionSubtitle(),
-                        step.getSelectionMode(),
-                        step.getDependsOn()
-                ))
-                .toList();
-        return new CurationFlowResponse(flowVersion, document.getTotalSteps(), steps);
-    }
-
-    /** 특정 단계의 선택지 + 동적 질문 문구. */
-    public CurationStepOptionsResponse getStepOptions(
-            String stepKeyValue,
-            String requestedFlowVersion,
-            String selectionsJson
-    ) {
-        String flowVersion = flowCatalog.resolveFlowVersion(requestedFlowVersion);
-        CurationStepKey stepKey = parseStepKey(stepKeyValue);
-        Map<CurationStepKey, String> priorSelections = selectionParser.parseToMap(selectionsJson);
-        flowCatalog.validatePriorSelectionsForOptions(stepKey, priorSelections);
-
-        List<CurationWizardOptionDto> options = flowCatalog.resolveOptions(stepKey, priorSelections);
-        options = codeResolver.enrichWithTagIds(options);
-
-        CurationFlowDocument.StepDocument stepMeta = flowCatalog.requireStep(stepKey);
-        return new CurationStepOptionsResponse(
-                flowVersion,
-                stepKey.name(),
-                stepMeta.getOrder(),
-                flowCatalog.resolveQuestionTitle(stepKey, priorSelections),
-                flowCatalog.resolveQuestionSubtitle(stepKey),
-                options
-        );
     }
 
     /**
@@ -107,7 +58,7 @@ public class CurationWizardService {
      */
     @LogAction(value = ActionType.CURATION_START, extractor = WizardCurationStartPayloadExtractor.class)
     @Transactional
-    public PageResponse<CurationFlowerResponse> getResults(CurationWizardResultsRequest request) {
+    public CurationResultsResponse getResults(CurationWizardResultsRequest request) {
         String flowVersion = flowCatalog.resolveFlowVersion(request.flowVersion());
         Map<CurationStepKey, String> selections = flowCatalog.validateCompleteSelections(request.selections());
 
@@ -122,8 +73,9 @@ public class CurationWizardService {
                 request.resolvedPage(),
                 request.resolvedSize()
         );
-        curationResultHistoryService.saveIfAuthenticated(flowVersion, toSelectionSnapshots(selections), response);
-        return response;
+        UserCurationResult savedResult =
+                curationResultHistoryService.saveIfAuthenticated(flowVersion, toSelectionSnapshots(selections), response);
+        return CurationResultsResponse.from(response, savedResult == null ? null : savedResult.getId());
     }
 
     private List<CurationSelectionSnapshot> toSelectionSnapshots(Map<CurationStepKey, String> selections) {
@@ -143,11 +95,4 @@ public class CurationWizardService {
                 .toList();
     }
 
-    private CurationStepKey parseStepKey(String stepKeyValue) {
-        try {
-            return CurationStepKey.from(stepKeyValue);
-        } catch (IllegalArgumentException exception) {
-            throw new BusinessException(ErrorCode.INVALID_CURATION_STEP);
-        }
-    }
 }

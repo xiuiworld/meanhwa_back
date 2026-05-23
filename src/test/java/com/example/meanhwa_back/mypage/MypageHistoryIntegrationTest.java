@@ -30,24 +30,25 @@ class MypageHistoryIntegrationTest {
     void authenticatedCurationResultIsSavedAndCanBeReplayed() throws Exception {
         String token = login("curation-history-user");
 
-        mockMvc.perform(post("/api/v1/curation/results")
+        String resultResponse = mockMvc.perform(post("/api/v1/curation/results")
                         .header("Authorization", bearer(token))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(curationBody()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.content", hasSize(greaterThan(0))));
-
-        String latestResponse = mockMvc.perform(get("/api/v1/users/me/curation-results/latest")
-                        .header("Authorization", bearer(token)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.id").isNumber())
-                .andExpect(jsonPath("$.data.flowVersion").value("2026-05-v1"))
-                .andExpect(jsonPath("$.data.selections[0].label").value("생일"))
-                .andExpect(jsonPath("$.data.recommendations[0].rank").value(1))
+                .andExpect(jsonPath("$.data.content", hasSize(greaterThan(0))))
+                .andExpect(jsonPath("$.data.curationResultId").isNumber())
                 .andReturn()
                 .getResponse()
                 .getContentAsString(StandardCharsets.UTF_8);
-        Integer resultId = JsonPath.read(latestResponse, "$.data.id");
+        Integer resultId = JsonPath.read(resultResponse, "$.data.curationResultId");
+
+        mockMvc.perform(get("/api/v1/users/me/curation-results/latest")
+                        .header("Authorization", bearer(token)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.id").value(resultId))
+                .andExpect(jsonPath("$.data.flowVersion").value("2026-05-v1"))
+                .andExpect(jsonPath("$.data.selections[0].label").value("생일"))
+                .andExpect(jsonPath("$.data.recommendations[0].rank").value(1));
 
         mockMvc.perform(get("/api/v1/users/me/curation-results"))
                 .andExpect(status().isUnauthorized());
@@ -63,18 +64,16 @@ class MypageHistoryIntegrationTest {
     void generatedMessagesAreSavedAndListedForCurrentUser() throws Exception {
         String token = login("message-history-user");
 
-        mockMvc.perform(post("/api/v1/curation/results")
+        String resultResponse = mockMvc.perform(post("/api/v1/curation/results")
                         .header("Authorization", bearer(token))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(curationBody()))
-                .andExpect(status().isOk());
-        String latestResponse = mockMvc.perform(get("/api/v1/users/me/curation-results/latest")
-                        .header("Authorization", bearer(token)))
                 .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.curationResultId").isNumber())
                 .andReturn()
                 .getResponse()
                 .getContentAsString(StandardCharsets.UTF_8);
-        Integer resultId = JsonPath.read(latestResponse, "$.data.id");
+        Integer resultId = JsonPath.read(resultResponse, "$.data.curationResultId");
 
         mockMvc.perform(post("/api/v1/messages/generate")
                         .header("Authorization", bearer(token))

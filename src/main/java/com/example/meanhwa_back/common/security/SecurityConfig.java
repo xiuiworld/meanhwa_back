@@ -49,9 +49,9 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/h2-console/**").permitAll()
-                        // 비로그인 조회: 꽃 사전, 태그, 큐레이션
+                        // 비로그인 조회: 꽃 사전, 태그
                         .requestMatchers(HttpMethod.GET, "/api/v1/flowers", "/api/v1/flowers/*").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/v1/tags", "/api/v1/curation", "/api/v1/curation/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/tags").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/curation/results").permitAll()
                         // 비로그인 쓰기: 인증, 큐레이션 결과 클릭 로그
                         .requestMatchers(

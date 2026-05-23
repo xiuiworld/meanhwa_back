@@ -16,9 +16,6 @@ import com.example.meanhwa_back.flower.domain.PriceRange;
 import com.example.meanhwa_back.flower.dto.TagSummaryResponse;
 import com.example.meanhwa_back.flower.repository.FlowerRepository;
 import com.example.meanhwa_back.flower.repository.FlowerTagMappingRepository;
-import com.example.meanhwa_back.log.aop.LogAction;
-import com.example.meanhwa_back.log.aop.extractor.CurationStartPayloadExtractor;
-import com.example.meanhwa_back.log.domain.ActionType;
 import com.example.meanhwa_back.tag.repository.TagRepository;
 
 import org.springframework.data.domain.Sort;
@@ -47,22 +44,7 @@ public class CurationService {
     }
 
     /**
-     * 레거시 {@code GET /api/v1/curation} 진입점.
-     * <p>성공 시 {@link LogAction} AOP가 {@link ActionType#CURATION_START} 로그를 남긴다.
-     */
-    @LogAction(value = ActionType.CURATION_START, extractor = CurationStartPayloadExtractor.class)
-    public PageResponse<CurationFlowerResponse> curate(
-            List<Long> tagIds,
-            Boolean isPetSafe,
-            String priceRangeValue,
-            int page,
-            int size
-    ) {
-        return executeCurate(tagIds, isPetSafe, priceRangeValue, page, size);
-    }
-
-    /**
-     * 점수 합산만 수행한다. 위저드 v2 등 AOP 로그를 별도로 남기는 호출자가 사용한다.
+     * 점수 합산만 수행한다. 위저드 v2 AOP 로그는 호출자가 별도로 남긴다.
      */
     public PageResponse<CurationFlowerResponse> executeCurate(
             List<Long> tagIds,
