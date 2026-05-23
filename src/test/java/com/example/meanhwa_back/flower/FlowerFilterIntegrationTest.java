@@ -47,13 +47,14 @@ class FlowerFilterIntegrationTest {
     }
 
     @Test
-    void flowerDetailIncludesFlowerInformationFields() throws Exception {
+    void flowerDetailIncludesDescriptionOnlyForFlowerDetailText() throws Exception {
         mockMvc.perform(get("/api/v1/flowers/{flowerId}", 1))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.description").exists())
-                .andExpect(jsonPath("$.data.scientificName").exists())
-                .andExpect(jsonPath("$.data.origin").exists())
-                .andExpect(jsonPath("$.data.bloomingSeason").exists())
-                .andExpect(jsonPath("$.data.scent").exists());
+                .andExpect(jsonPath("$.data.scientificName").doesNotExist())
+                .andExpect(jsonPath("$.data.origin").doesNotExist())
+                .andExpect(jsonPath("$.data.bloomingSeason").doesNotExist())
+                .andExpect(jsonPath("$.data.scent").doesNotExist())
+                .andExpect(jsonPath("$.data.managementInfo").doesNotExist());
     }
 }

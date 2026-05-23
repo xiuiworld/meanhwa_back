@@ -1,25 +1,25 @@
-insert into flowers (id, name, image_url, core_meaning, description, scientific_name, origin, blooming_season, scent, management_level, management_info, is_toxic_to_pets, price_range, created_at, updated_at)
+insert into flowers (id, name, image_url, core_meaning, description, management_level, is_toxic_to_pets, price_range, created_at, updated_at)
 values
-    (1, '장미', 'https://cdn.meanhwa.example/flowers/rose.jpg', '사랑과 열정', '선명한 색과 풍성한 꽃잎으로 마음을 직접적으로 전하기 좋은 대표적인 꽃입니다.', 'Rosa', '아시아, 유럽', '봄~초여름', '품종에 따라 은은하거나 진한 향', 'NORMAL', '햇빛이 잘 드는 곳에 두고 겉흙이 마르면 물을 주세요.', false, 'MEDIUM', current_timestamp, current_timestamp),
-    (2, '해바라기', 'https://cdn.meanhwa.example/flowers/sunflower.jpg', '기다림과 존경', '큰 꽃송이와 밝은 색감으로 응원과 긍정의 분위기를 전합니다.', 'Helianthus annuus', '북아메리카', '여름', '약한 풀 향', 'EASY', '직사광선을 좋아하며 키가 커질 수 있어 넓은 공간이 좋습니다.', false, 'LOW', current_timestamp, current_timestamp),
-    (3, '튤립', 'https://cdn.meanhwa.example/flowers/tulip.jpg', '고백과 배려', '단정한 실루엣과 다양한 색으로 담백한 고백에 잘 어울립니다.', 'Tulipa', '중앙아시아', '봄', '거의 없거나 은은함', 'NORMAL', '서늘한 환경을 좋아하고 과습을 피해야 합니다.', true, 'MEDIUM', current_timestamp, current_timestamp),
-    (4, '라벤더', 'https://cdn.meanhwa.example/flowers/lavender.jpg', '평온과 위로', '보랏빛 꽃대와 차분한 향으로 안정감을 주는 허브성 꽃입니다.', 'Lavandula', '지중해 연안', '여름', '허브 계열의 진한 향', 'EASY', '통풍이 잘 되는 곳에서 건조하게 관리하세요.', false, 'LOW', current_timestamp, current_timestamp),
-    (5, '백합', 'https://cdn.meanhwa.example/flowers/lily.jpg', '순수와 축복', '우아한 꽃형과 존재감 있는 향으로 축하 자리에서 돋보입니다.', 'Lilium', '북반구 온대 지역', '여름', '진하고 풍성한 향', 'NORMAL', '밝은 간접광에서 키우고 꽃가루는 빨리 제거하는 것이 좋습니다.', true, 'HIGH', current_timestamp, current_timestamp),
-    (6, '몬스테라', 'https://cdn.meanhwa.example/plants/monstera.jpg', '성장과 여유', '갈라진 큰 잎이 공간에 시원한 인상을 주는 관엽식물입니다.', 'Monstera deliciosa', '중앙아메리카', '관엽 중심', '거의 없음', 'EASY', '밝은 간접광을 좋아하며 잎에 분무하면 생기가 유지됩니다.', true, 'HIGH', current_timestamp, current_timestamp),
-    (7, '스투키', 'https://cdn.meanhwa.example/plants/sansevieria.jpg', '단단한 응원', '곧게 선 잎이 단정하고 관리 부담이 적은 실내 식물입니다.', 'Dracaena stuckyi', '아프리카', '관엽 중심', '거의 없음', 'EASY', '물을 자주 주지 않아도 되어 초보자에게 적합합니다.', true, 'LOW', current_timestamp, current_timestamp),
-    (8, '안스리움', 'https://cdn.meanhwa.example/plants/anthurium.jpg', '환대와 행복', '광택 있는 포엽이 오래 유지되어 실내 포인트로 좋습니다.', 'Anthurium andraeanum', '열대 아메리카', '연중', '거의 없음', 'NORMAL', '습도를 좋아하며 강한 직사광선은 피하세요.', true, 'MEDIUM', current_timestamp, current_timestamp),
-    (9, '아이비', 'https://cdn.meanhwa.example/plants/ivy.jpg', '우정과 신뢰', '덩굴성 잎이 부드럽게 늘어져 선반과 벽면 연출에 어울립니다.', 'Hedera helix', '유럽, 서아시아', '관엽 중심', '거의 없음', 'EASY', '반음지에서도 잘 자라며 흙이 마르면 충분히 물을 주세요.', true, 'LOW', current_timestamp, current_timestamp),
-    (10, '카네이션', 'https://cdn.meanhwa.example/flowers/carnation.jpg', '감사와 존경', '잔잔한 프릴 꽃잎이 감사와 존중의 마음을 부드럽게 전합니다.', 'Dianthus caryophyllus', '지중해 연안', '봄~여름', '은은한 향', 'NORMAL', '서늘하고 햇빛이 드는 곳에서 오래 꽃을 볼 수 있습니다.', false, 'MEDIUM', current_timestamp, current_timestamp),
-    (11, '호접란', 'https://cdn.meanhwa.example/flowers/orchid.jpg', '품격과 축하', '나비처럼 펼쳐진 꽃이 오래 지속되어 격식 있는 선물에 적합합니다.', 'Phalaenopsis', '동남아시아', '겨울~봄', '거의 없음', 'HARD', '밝은 간접광과 일정한 습도를 유지해야 합니다.', false, 'PREMIUM', current_timestamp, current_timestamp),
-    (12, '프리지아', 'https://cdn.meanhwa.example/flowers/freesia.jpg', '새로운 시작', '맑은 색감과 산뜻한 향으로 시작과 응원의 메시지를 전합니다.', 'Freesia refracta', '남아프리카', '봄', '달콤하고 산뜻한 향', 'NORMAL', '서늘한 곳에서 관리하면 향과 꽃을 오래 즐길 수 있습니다.', false, 'MEDIUM', current_timestamp, current_timestamp),
-    (13, '수국', 'https://cdn.meanhwa.example/flowers/hydrangea.jpg', '진심과 변함없는 마음', '풍성한 꽃송이가 부드럽고 진심 어린 분위기를 만듭니다.', 'Hydrangea macrophylla', '동아시아', '초여름~여름', '거의 없음', 'NORMAL', '물을 좋아하므로 흙이 마르지 않게 관리하고 직사광선은 피하세요.', true, 'HIGH', current_timestamp, current_timestamp),
-    (14, '작약', 'https://cdn.meanhwa.example/flowers/peony.jpg', '풍요와 행복', '겹겹이 피는 큰 꽃잎이 화려하고 풍성한 인상을 줍니다.', 'Paeonia lactiflora', '동아시아', '늦봄~초여름', '은은하고 달콤한 향', 'NORMAL', '밝고 서늘한 곳에서 관리하면 큰 꽃을 오래 감상할 수 있습니다.', false, 'HIGH', current_timestamp, current_timestamp),
-    (15, '거베라', 'https://cdn.meanhwa.example/flowers/gerbera.jpg', '희망과 즐거움', '선명한 원형 꽃이 밝고 경쾌한 분위기를 만드는 꽃입니다.', 'Gerbera jamesonii', '남아프리카', '봄~가을', '거의 없음', 'EASY', '햇빛을 좋아하고 물빠짐이 좋은 흙에서 잘 자랍니다.', false, 'LOW', current_timestamp, current_timestamp),
-    (16, '유칼립투스', 'https://cdn.meanhwa.example/plants/eucalyptus.jpg', '치유와 기억', '은빛 잎과 청량한 향으로 차분한 공간감을 만드는 식물입니다.', 'Eucalyptus', '오스트레일리아', '관엽 중심', '청량한 허브 향', 'NORMAL', '통풍이 잘 되는 밝은 곳에 두고 과습을 피하세요.', true, 'MEDIUM', current_timestamp, current_timestamp),
-    (17, '필로덴드론', 'https://cdn.meanhwa.example/plants/philodendron.jpg', '성장과 신뢰', '풍성한 잎과 안정적인 생장으로 실내에 생기를 더합니다.', 'Philodendron', '열대 아메리카', '관엽 중심', '거의 없음', 'EASY', '밝은 간접광과 적당한 습도를 유지하면 잎이 건강하게 자랍니다.', true, 'MEDIUM', current_timestamp, current_timestamp),
-    (18, '금전수', 'https://cdn.meanhwa.example/plants/zz-plant.jpg', '번영과 행운', '두꺼운 잎과 강한 생명력으로 개업과 집들이 선물에 자주 쓰입니다.', 'Zamioculcas zamiifolia', '동아프리카', '관엽 중심', '거의 없음', 'EASY', '건조에 강해 물을 자주 주지 않아도 되며 반음지에서도 잘 자랍니다.', true, 'LOW', current_timestamp, current_timestamp),
-    (19, '칼라디움', 'https://cdn.meanhwa.example/plants/caladium.jpg', '기쁨과 섬세함', '화려한 잎 무늬가 공간에 생동감과 장식성을 더합니다.', 'Caladium bicolor', '남아메리카', '관엽 중심', '거의 없음', 'HARD', '높은 습도와 따뜻한 환경을 좋아하며 찬바람을 피해야 합니다.', true, 'MEDIUM', current_timestamp, current_timestamp),
-    (20, '로즈마리', 'https://cdn.meanhwa.example/plants/rosemary.jpg', '기억과 응원', '가느다란 잎과 향긋한 허브 향이 기억과 응원의 상징으로 쓰입니다.', 'Salvia rosmarinus', '지중해 연안', '봄~여름', '상쾌한 허브 향', 'EASY', '햇빛과 통풍을 좋아하고 흙이 충분히 마른 뒤 물을 주세요.', false, 'LOW', current_timestamp, current_timestamp);
+    (1, '장미', 'https://cdn.meanhwa.example/flowers/rose.jpg', '사랑과 열정', '선명한 색과 풍성한 꽃잎으로 마음을 직접적으로 전하기 좋은 대표적인 꽃입니다.', 'NORMAL', false, 'MEDIUM', current_timestamp, current_timestamp),
+    (2, '해바라기', 'https://cdn.meanhwa.example/flowers/sunflower.jpg', '기다림과 존경', '큰 꽃송이와 밝은 색감으로 응원과 긍정의 분위기를 전합니다.', 'EASY', false, 'LOW', current_timestamp, current_timestamp),
+    (3, '튤립', 'https://cdn.meanhwa.example/flowers/tulip.jpg', '고백과 배려', '단정한 실루엣과 다양한 색으로 담백한 고백에 잘 어울립니다.', 'NORMAL', true, 'MEDIUM', current_timestamp, current_timestamp),
+    (4, '라벤더', 'https://cdn.meanhwa.example/flowers/lavender.jpg', '평온과 위로', '보랏빛 꽃대와 차분한 향으로 안정감을 주는 허브성 꽃입니다.', 'EASY', false, 'LOW', current_timestamp, current_timestamp),
+    (5, '백합', 'https://cdn.meanhwa.example/flowers/lily.jpg', '순수와 축복', '우아한 꽃형과 존재감 있는 향으로 축하 자리에서 돋보입니다.', 'NORMAL', true, 'HIGH', current_timestamp, current_timestamp),
+    (6, '몬스테라', 'https://cdn.meanhwa.example/plants/monstera.jpg', '성장과 여유', '갈라진 큰 잎이 공간에 시원한 인상을 주는 관엽식물입니다.', 'EASY', true, 'HIGH', current_timestamp, current_timestamp),
+    (7, '스투키', 'https://cdn.meanhwa.example/plants/sansevieria.jpg', '단단한 응원', '곧게 선 잎이 단정하고 관리 부담이 적은 실내 식물입니다.', 'EASY', true, 'LOW', current_timestamp, current_timestamp),
+    (8, '안스리움', 'https://cdn.meanhwa.example/plants/anthurium.jpg', '환대와 행복', '광택 있는 포엽이 오래 유지되어 실내 포인트로 좋습니다.', 'NORMAL', true, 'MEDIUM', current_timestamp, current_timestamp),
+    (9, '아이비', 'https://cdn.meanhwa.example/plants/ivy.jpg', '우정과 신뢰', '덩굴성 잎이 부드럽게 늘어져 선반과 벽면 연출에 어울립니다.', 'EASY', true, 'LOW', current_timestamp, current_timestamp),
+    (10, '카네이션', 'https://cdn.meanhwa.example/flowers/carnation.jpg', '감사와 존경', '잔잔한 프릴 꽃잎이 감사와 존중의 마음을 부드럽게 전합니다.', 'NORMAL', false, 'MEDIUM', current_timestamp, current_timestamp),
+    (11, '호접란', 'https://cdn.meanhwa.example/flowers/orchid.jpg', '품격과 축하', '나비처럼 펼쳐진 꽃이 오래 지속되어 격식 있는 선물에 적합합니다.', 'HARD', false, 'PREMIUM', current_timestamp, current_timestamp),
+    (12, '프리지아', 'https://cdn.meanhwa.example/flowers/freesia.jpg', '새로운 시작', '맑은 색감과 산뜻한 향으로 시작과 응원의 메시지를 전합니다.', 'NORMAL', false, 'MEDIUM', current_timestamp, current_timestamp),
+    (13, '수국', 'https://cdn.meanhwa.example/flowers/hydrangea.jpg', '진심과 변함없는 마음', '풍성한 꽃송이가 부드럽고 진심 어린 분위기를 만듭니다.', 'NORMAL', true, 'HIGH', current_timestamp, current_timestamp),
+    (14, '작약', 'https://cdn.meanhwa.example/flowers/peony.jpg', '풍요와 행복', '겹겹이 피는 큰 꽃잎이 화려하고 풍성한 인상을 줍니다.', 'NORMAL', false, 'HIGH', current_timestamp, current_timestamp),
+    (15, '거베라', 'https://cdn.meanhwa.example/flowers/gerbera.jpg', '희망과 즐거움', '선명한 원형 꽃이 밝고 경쾌한 분위기를 만드는 꽃입니다.', 'EASY', false, 'LOW', current_timestamp, current_timestamp),
+    (16, '유칼립투스', 'https://cdn.meanhwa.example/plants/eucalyptus.jpg', '치유와 기억', '은빛 잎과 청량한 향으로 차분한 공간감을 만드는 식물입니다.', 'NORMAL', true, 'MEDIUM', current_timestamp, current_timestamp),
+    (17, '필로덴드론', 'https://cdn.meanhwa.example/plants/philodendron.jpg', '성장과 신뢰', '풍성한 잎과 안정적인 생장으로 실내에 생기를 더합니다.', 'EASY', true, 'MEDIUM', current_timestamp, current_timestamp),
+    (18, '금전수', 'https://cdn.meanhwa.example/plants/zz-plant.jpg', '번영과 행운', '두꺼운 잎과 강한 생명력으로 개업과 집들이 선물에 자주 쓰입니다.', 'EASY', true, 'LOW', current_timestamp, current_timestamp),
+    (19, '칼라디움', 'https://cdn.meanhwa.example/plants/caladium.jpg', '기쁨과 섬세함', '화려한 잎 무늬가 공간에 생동감과 장식성을 더합니다.', 'HARD', true, 'MEDIUM', current_timestamp, current_timestamp),
+    (20, '로즈마리', 'https://cdn.meanhwa.example/plants/rosemary.jpg', '기억과 응원', '가느다란 잎과 향긋한 허브 향이 기억과 응원의 상징으로 쓰입니다.', 'EASY', false, 'LOW', current_timestamp, current_timestamp);
 
 -- tags.code: 위저드 선택 code ↔ DB 태그 (P2). null은 사전·레거시 전용 태그.
 insert into tags (id, category, name, code)

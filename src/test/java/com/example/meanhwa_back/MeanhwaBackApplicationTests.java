@@ -703,7 +703,6 @@ class MeanhwaBackApplicationTests {
                     "https://cdn.meanhwa.example/test/" + index + ".jpg",
                     "테스트 의미 " + index,
                     ManagementLevel.EASY,
-                    "테스트 관리법",
                     false,
                     PriceRange.LOW
             )));
@@ -807,7 +806,6 @@ class MeanhwaBackApplicationTests {
                   "imageUrl": "https://cdn.meanhwa.example/admin-test.jpg",
                   "coreMeaning": "%s",
                   "managementLevel": "EASY",
-                  "managementInfo": "관리자 테스트 관리법",
                   "isToxicToPets": false,
                   "priceRange": "%s"
                 }

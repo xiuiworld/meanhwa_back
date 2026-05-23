@@ -73,12 +73,12 @@ class FlywayMysqlMigrationIntegrationTest {
 
         jdbcTemplate.update("""
                 INSERT INTO flowers (
-                    name, image_url, core_meaning, management_level, management_info,
+                    name, image_url, core_meaning, management_level,
                     is_toxic_to_pets, price_range, created_at, updated_at
                 )
                 VALUES (
                     'legacy rose', 'https://example.com/legacy-rose.jpg', 'legacy',
-                    'EASY', 'legacy management', false, 'LOW', CURRENT_TIMESTAMP(6), CURRENT_TIMESTAMP(6)
+                    'EASY', false, 'LOW', CURRENT_TIMESTAMP(6), CURRENT_TIMESTAMP(6)
                 )
                 """);
         jdbcTemplate.update("""

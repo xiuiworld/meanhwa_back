@@ -54,12 +54,7 @@ public class AdminFlowerService {
                 normalizeOptional(request.imageUrl()),
                 normalizeOptional(request.coreMeaning()),
                 normalizeOptional(request.description()),
-                normalizeOptional(request.scientificName()),
-                normalizeOptional(request.origin()),
-                normalizeOptional(request.bloomingSeason()),
-                normalizeOptional(request.scent()),
                 request.managementLevel(),
-                normalizeOptional(request.managementInfo()),
                 request.isToxicToPets(),
                 request.priceRange()
         );
@@ -83,12 +78,7 @@ public class AdminFlowerService {
                 normalizeOptional(request.imageUrl()),
                 normalizeOptional(request.coreMeaning()),
                 normalizeOptional(request.description()),
-                normalizeOptional(request.scientificName()),
-                normalizeOptional(request.origin()),
-                normalizeOptional(request.bloomingSeason()),
-                normalizeOptional(request.scent()),
                 request.managementLevel(),
-                normalizeOptional(request.managementInfo()),
                 request.isToxicToPets(),
                 request.priceRange()
         );

@@ -1,7 +1,9 @@
 -- =============================================================================
 -- Meanhwa 운영 DB: 마이페이지 이력/꽃 정보 추가 (2026-05)
--- MySQL 8.x / RDS. 재실행 가능(멱등).
--- 적용 전 백업 필수. 실행 가이드: docs/migration/README.md
+-- 과거 수동 적용 이력입니다. 현재 운영/신규 DB에는 실행하지 마세요.
+-- 꽃 상세 추가 컬럼(scientific_name, origin, blooming_season, scent)은
+-- Flyway V4__drop_unused_flower_detail_columns.sql에서 제거됩니다.
+-- 현재 schema 변경은 src/main/resources/db/migration/mysql/V*.sql로 관리합니다.
 -- =============================================================================
 
 SET NAMES utf8mb4;

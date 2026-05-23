@@ -197,7 +197,7 @@ Query:
 
 | Name | Type | Default | 설명 |
 | --- | --- | --- | --- |
-| `keyword` | string | null | `name`, `coreMeaning`, `description`, `scientificName`, `origin` 검색 |
+| `keyword` | string | null | `name`, `coreMeaning`, `description` 검색 |
 | `priceRange` | enum | null | `LOW`, `MEDIUM`, `HIGH`, `PREMIUM` |
 | `isPetSafe` | boolean string | null | `true`, `false`; 생략 시 전체 |
 | `managementLevel` | enum | null | `EASY`, `NORMAL`, `HARD` |
@@ -242,12 +242,7 @@ Response `data`:
   "imageUrl": "https://cdn.meanhwa.example/flowers/rose.jpg",
   "coreMeaning": "사랑과 열정",
   "description": "선명한 색과 풍성한 꽃잎으로 마음을 직접적으로 전하기 좋은 대표적인 꽃입니다.",
-  "scientificName": "Rosa",
-  "origin": "아시아, 유럽",
-  "bloomingSeason": "봄~초여름",
-  "scent": "품종에 따라 은은하거나 진한 향",
   "managementLevel": "NORMAL",
-  "managementInfo": "햇빛이 잘 드는 곳에 두고 겉흙이 마르면 물을 주세요.",
   "isPetSafe": true,
   "priceRange": "MEDIUM",
   "tags": [
@@ -593,13 +588,8 @@ Create/update request:
   "name": "관리자테스트꽃",
   "imageUrl": "https://cdn.meanhwa.example/admin-test.jpg",
   "coreMeaning": "처음 의미",
-  "description": "꽃 자체에 대한 소개 문구",
-  "scientificName": "Rosa",
-  "origin": "아시아, 유럽",
-  "bloomingSeason": "봄~초여름",
-  "scent": "은은한 향",
+  "description": "꽃 상세정보 문구",
   "managementLevel": "EASY",
-  "managementInfo": "관리자 테스트 관리법",
   "isToxicToPets": false,
   "priceRange": "LOW"
 }

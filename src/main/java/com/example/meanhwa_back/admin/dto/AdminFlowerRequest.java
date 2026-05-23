@@ -20,22 +20,8 @@ public record AdminFlowerRequest(
 
         String description,
 
-        @Size(max = 150)
-        String scientificName,
-
-        @Size(max = 100)
-        String origin,
-
-        @Size(max = 100)
-        String bloomingSeason,
-
-        @Size(max = 100)
-        String scent,
-
         @NotNull
         ManagementLevel managementLevel,
-
-        String managementInfo,
 
         boolean isToxicToPets,
 

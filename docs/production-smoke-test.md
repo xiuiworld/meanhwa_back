@@ -122,12 +122,7 @@ curl -fsS -X POST "$BASE_URL/api/v1/admin/flowers" \
     "imageUrl": "<RETURNED_IMAGE_URL>",
     "coreMeaning": "운영 점검",
     "description": "운영 smoke test용 임시 데이터",
-    "scientificName": "Smoke test",
-    "origin": "운영 점검",
-    "bloomingSeason": "연중",
-    "scent": "없음",
     "managementLevel": "EASY",
-    "managementInfo": "점검 후 삭제",
     "isToxicToPets": false,
     "priceRange": "LOW"
   }'

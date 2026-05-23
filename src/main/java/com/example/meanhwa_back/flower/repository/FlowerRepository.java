@@ -55,8 +55,6 @@ public interface FlowerRepository extends JpaRepository<Flower, Long> {
                 or lower(f.name) like lower(concat('%', :keyword, '%'))
                 or lower(f.coreMeaning) like lower(concat('%', :keyword, '%'))
                 or lower(f.description) like lower(concat('%', :keyword, '%'))
-                or lower(f.scientificName) like lower(concat('%', :keyword, '%'))
-                or lower(f.origin) like lower(concat('%', :keyword, '%'))
               )
               and (:priceRange is null or f.priceRange = :priceRange)
               and (

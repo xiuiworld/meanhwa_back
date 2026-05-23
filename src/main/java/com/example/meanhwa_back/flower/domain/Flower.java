@@ -34,24 +34,9 @@ public class Flower {
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    @Column(length = 150)
-    private String scientificName;
-
-    @Column(length = 100)
-    private String origin;
-
-    @Column(length = 100)
-    private String bloomingSeason;
-
-    @Column(length = 100)
-    private String scent;
-
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private ManagementLevel managementLevel;
-
-    @Column(columnDefinition = "TEXT")
-    private String managementInfo;
 
     @Column(name = "is_toxic_to_pets", nullable = false)
     private boolean isToxicToPets;
@@ -84,7 +69,6 @@ public class Flower {
             String imageUrl,
             String coreMeaning,
             ManagementLevel managementLevel,
-            String managementInfo,
             boolean isToxicToPets,
             PriceRange priceRange
     ) {
@@ -93,12 +77,7 @@ public class Flower {
                 imageUrl,
                 coreMeaning,
                 null,
-                null,
-                null,
-                null,
-                null,
                 managementLevel,
-                managementInfo,
                 isToxicToPets,
                 priceRange
         );
@@ -109,12 +88,7 @@ public class Flower {
             String imageUrl,
             String coreMeaning,
             String description,
-            String scientificName,
-            String origin,
-            String bloomingSeason,
-            String scent,
             ManagementLevel managementLevel,
-            String managementInfo,
             boolean isToxicToPets,
             PriceRange priceRange
     ) {
@@ -122,12 +96,7 @@ public class Flower {
         this.imageUrl = imageUrl;
         this.coreMeaning = coreMeaning;
         this.description = description;
-        this.scientificName = scientificName;
-        this.origin = origin;
-        this.bloomingSeason = bloomingSeason;
-        this.scent = scent;
         this.managementLevel = managementLevel;
-        this.managementInfo = managementInfo;
         this.isToxicToPets = isToxicToPets;
         this.priceRange = priceRange;
     }
@@ -152,28 +121,8 @@ public class Flower {
         return description;
     }
 
-    public String getScientificName() {
-        return scientificName;
-    }
-
-    public String getOrigin() {
-        return origin;
-    }
-
-    public String getBloomingSeason() {
-        return bloomingSeason;
-    }
-
-    public String getScent() {
-        return scent;
-    }
-
     public ManagementLevel getManagementLevel() {
         return managementLevel;
-    }
-
-    public String getManagementInfo() {
-        return managementInfo;
     }
 
     public boolean isToxicToPets() {
@@ -214,7 +163,6 @@ public class Flower {
             String imageUrl,
             String coreMeaning,
             ManagementLevel managementLevel,
-            String managementInfo,
             boolean isToxicToPets,
             PriceRange priceRange
     ) {
@@ -223,12 +171,7 @@ public class Flower {
                 imageUrl,
                 coreMeaning,
                 null,
-                null,
-                null,
-                null,
-                null,
                 managementLevel,
-                managementInfo,
                 isToxicToPets,
                 priceRange
         );
@@ -239,12 +182,7 @@ public class Flower {
             String imageUrl,
             String coreMeaning,
             String description,
-            String scientificName,
-            String origin,
-            String bloomingSeason,
-            String scent,
             ManagementLevel managementLevel,
-            String managementInfo,
             boolean isToxicToPets,
             PriceRange priceRange
     ) {
@@ -252,12 +190,7 @@ public class Flower {
         this.imageUrl = imageUrl;
         this.coreMeaning = coreMeaning;
         this.description = description;
-        this.scientificName = scientificName;
-        this.origin = origin;
-        this.bloomingSeason = bloomingSeason;
-        this.scent = scent;
         this.managementLevel = managementLevel;
-        this.managementInfo = managementInfo;
         this.isToxicToPets = isToxicToPets;
         this.priceRange = priceRange;
     }

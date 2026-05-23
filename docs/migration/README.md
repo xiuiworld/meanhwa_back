@@ -12,6 +12,7 @@ Flyway 도입 이전 운영 RDS에는 `data.sql`이 자동 실행되지 않았�
 | 파일 | 용도 |
 | --- | --- |
 | [2026-05-curation-wizard-prod.sql](2026-05-curation-wizard-prod.sql) | MySQL 8 / RDS용 일괄 스크립트 (재실행 가능) |
+| [2026-05-mypage-flower-additions.sql](2026-05-mypage-flower-additions.sql) | 과거 수동 적용 이력. 현재 운영/신규 DB에는 재실행 금지 |
 
 ## 적용 시점
 

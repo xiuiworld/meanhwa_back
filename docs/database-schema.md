@@ -100,12 +100,7 @@ erDiagram
         varchar image_url
         varchar core_meaning
         text description
-        varchar scientific_name
-        varchar origin
-        varchar blooming_season
-        varchar scent
         enum management_level
-        text management_info
         boolean is_toxic_to_pets
         enum price_range
         datetime created_at
@@ -200,12 +195,7 @@ erDiagram
 | `image_url` | VARCHAR(255) | Y | S3/CDN 이미지 URL |
 | `core_meaning` | VARCHAR(100) | Y | 대표 꽃말 |
 | `description` | TEXT | Y | 꽃/식물 자체 소개 및 특징 |
-| `scientific_name` | VARCHAR(150) | Y | 학명 |
-| `origin` | VARCHAR(100) | Y | 원산지 또는 주요 분포 |
-| `blooming_season` | VARCHAR(100) | Y | 개화 시기 |
-| `scent` | VARCHAR(100) | Y | 향 정보 |
 | `management_level` | ENUM | N | 관리 난이도 |
-| `management_info` | TEXT | Y | 상세 관리 방법 |
 | `is_toxic_to_pets` | BOOLEAN | N | 반려동물 독성 여부 |
 | `price_range` | ENUM | N | 예산대 |
 | `created_at` | DATETIME | N | 생성 일시 |
