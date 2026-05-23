@@ -2,6 +2,8 @@ package com.example.meanhwa_back.curation.wizard.dto;
 
 import java.util.List;
 
+import com.example.meanhwa_back.common.web.PageRequestUtils;
+
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -17,11 +19,11 @@ public record CurationWizardResultsRequest(
 ) {
     /** JSON에 page가 없으면 0. */
     public int resolvedPage() {
-        return page == null || page < 0 ? 0 : page;
+        return page == null ? 0 : PageRequestUtils.normalizePage(page);
     }
 
     /** JSON에 size가 없으면 20. */
     public int resolvedSize() {
-        return size == null || size < 1 ? 20 : size;
+        return size == null ? PageRequestUtils.DEFAULT_SIZE : PageRequestUtils.normalizeSize(size);
     }
 }

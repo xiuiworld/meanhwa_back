@@ -9,6 +9,7 @@ import java.util.Map;
 import com.example.meanhwa_back.common.error.BusinessException;
 import com.example.meanhwa_back.common.error.ErrorCode;
 import com.example.meanhwa_back.common.response.PageResponse;
+import com.example.meanhwa_back.common.web.PageRequestUtils;
 import com.example.meanhwa_back.curation.dto.CurationFlowerResponse;
 import com.example.meanhwa_back.flower.domain.Flower;
 import com.example.meanhwa_back.flower.domain.FlowerTagMapping;
@@ -129,13 +130,12 @@ public class CurationService {
     }
 
     private PageResponse<CurationFlowerResponse> toPage(List<CurationFlowerResponse> results, int page, int size) {
-        if (page < 0 || size < 1) {
-            throw new IllegalArgumentException("page는 0 이상, size는 1 이상이어야 합니다.");
-        }
-
-        int fromIndex = Math.min(page * size, results.size());
-        int toIndex = Math.min(fromIndex + size, results.size());
-        return PageResponse.of(results.subList(fromIndex, toIndex), page, size, results.size());
+        int normalizedPage = PageRequestUtils.normalizePage(page);
+        int normalizedSize = PageRequestUtils.normalizeSize(size);
+        long offset = (long) normalizedPage * normalizedSize;
+        int fromIndex = (int) Math.min(offset, results.size());
+        int toIndex = Math.min(fromIndex + normalizedSize, results.size());
+        return PageResponse.of(results.subList(fromIndex, toIndex), normalizedPage, normalizedSize, results.size());
     }
 
     private Comparator<CurationFlowerResponse> curationComparator() {

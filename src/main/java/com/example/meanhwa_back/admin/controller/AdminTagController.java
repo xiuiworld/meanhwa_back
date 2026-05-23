@@ -26,20 +26,20 @@ public class AdminTagController {
     public AdminTagController(AdminTagService adminTagService) {
         this.adminTagService = adminTagService;
     }
-/**
- * 관리자 요청으로 새 태그를 생성하고 중복 이름을 방지한다.
- */
 
+    /**
+     * 관리자 요청으로 새 태그를 생성하고 중복 이름을 방지한다.
+     */
     @PostMapping
     public ResponseEntity<ApiResponse<AdminTagResponse>> createTag(@Valid @RequestBody AdminTagRequest request) {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(ApiResponse.created(adminTagService.createTag(request)));
     }
-/**
- * 기존 태그의 카테고리와 이름을 수정한다.
- */
 
+    /**
+     * 기존 태그의 카테고리와 이름을 수정한다.
+     */
     @PutMapping("/{tagId}")
     public ApiResponse<AdminTagResponse> updateTag(
             @PathVariable Long tagId,
@@ -47,10 +47,10 @@ public class AdminTagController {
     ) {
         return ApiResponse.ok(adminTagService.updateTag(tagId, request));
     }
-/**
- * 태그를 soft delete 처리해 공개 API와 큐레이션 대상에서 제외한다.
- */
 
+    /**
+     * 태그를 soft delete 처리해 공개 API와 큐레이션 대상에서 제외한다.
+     */
     @DeleteMapping("/{tagId}")
     public ApiResponse<Void> deleteTag(@PathVariable Long tagId) {
         adminTagService.deleteTag(tagId);

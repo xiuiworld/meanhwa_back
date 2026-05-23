@@ -19,9 +19,9 @@ import org.springframework.stereotype.Component;
  *
  * <h2>왜 AOP인가</h2>
  * <ul>
- *   <li>서비스 본문에서 {@link ActionLogService#record} 호출을 제거해 도메인 코드가 짧아진다.</li>
- *   <li>새 API 추가 시 어노테이션만 붙이면 되어 로그 누락을 줄인다.</li>
- *   <li>payload 형식은 {@link ActionLogPayloadExtractor} 로 모아 통계·집계 시 필드가 들쭉날쭉하지 않게 한다.</li>
+ * <li>서비스 본문에서 {@link ActionLogService#record} 호출을 제거해 도메인 코드가 짧아진다.</li>
+ * <li>새 API 추가 시 어노테이션만 붙이면 되어 로그 누락을 줄인다.</li>
+ * <li>payload 형식은 {@link ActionLogPayloadExtractor} 로 모아 통계·집계 시 필드가 들쭉날쭉하지 않게 한다.</li>
  * </ul>
  *
  * <h2>동작 시점</h2>

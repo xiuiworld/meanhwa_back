@@ -32,10 +32,10 @@ public class NaverOAuthClient implements OAuthClient {
     public OAuthProvider getProvider() {
         return OAuthProvider.NAVER;
     }
-/**
- * 외부 OAuth provider에서 사용자 profile을 가져와 내부 공통 모델로 변환한다.
- */
 
+    /**
+     * 외부 OAuth provider에서 사용자 profile을 가져와 내부 공통 모델로 변환한다.
+     */
     @Override
     public OAuthProfile fetchProfile(String accessToken) {
         try {

@@ -10,7 +10,6 @@ import jakarta.validation.constraints.Size;
  * 관리자 꽃 생성과 수정 요청 본문.
  * 운영 데이터 품질을 위해 이름, 의미, 가격대, 관리 난이도 같은 필수 속성을 Bean Validation으로 제한한다.
  */
-
 public record AdminFlowerRequest(
         @NotBlank
         @Size(max = 100)

@@ -19,7 +19,6 @@ import org.springframework.test.web.servlet.MockMvc;
  * 비로그인 큐레이션 결과 클릭 로그 API를 검증하는 통합 테스트.
  * 추천 결과 클릭 이벤트가 통계에 필요한 payload와 함께 저장되는지 확인한다.
  */
-
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")

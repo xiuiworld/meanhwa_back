@@ -116,6 +116,30 @@ class CurationWizardIntegrationTest {
     }
 
     @Test
+    void postResultsRejectsInvalidPaging() throws Exception {
+        String body = """
+                {
+                  "flowVersion": "2026-05-v1",
+                  "selections": [
+                    { "step": "OCCASION", "code": "BIRTHDAY" },
+                    { "step": "RECIPIENT", "code": "LOVER" },
+                    { "step": "EMOTION", "code": "LOVE" },
+                    { "step": "FLOWER_MEANING", "code": "LOVE_3" },
+                    { "step": "SPACE", "code": "DESK_SMALL" },
+                    { "step": "BUDGET", "code": "BUDGET_MEDIUM" }
+                  ],
+                  "page": -1,
+                  "size": 5
+                }
+                """;
+        mockMvc.perform(post("/api/v1/curation/results")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errorCode").value("INVALID_REQUEST"));
+    }
+
+    @Test
     void postResultsRejectsInvalidBranchCombinationRegardlessOfArrayOrder() throws Exception {
         String body = """
                 {

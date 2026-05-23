@@ -9,7 +9,6 @@ import com.example.meanhwa_back.flower.domain.PriceRange;
  * 꽃 목록과 검색 결과에 사용하는 요약 응답 DTO.
  * 카드 UI에 필요한 핵심 정보만 담아 페이지 응답 크기를 낮춘다.
  */
-
 public record FlowerSummaryResponse(
         Long id,
         String name,

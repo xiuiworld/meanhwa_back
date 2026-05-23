@@ -28,8 +28,8 @@ import org.springframework.transaction.annotation.Transactional;
  * 분기형 큐레이션 위저드 API 오케스트레이션.
  *
  * <ul>
- *   <li>{@link CurationFlowCatalog} YAML 기반 selection 검증</li>
- *   <li>{@link CurationCodeResolver}로 code→tagId 후 {@link CurationService} 점수 합산 재사용</li>
+ * <li>{@link CurationFlowCatalog} YAML 기반 selection 검증</li>
+ * <li>{@link CurationCodeResolver}로 code→tagId 후 {@link CurationService} 점수 합산 재사용</li>
  * </ul>
  */
 @Service

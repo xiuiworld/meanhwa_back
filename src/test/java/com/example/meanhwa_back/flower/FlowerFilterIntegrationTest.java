@@ -16,7 +16,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * 꽃 사전 필터링과 상세 응답 계약을 검증하는 통합 테스트.
  * 검색 조건 조합이 페이징 전에 적용되고 잘못된 필터가 통제된 오류로 반환되는지 확인한다.
  */
-
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")

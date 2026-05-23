@@ -27,8 +27,8 @@ public class RedisMessageGenerationRateLimiter implements MessageGenerationRateL
      * INCR과 최초 TTL 설정을 한 번에 수행해 레이스 컨디션을 줄인다.
      *
      * <ul>
-     *   <li>KEYS[1]: 카운터 키</li>
-     *   <li>ARGV[1]: 윈도우 길이(밀리초)</li>
+     * <li>KEYS[1]: 카운터 키</li>
+     * <li>ARGV[1]: 윈도우 길이(밀리초)</li>
      * </ul>
      */
     private static final DefaultRedisScript<Long> CONSUME_SCRIPT = new DefaultRedisScript<>(
@@ -52,10 +52,10 @@ public class RedisMessageGenerationRateLimiter implements MessageGenerationRateL
         this.redisTemplate = redisTemplate;
         this.properties = properties;
     }
-/**
- * 사용자별 메시지 생성 quota를 확인하고 허용되면 현재 요청을 차감한다.
- */
 
+    /**
+     * 사용자별 메시지 생성 quota를 확인하고 허용되면 현재 요청을 차감한다.
+     */
     @Override
     public RateLimitDecision consume(Long userId) {
         String key = "message-gen:" + userId;

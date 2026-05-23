@@ -72,18 +72,18 @@ public class Tag {
     public boolean isDeleted() {
         return deletedAt != null;
     }
-/**
- * 수정 가능한 도메인 필드를 새 요청값으로 갱신한다.
- */
 
+    /**
+     * 수정 가능한 도메인 필드를 새 요청값으로 갱신한다.
+     */
     public void update(TagCategory category, String name) {
         this.category = category;
         this.name = name;
     }
-/**
- * 엔티티를 즉시 삭제하지 않고 삭제 시각을 기록해 공개 조회에서 제외한다.
- */
 
+    /**
+     * 엔티티를 즉시 삭제하지 않고 삭제 시각을 기록해 공개 조회에서 제외한다.
+     */
     public void softDelete() {
         this.deletedAt = LocalDateTime.now();
     }

@@ -6,7 +6,6 @@ import com.example.meanhwa_back.tag.domain.TagCategory;
  * 꽃 상세와 큐레이션 스냅샷에서 재사용하는 태그 요약 DTO.
  * 태그 엔티티의 화면 표시값을 안정적인 응답 계약으로 변환한다.
  */
-
 public record TagSummaryResponse(
         Long id,
         TagCategory category,

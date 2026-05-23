@@ -11,7 +11,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
  * 사용자 큐레이션 결과 히스토리 저장소.
  * 사용자 소유권 조건을 포함한 조회 메서드로 다른 사용자의 결과 접근을 방지한다.
  */
-
 public interface UserCurationResultRepository extends JpaRepository<UserCurationResult, Long> {
     Page<UserCurationResult> findByUserIdOrderByCreatedAtDesc(Long userId, Pageable pageable);
 

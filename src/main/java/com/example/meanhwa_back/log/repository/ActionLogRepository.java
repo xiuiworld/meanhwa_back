@@ -14,7 +14,6 @@ import org.springframework.data.repository.query.Param;
  * 행동 로그 조회와 관리자 통계 projection을 제공하는 저장소.
  * 대량 통계 조회는 엔티티 전체 대신 필요한 컬럼만 읽도록 전용 projection을 둔다.
  */
-
 public interface ActionLogRepository extends JpaRepository<ActionLog, Long> {
     long countByActionType(ActionType actionType);
 

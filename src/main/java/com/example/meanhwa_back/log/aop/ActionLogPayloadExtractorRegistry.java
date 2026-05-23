@@ -24,10 +24,10 @@ public class ActionLogPayloadExtractorRegistry {
         }
         this.extractorsByClass = Map.copyOf(map);
     }
-/**
- * 지정한 payload extractor bean이 등록되어 있는지 확인하고 반환한다.
- */
 
+    /**
+     * 지정한 payload extractor bean이 등록되어 있는지 확인하고 반환한다.
+     */
     public ActionLogPayloadExtractor require(Class<? extends ActionLogPayloadExtractor> type) {
         ActionLogPayloadExtractor extractor = extractorsByClass.get(type);
         if (extractor == null) {

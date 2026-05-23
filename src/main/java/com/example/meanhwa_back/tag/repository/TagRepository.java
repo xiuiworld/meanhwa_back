@@ -15,7 +15,6 @@ import org.springframework.data.repository.query.Param;
  * 태그 조회와 카테고리별 필터링을 담당하는 저장소.
  * 삭제되지 않은 태그만 공개 API와 큐레이션 검증에 사용한다.
  */
-
 public interface TagRepository extends JpaRepository<Tag, Long> {
     @Query("""
             select t

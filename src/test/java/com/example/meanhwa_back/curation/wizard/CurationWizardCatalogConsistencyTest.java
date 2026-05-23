@@ -18,7 +18,6 @@ import org.junit.jupiter.api.Test;
  * 큐레이션 플로우 문서와 DB 시드 태그 코드의 일관성을 검증하는 테스트.
  * YAML 선택지와 실제 태그 데이터가 어긋나 추천 요청이 실패하는 상황을 막는다.
  */
-
 class CurationWizardCatalogConsistencyTest {
     private static final Path ROOT = Path.of("").toAbsolutePath();
 

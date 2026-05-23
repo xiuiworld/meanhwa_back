@@ -11,10 +11,10 @@ public enum CurationStepKey {
     FLOWER_MEANING,
     SPACE,
     BUDGET;
-/**
- * 외부 입력 문자열을 내부 enum 값으로 안전하게 변환한다.
- */
 
+    /**
+     * 외부 입력 문자열을 내부 enum 값으로 안전하게 변환한다.
+     */
     public static CurationStepKey from(String value) {
         if (value == null || value.isBlank()) {
             throw new IllegalArgumentException("step key가 비어 있습니다.");

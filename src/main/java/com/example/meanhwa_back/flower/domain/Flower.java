@@ -148,25 +148,25 @@ public class Flower {
     public boolean isDeleted() {
         return deletedAt != null;
     }
-/**
- * 관리자 생성 작업의 작성자 식별자를 꽃 엔티티에 기록한다.
- */
 
+    /**
+     * 관리자 생성 작업의 작성자 식별자를 꽃 엔티티에 기록한다.
+     */
     public void markCreatedBy(Long adminUserId) {
         this.createdBy = adminUserId;
         this.updatedBy = adminUserId;
     }
-/**
- * 관리자 수정 작업의 마지막 수정자 식별자를 꽃 엔티티에 기록한다.
- */
 
+    /**
+     * 관리자 수정 작업의 마지막 수정자 식별자를 꽃 엔티티에 기록한다.
+     */
     public void markUpdatedBy(Long adminUserId) {
         this.updatedBy = adminUserId;
     }
-/**
- * 수정 가능한 도메인 필드를 새 요청값으로 갱신한다.
- */
 
+    /**
+     * 수정 가능한 도메인 필드를 새 요청값으로 갱신한다.
+     */
     public void update(
             String name,
             String imageUrl,
@@ -185,10 +185,10 @@ public class Flower {
                 priceRange
         );
     }
-/**
- * 수정 가능한 도메인 필드를 새 요청값으로 갱신한다.
- */
 
+    /**
+     * 수정 가능한 도메인 필드를 새 요청값으로 갱신한다.
+     */
     public void update(
             String name,
             String imageUrl,
@@ -206,10 +206,10 @@ public class Flower {
         this.isToxicToPets = isToxicToPets;
         this.priceRange = priceRange;
     }
-/**
- * 엔티티를 즉시 삭제하지 않고 삭제 시각을 기록해 공개 조회에서 제외한다.
- */
 
+    /**
+     * 엔티티를 즉시 삭제하지 않고 삭제 시각을 기록해 공개 조회에서 제외한다.
+     */
     public void softDelete() {
         this.deletedAt = LocalDateTime.now();
     }

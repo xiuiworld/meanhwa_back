@@ -16,30 +16,30 @@ public final class PageRequestUtils {
 
     private PageRequestUtils() {
     }
-/**
- * page 요청값을 검증하고 허용되는 0 기반 페이지 번호로 반환한다.
- */
 
+    /**
+     * page 요청값을 검증하고 허용되는 0 기반 페이지 번호로 반환한다.
+     */
     public static int normalizePage(int page) {
         if (page < 0) {
             throw new BusinessException(ErrorCode.INVALID_REQUEST, "page는 0 이상이어야 합니다.");
         }
         return page;
     }
-/**
- * size 요청값을 검증하고 운영 보호용 최대 크기 안으로 제한한다.
- */
 
+    /**
+     * size 요청값을 검증하고 운영 보호용 최대 크기 안으로 제한한다.
+     */
     public static int normalizeSize(int size) {
         if (size < 1) {
             throw new BusinessException(ErrorCode.INVALID_REQUEST, "size는 1 이상이어야 합니다.");
         }
         return Math.min(size, MAX_SIZE);
     }
-/**
- * 도메인 값들을 조합해 이 API 응답 DTO를 만든다.
- */
 
+    /**
+     * 도메인 값들을 조합해 이 API 응답 DTO를 만든다.
+     */
     public static PageRequest of(int page, int size, Sort sort) {
         return PageRequest.of(normalizePage(page), normalizeSize(size), sort);
     }

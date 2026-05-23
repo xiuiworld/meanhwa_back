@@ -9,10 +9,10 @@ public enum PriceRange {
     MEDIUM,
     HIGH,
     PREMIUM;
-/**
- * 외부 입력 문자열을 내부 enum 값으로 안전하게 변환한다.
- */
 
+    /**
+     * 외부 입력 문자열을 내부 enum 값으로 안전하게 변환한다.
+     */
     public static PriceRange from(String value) {
         if (value == null || value.isBlank()) {
             return null;

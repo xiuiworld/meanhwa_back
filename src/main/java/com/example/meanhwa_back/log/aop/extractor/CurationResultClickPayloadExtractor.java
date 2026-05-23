@@ -21,10 +21,10 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class CurationResultClickPayloadExtractor implements ActionLogPayloadExtractor {
-/**
- * 컨트롤러 호출 인자를 행동 로그 actionData JSON으로 변환한다.
- */
 
+    /**
+     * 컨트롤러 호출 인자를 행동 로그 actionData JSON으로 변환한다.
+     */
     @Override
     public Optional<Map<String, Object>> extract(JoinPoint joinPoint, Object returnValue, LogAction logAction) {
         CurationResultClickRequest request = (CurationResultClickRequest) joinPoint.getArgs()[0];

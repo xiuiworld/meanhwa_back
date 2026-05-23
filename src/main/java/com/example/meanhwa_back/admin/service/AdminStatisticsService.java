@@ -204,10 +204,10 @@ public class AdminStatisticsService {
         }
         return Math.min(limit, 100);
     }
-/**
- * 관리자 통계 limit 요청값을 기본값과 운영 상한 안으로 정리한다.
- */
 
+    /**
+     * 관리자 통계 limit 요청값을 기본값과 운영 상한 안으로 정리한다.
+     */
     public int limitOrDefault(Integer limit) {
         return normalizeLimit(limit);
     }

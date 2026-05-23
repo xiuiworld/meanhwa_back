@@ -24,7 +24,6 @@ import org.testcontainers.junit.jupiter.Testcontainers;
  * MySQL Testcontainers로 Flyway 마이그레이션과 JPA validate를 검증하는 통합 테스트.
  * 운영 DB에 가까운 환경에서 마이그레이션 누락과 enum 컬럼 불일치를 배포 전에 잡는다.
  */
-
 @Testcontainers
 @EnabledIfEnvironmentVariable(named = "ENABLE_MYSQL_FLYWAY_TESTS", matches = "true")
 class FlywayMysqlMigrationIntegrationTest {

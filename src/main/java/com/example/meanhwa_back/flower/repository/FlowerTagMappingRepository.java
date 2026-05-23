@@ -13,7 +13,6 @@ import org.springframework.data.repository.query.Param;
  * 꽃-태그 매핑 조회와 교체를 담당하는 저장소.
  * 상세 조회와 큐레이션 계산에서 N+1을 줄이기 위해 필요한 연관 엔티티를 fetch join으로 읽는다.
  */
-
 public interface FlowerTagMappingRepository extends JpaRepository<FlowerTagMapping, Long> {
 
     @Query("""

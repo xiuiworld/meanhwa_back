@@ -43,18 +43,18 @@ public class UserController {
     public ApiResponse<List<FlowerSummaryResponse>> getLikes() {
         return ApiResponse.ok(userLikeService.getLikes());
     }
-/**
- * 인증 사용자의 꽃 찜을 추가하고 결과 표시용 꽃 요약을 반환한다.
- */
 
+    /**
+     * 인증 사용자의 꽃 찜을 추가하고 결과 표시용 꽃 요약을 반환한다.
+     */
     @PostMapping("/likes/{flowerId}")
     public ApiResponse<FlowerSummaryResponse> addLike(@PathVariable Long flowerId) {
         return ApiResponse.ok(userLikeService.addLike(flowerId));
     }
-/**
- * 인증 사용자의 꽃 찜을 해제한다.
- */
 
+    /**
+     * 인증 사용자의 꽃 찜을 해제한다.
+     */
     @DeleteMapping("/likes/{flowerId}")
     public ApiResponse<Void> deleteLike(@PathVariable Long flowerId) {
         userLikeService.deleteLike(flowerId);
@@ -65,10 +65,10 @@ public class UserController {
     public ApiResponse<List<FlowerSummaryResponse>> getHistories() {
         return ApiResponse.ok(userHistoryService.getHistories());
     }
-/**
- * 인증 사용자의 최근 본 꽃 이력을 모두 삭제한다.
- */
 
+    /**
+     * 인증 사용자의 최근 본 꽃 이력을 모두 삭제한다.
+     */
     @DeleteMapping("/histories")
     public ApiResponse<Void> deleteHistories() {
         userHistoryService.deleteHistories();

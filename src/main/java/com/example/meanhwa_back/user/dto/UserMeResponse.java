@@ -7,7 +7,6 @@ import com.example.meanhwa_back.user.domain.User;
  * 내 정보 조회 API 응답 DTO.
  * 인증된 사용자의 기본 프로필, provider, role 정보를 클라이언트에 전달한다.
  */
-
 public record UserMeResponse(
         Long id,
         OAuthProvider provider,

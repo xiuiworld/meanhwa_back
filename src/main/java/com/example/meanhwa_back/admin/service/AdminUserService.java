@@ -92,8 +92,8 @@ public class AdminUserService {
      * 회원 {@link Role} 변경 (승격·회수).
      * <p>안전 규칙:
      * <ul>
-     *   <li>요청을 보낸 관리자 본인의 role은 변경 불가 → DB 직접 수정 또는 다른 관리자에게 요청</li>
-     *   <li>시스템에 {@code ROLE_ADMIN}이 1명뿐일 때 그 계정을 {@code ROLE_USER}로 내리지 못함</li>
+     * <li>요청을 보낸 관리자 본인의 role은 변경 불가 → DB 직접 수정 또는 다른 관리자에게 요청</li>
+     * <li>시스템에 {@code ROLE_ADMIN}이 1명뿐일 때 그 계정을 {@code ROLE_USER}로 내리지 못함</li>
      * </ul>
      * 권한 변경 후에는 대상 사용자가 <strong>재로그인</strong>해야 JWT에 반영된 role을 받는다.
      */

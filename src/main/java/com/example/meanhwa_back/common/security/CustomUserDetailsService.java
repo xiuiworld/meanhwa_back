@@ -15,10 +15,10 @@ public class CustomUserDetailsService implements UserDetailsService {
     public CustomUserDetailsService(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
-/**
- * JWT subject로 전달된 userId를 Spring Security UserDetails로 복원한다.
- */
 
+    /**
+     * JWT subject로 전달된 userId를 Spring Security UserDetails로 복원한다.
+     */
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Long userId = parseUserId(username);

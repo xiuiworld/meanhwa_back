@@ -44,10 +44,10 @@ public class AdminFlowerService {
         this.tagRepository = tagRepository;
         this.authenticatedUserProvider = authenticatedUserProvider;
     }
-/**
- * 관리자 요청을 검증한 뒤 새 꽃 데이터를 생성한다.
- */
 
+    /**
+     * 관리자 요청을 검증한 뒤 새 꽃 데이터를 생성한다.
+     */
     @Transactional
     @CacheEvict(cacheNames = "flowers", allEntries = true)
     public AdminFlowerDetailResponse createFlower(AdminFlowerRequest request) {
@@ -70,10 +70,10 @@ public class AdminFlowerService {
     public AdminFlowerDetailResponse getFlower(Long flowerId) {
         return toDetailResponse(getActiveFlower(flowerId));
     }
-/**
- * 관리자 요청값으로 기존 꽃 데이터를 갱신한다.
- */
 
+    /**
+     * 관리자 요청값으로 기존 꽃 데이터를 갱신한다.
+     */
     @Transactional
     @CacheEvict(cacheNames = "flowers", allEntries = true)
     public AdminFlowerDetailResponse updateFlower(Long flowerId, AdminFlowerRequest request) {
@@ -91,10 +91,10 @@ public class AdminFlowerService {
         flower.markUpdatedBy(adminUserId);
         return toDetailResponse(flower);
     }
-/**
- * 꽃을 물리 삭제하지 않고 soft delete 처리한다.
- */
 
+    /**
+     * 꽃을 물리 삭제하지 않고 soft delete 처리한다.
+     */
     @Transactional
     @CacheEvict(cacheNames = "flowers", allEntries = true)
     public void deleteFlower(Long flowerId) {
@@ -102,10 +102,10 @@ public class AdminFlowerService {
         flower.markUpdatedBy(currentAdminUserId());
         flower.softDelete();
     }
-/**
- * 특정 꽃의 태그 매핑을 요청 목록 기준으로 일괄 교체한다.
- */
 
+    /**
+     * 특정 꽃의 태그 매핑을 요청 목록 기준으로 일괄 교체한다.
+     */
     @Transactional
     @CacheEvict(cacheNames = "flowers", allEntries = true)
     public AdminFlowerDetailResponse replaceMappings(Long flowerId, FlowerTagMappingUpdateRequest request) {

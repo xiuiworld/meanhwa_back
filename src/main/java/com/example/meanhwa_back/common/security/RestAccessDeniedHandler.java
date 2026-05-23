@@ -20,10 +20,10 @@ public class RestAccessDeniedHandler implements AccessDeniedHandler {
     public RestAccessDeniedHandler(SecurityErrorWriter securityErrorWriter) {
         this.securityErrorWriter = securityErrorWriter;
     }
-/**
- * 인가 실패 상황을 JSON 오류 응답으로 기록한다.
- */
 
+    /**
+     * 인가 실패 상황을 JSON 오류 응답으로 기록한다.
+     */
     @Override
     public void handle(
             HttpServletRequest request,

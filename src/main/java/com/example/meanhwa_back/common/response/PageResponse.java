@@ -27,10 +27,10 @@ public record PageResponse<T>(
                 page.hasNext()
         );
     }
-/**
- * 이미 계산된 페이지 메타데이터와 content로 PageResponse를 만든다.
- */
 
+    /**
+     * 이미 계산된 페이지 메타데이터와 content로 PageResponse를 만든다.
+     */
     public static <T> PageResponse<T> of(List<T> content, int page, int size, long totalElements) {
         int totalPages = size == 0 ? 0 : (int) Math.ceil((double) totalElements / size);
         boolean hasNext = page + 1 < totalPages;

@@ -19,13 +19,12 @@ import org.springframework.stereotype.Service;
 
 
 /**
-
+ * 
  * 메시지 생성 API 진입 시 호출하는 Rate Limit 게이트.
  * <p>{@link MessageService#generate}에서 꽃·태그 검증이 끝난 뒤,
  * OpenAI/템플릿 생성 직전에 호출한다. 유효하지 않은 요청은 카운터에 포함하지 않는다.
  * <p>한도 초과 시 HTTP 429와 {@link ErrorCode#MESSAGE_GENERATION_RATE_LIMIT_EXCEEDED}를 반환한다.
  */
-
 @Service
 
 public class MessageGenerationRateLimitService {
@@ -57,7 +56,6 @@ public class MessageGenerationRateLimitService {
      * @param userId JWT로 인증된 사용자 ID
      * @throws BusinessException {@code MESSAGE_GENERATION_RATE_LIMIT_EXCEEDED} (429)
      */
-
     public void checkAndConsume(Long userId) {
 
         if (!properties.isEnabled()) {

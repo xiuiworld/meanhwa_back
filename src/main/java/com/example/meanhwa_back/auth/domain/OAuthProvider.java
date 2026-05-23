@@ -8,10 +8,10 @@ public enum OAuthProvider {
     DEV,
     KAKAO,
     NAVER;
-/**
- * 외부 입력 문자열을 내부 enum 값으로 안전하게 변환한다.
- */
 
+    /**
+     * 외부 입력 문자열을 내부 enum 값으로 안전하게 변환한다.
+     */
     public static OAuthProvider from(String value) {
         if (value == null || value.isBlank()) {
             throw new BusinessException(ErrorCode.UNSUPPORTED_OAUTH_PROVIDER);

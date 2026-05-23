@@ -32,19 +32,19 @@ public class JwtTokenProvider {
         this.jwtProperties = jwtProperties;
         this.secretKey = Keys.hmacShaKeyFor(jwtProperties.getSecret().getBytes(StandardCharsets.UTF_8));
     }
-/**
- * 사용자 식별자와 권한을 담은 access token을 발급한다.
- */
 
+    /**
+     * 사용자 식별자와 권한을 담은 access token을 발급한다.
+     */
     public String createAccessToken(User user) {
         Instant now = Instant.now();
         Instant expiration = now.plusSeconds(jwtProperties.getAccessTokenValidityMinutes() * 60);
         return createToken(user, ACCESS_TYPE, now, expiration);
     }
-/**
- * 사용자 식별자를 담은 refresh token을 발급한다.
- */
 
+    /**
+     * 사용자 식별자를 담은 refresh token을 발급한다.
+     */
     public String createRefreshToken(User user) {
         Instant now = Instant.now();
         Instant expiration = now.plusSeconds(jwtProperties.getRefreshTokenValidityDays() * 24 * 60 * 60);
@@ -66,10 +66,10 @@ public class JwtTokenProvider {
         validateTokenType(claims, REFRESH_TYPE);
         return LocalDateTime.ofInstant(claims.getExpiration().toInstant(), ZONE_ID);
     }
-/**
- * refresh token 서명, 만료, token type claim을 검증한다.
- */
 
+    /**
+     * refresh token 서명, 만료, token type claim을 검증한다.
+     */
     public void validateRefreshToken(String token) {
         Claims claims = parseClaims(token);
         validateTokenType(claims, REFRESH_TYPE);

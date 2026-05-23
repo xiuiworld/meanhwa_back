@@ -14,10 +14,10 @@ import org.springframework.web.servlet.resource.NoResourceFoundException;
 /** API 전역 예외를 {@link ErrorResponse} 형식으로 변환한다. */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
-/**
- * 도메인 예외를 ErrorCode에 맞는 HTTP 오류 응답으로 변환한다.
- */
 
+    /**
+     * 도메인 예외를 ErrorCode에 맞는 HTTP 오류 응답으로 변환한다.
+     */
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<ErrorResponse> handleBusinessException(BusinessException exception) {
         ErrorCode errorCode = exception.getErrorCode();
@@ -25,10 +25,10 @@ public class GlobalExceptionHandler {
                 .status(errorCode.getStatus())
                 .body(ErrorResponse.of(errorCode, exception.getMessage()));
     }
-/**
- * Bean Validation 실패 내용을 필드별 메시지로 묶어 400 응답으로 반환한다.
- */
 
+    /**
+     * Bean Validation 실패 내용을 필드별 메시지로 묶어 400 응답으로 반환한다.
+     */
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleMethodArgumentNotValidException(
             MethodArgumentNotValidException exception
@@ -70,10 +70,10 @@ public class GlobalExceptionHandler {
                 .status(ErrorCode.RESOURCE_NOT_FOUND.getStatus())
                 .body(ErrorResponse.from(ErrorCode.RESOURCE_NOT_FOUND));
     }
-/**
- * 예상하지 못한 예외는 내부 구현을 숨기고 공통 500 응답으로 반환한다.
- */
 
+    /**
+     * 예상하지 못한 예외는 내부 구현을 숨기고 공통 500 응답으로 반환한다.
+     */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleException(Exception exception) {
         return ResponseEntity

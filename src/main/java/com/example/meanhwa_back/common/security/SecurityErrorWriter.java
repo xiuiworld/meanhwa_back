@@ -19,10 +19,10 @@ public class SecurityErrorWriter {
     public SecurityErrorWriter(ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
     }
-/**
- * Spring Security 예외 응답을 API 공통 오류 형식으로 직렬화한다.
- */
 
+    /**
+     * Spring Security 예외 응답을 API 공통 오류 형식으로 직렬화한다.
+     */
     public void write(HttpServletResponse response, ErrorCode errorCode) throws IOException {
         response.setStatus(errorCode.getStatus().value());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);

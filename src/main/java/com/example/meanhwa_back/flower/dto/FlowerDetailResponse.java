@@ -9,7 +9,6 @@ import com.example.meanhwa_back.flower.domain.PriceRange;
  * 꽃 상세 조회 응답 DTO.
  * 목록보다 상세한 설명과 연결 태그를 포함해 상세 화면 렌더링에 필요한 값을 제공한다.
  */
-
 public record FlowerDetailResponse(
         Long id,
         String name,

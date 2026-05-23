@@ -18,10 +18,10 @@ public class ImageFileValidator {
     public ImageFileValidator(StorageProperties storageProperties) {
         this.storageProperties = storageProperties;
     }
-/**
- * 업로드 파일의 존재 여부, 크기, content type, 실제 파일 헤더를 검증한다.
- */
 
+    /**
+     * 업로드 파일의 존재 여부, 크기, content type, 실제 파일 헤더를 검증한다.
+     */
     public void validate(MultipartFile file) {
         if (file == null || file.isEmpty()) {
             throw new BusinessException(ErrorCode.INVALID_REQUEST, "업로드할 이미지 파일이 필요합니다.");

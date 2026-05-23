@@ -42,10 +42,10 @@ public class OpenAiMessageGenerator implements MessageGenerator {
                 .requestFactory(requestFactory(properties.getTimeoutMillis()))
                 .build();
     }
-/**
- * 입력 컨텍스트를 바탕으로 선물 메시지를 생성한다.
- */
 
+    /**
+     * 입력 컨텍스트를 바탕으로 선물 메시지를 생성한다.
+     */
     @Override
     public String generate(MessageContext context) {
         if (isBlank(properties.getApiKey())) {

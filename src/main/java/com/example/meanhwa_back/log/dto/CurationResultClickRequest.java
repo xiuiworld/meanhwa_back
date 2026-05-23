@@ -16,9 +16,9 @@ import jakarta.validation.constraints.NotNull;
  *
  * <h2>위저드 v2 (P3 §9)</h2>
  * <ul>
- *   <li>{@link #source()} — {@code "curation-v2"} 권장</li>
- *   <li>{@link #selections()} — 결과 화면까지의 6단계 선택 스냅샷. 생략 가능(레거시 호환)</li>
- *   <li>{@link #flowVersion()} — 예: {@code 2026-05-v1}. 생략 가능</li>
+ * <li>{@link #source()} — {@code "curation-v2"} 권장</li>
+ * <li>{@link #selections()} — 결과 화면까지의 6단계 선택 스냅샷. 생략 가능(레거시 호환)</li>
+ * <li>{@link #flowVersion()} — 예: {@code 2026-05-v1}. 생략 가능</li>
  * </ul>
  */
 public record CurationResultClickRequest(
