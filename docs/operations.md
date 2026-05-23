@@ -158,14 +158,14 @@ sudo docker inspect meanhwa-server \
 
 기존 운영 DB처럼 이미 테이블이 있고 `flyway_schema_history`가 없는 DB는 최초 편입 배포에서만 `FLYWAY_BASELINE_ON_MIGRATE=true`를 켜서 V1 baseline을 기록합니다. 이후 배포부터는 false가 기본입니다.
 
-신규 빈 DB에서는 `V1__baseline_current_schema.sql`이 현재 엔티티 기준 빈 schema를 만들고, `V2__seed_curation_reference_data.sql`이 큐레이션 위저드에 필요한 `tags.code` 참조 데이터를 넣습니다. V2는 이미지 URL이 있는 꽃 seed를 넣지 않습니다.
+신규 빈 DB에서는 `V1__baseline_current_schema.sql`이 기본 schema를 만들고, `V2__seed_curation_reference_data.sql`이 큐레이션 위저드에 필요한 `tags.code` 참조 데이터를 넣습니다. `V3__align_enum_column_types.sql`은 Hibernate 6 MySQL schema validation에 맞게 enum 컬럼을 native `ENUM` 타입으로 정렬합니다. V2는 이미지 URL이 있는 꽃 seed를 넣지 않습니다.
 
 과거 수동 운영 DB migration 이력:
 
 - Guide: [migration/README.md](migration/README.md)
 - SQL: [migration/2026-05-curation-wizard-prod.sql](migration/2026-05-curation-wizard-prod.sql)
 
-위 수동 SQL들은 Flyway 도입 전 운영 적용 이력과 참고용으로만 유지합니다. Flyway 관리 DB에는 이 SQL을 다시 직접 실행하지 않습니다. 새 schema 변경은 `src/main/resources/db/migration/mysql/V3__...sql`부터 Flyway migration으로 추가합니다.
+위 수동 SQL들은 Flyway 도입 전 운영 적용 이력과 참고용으로만 유지합니다. Flyway 관리 DB에는 이 SQL을 다시 직접 실행하지 않습니다. 새 schema 변경은 `src/main/resources/db/migration/mysql/V4__...sql`부터 Flyway migration으로 추가합니다.
 
 RDS 접속:
 
@@ -351,6 +351,7 @@ sudo docker logs --tail=200 meanhwa-server
 - 기존 수동 변경과 JPA 엔티티가 불일치함
 - `flyway_schema_history` baseline이 없는 기존 DB에서 `FLYWAY_BASELINE_ON_MIGRATE=false`로 기동함
 - V2 참조 데이터 migration 전 검증에서 기존 태그/매핑 source가 누락됨
+- enum 컬럼이 Hibernate 6 MySQL validation이 기대하는 native `ENUM` 타입과 다름
 
 대응:
 

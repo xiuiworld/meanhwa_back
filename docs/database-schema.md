@@ -5,7 +5,7 @@
 ## 공통 정책
 
 - PK는 `BIGINT` auto increment로 생성됩니다.
-- Enum 값은 문자열(`VARCHAR`)로 저장됩니다.
+- Enum 값은 API/Java에서는 문자열로 다루고, 운영 MySQL schema에서는 Hibernate 6 validation에 맞춰 native `ENUM` 컬럼으로 저장됩니다.
 - 시간 필드는 `DATETIME` 계열로 저장됩니다.
 - 삭제 정책은 주요 콘텐츠 테이블에서 soft delete를 사용합니다.
 - `action_logs.action_data`는 MySQL/H2 호환성을 위해 JSON 타입이 아니라 `TEXT`에 JSON 문자열로 저장합니다.
@@ -85,11 +85,11 @@ erDiagram
 
     users {
         bigint id PK
-        varchar provider
+        enum provider
         varchar oauth_id
         varchar email
         varchar nickname
-        varchar role
+        enum role
         datetime created_at
         datetime updated_at
     }
@@ -104,10 +104,10 @@ erDiagram
         varchar origin
         varchar blooming_season
         varchar scent
-        varchar management_level
+        enum management_level
         text management_info
         boolean is_toxic_to_pets
-        varchar price_range
+        enum price_range
         datetime created_at
         datetime updated_at
         bigint created_by
@@ -117,7 +117,7 @@ erDiagram
 
     tags {
         bigint id PK
-        varchar category
+        enum category
         varchar name
         varchar code
         datetime deleted_at
@@ -181,7 +181,7 @@ erDiagram
     action_logs {
         bigint id PK
         bigint user_id
-        varchar action_type
+        enum action_type
         text action_data
         datetime created_at
     }
@@ -204,10 +204,10 @@ erDiagram
 | `origin` | VARCHAR(100) | Y | 원산지 또는 주요 분포 |
 | `blooming_season` | VARCHAR(100) | Y | 개화 시기 |
 | `scent` | VARCHAR(100) | Y | 향 정보 |
-| `management_level` | VARCHAR(20) | N | 관리 난이도 |
+| `management_level` | ENUM | N | 관리 난이도 |
 | `management_info` | TEXT | Y | 상세 관리 방법 |
 | `is_toxic_to_pets` | BOOLEAN | N | 반려동물 독성 여부 |
-| `price_range` | VARCHAR(20) | N | 예산대 |
+| `price_range` | ENUM | N | 예산대 |
 | `created_at` | DATETIME | N | 생성 일시 |
 | `updated_at` | DATETIME | N | 수정 일시 |
 | `created_by` | BIGINT | Y | 생성 관리자 user id |
@@ -223,7 +223,7 @@ erDiagram
 | 컬럼 | 타입 | Null | 설명 |
 | --- | --- | --- | --- |
 | `id` | BIGINT | N | PK |
-| `category` | VARCHAR(50) | N | 태그 카테고리 (`EVENT`, `RELATION`, `EMOTION`, `MEANING`, `ENVIRONMENT`, …) |
+| `category` | ENUM | N | 태그 카테고리 (`EVENT`, `RELATION`, `EMOTION`, `MEANING`, `ENVIRONMENT`, …) |
 | `name` | VARCHAR(50) | N | 태그명 |
 | `code` | VARCHAR(80) | Y | 위저드·API 공통 식별자 (예: `BIRTHDAY`, `LOVE_3`). UNIQUE. 레거시(스타일·계절 등)는 NULL 가능 |
 | `deleted_at` | DATETIME | Y | soft delete 일시 |
@@ -260,11 +260,11 @@ erDiagram
 | 컬럼 | 타입 | Null | 설명 |
 | --- | --- | --- | --- |
 | `id` | BIGINT | N | PK |
-| `provider` | VARCHAR(20) | N | `DEV`, `KAKAO`, `NAVER` |
+| `provider` | ENUM | N | `DEV`, `KAKAO`, `NAVER` |
 | `oauth_id` | VARCHAR(100) | N | provider 사용자 식별자 |
 | `email` | VARCHAR(100) | Y | 이메일 |
 | `nickname` | VARCHAR(50) | N | 닉네임 |
-| `role` | VARCHAR(20) | N | `ROLE_USER`, `ROLE_ADMIN` |
+| `role` | ENUM | N | `ROLE_USER`, `ROLE_ADMIN` |
 | `created_at` | DATETIME | N | 가입 일시 |
 | `updated_at` | DATETIME | N | 마지막 프로필/권한 갱신 일시 |
 
@@ -403,7 +403,7 @@ refresh API는 성공 시 토큰을 회전시키고 기존 refresh token을 폐�
 | --- | --- | --- | --- |
 | `id` | BIGINT | N | PK |
 | `user_id` | BIGINT | Y | 인증 사용자의 `users.id`, 비회원은 null |
-| `action_type` | VARCHAR(50) | N | 행동 유형 |
+| `action_type` | ENUM | N | 행동 유형 |
 | `action_data` | TEXT | N | JSON 문자열 payload |
 | `created_at` | DATETIME | N | 로그 생성 일시 |
 

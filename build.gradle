@@ -53,4 +53,8 @@ tasks.withType(JavaCompile).configureEach {
 tasks.named('test') {
 	useJUnitPlatform()
 	systemProperty 'file.encoding', 'UTF-8'
+	testLogging {
+		events 'failed'
+		exceptionFormat 'full'
+	}
 }
