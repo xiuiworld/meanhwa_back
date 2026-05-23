@@ -1,6 +1,7 @@
 package com.example.meanhwa_back.common.config;
 
 import java.time.Duration;
+import java.util.List;
 import java.util.Set;
 
 import com.example.meanhwa_back.common.security.JwtProperties;
@@ -52,6 +53,14 @@ class ConfigurationPropertiesValidationTest {
         properties.setTimeoutMillis(1);
 
         assertThat(propertyPaths(validator.validate(properties))).contains("timeoutMillis");
+    }
+
+    @Test
+    void corsOriginsCannotUseWildcardWhenCredentialsAreEnabled() {
+        CorsProperties properties = new CorsProperties();
+        properties.setAllowedOrigins(List.of("*"));
+
+        assertThat(propertyPaths(validator.validate(properties))).contains("wildcardOriginAbsent");
     }
 
     private Set<String> propertyPaths(Set<? extends ConstraintViolation<?>> violations) {

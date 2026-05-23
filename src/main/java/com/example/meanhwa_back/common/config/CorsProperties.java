@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.annotation.Validated;
 
+import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 
@@ -25,5 +26,14 @@ public class CorsProperties {
 
     public void setAllowedOrigins(List<String> allowedOrigins) {
         this.allowedOrigins = allowedOrigins;
+    }
+
+    @AssertTrue(message = "CORS allowed-origins cannot contain '*' because credentials are enabled.")
+    public boolean isWildcardOriginAbsent() {
+        if (allowedOrigins == null) {
+            return true;
+        }
+        return allowedOrigins.stream()
+                .noneMatch(origin -> "*".equals(origin.trim()));
     }
 }

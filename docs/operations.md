@@ -93,7 +93,7 @@ GitHub Actions 배포는 `FLYWAY_ENABLED`, `FLYWAY_BASELINE_ON_MIGRATE`, `JPA_DD
 7. `meanhwa-net` 생성/연결
 8. `meanhwa-redis` 확인/시작
 9. `meanhwa-server` 컨테이너 교체
-10. `GET http://localhost:8080/api/v1/flowers` health check
+10. `GET http://localhost:8080/actuator/health/readiness` health check
 
 CI는 별도 `mysql-flyway` job에서, 배포 workflow는 Docker image build 전에 Testcontainers 기반 MySQL 검증 테스트를 실행합니다. 로컬에서 같은 검증을 실행할 때는 Docker가 켜진 상태에서 아래 명령을 사용합니다.
 
@@ -119,7 +119,7 @@ EC2 확인 명령:
 sudo docker ps
 sudo docker logs --tail=200 meanhwa-server
 sudo docker logs --tail=100 meanhwa-redis
-curl -fsS http://localhost:8080/api/v1/flowers
+curl -fsS http://localhost:8080/actuator/health/readiness
 ```
 
 재시작:
@@ -368,7 +368,7 @@ sudo docker logs --tail=200 meanhwa-server
 sudo docker ps -a
 sudo docker logs --tail=200 meanhwa-server
 sudo docker logs --tail=100 meanhwa-redis
-curl -v http://localhost:8080/api/v1/flowers
+curl -v http://localhost:8080/actuator/health/readiness
 ```
 
 자주 보는 원인:
