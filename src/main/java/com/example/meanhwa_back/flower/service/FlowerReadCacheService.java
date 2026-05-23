@@ -24,6 +24,9 @@ public class FlowerReadCacheService {
         this.flowerRepository = flowerRepository;
     }
 
+    /**
+     * 검색 필터를 정규화한 뒤 캐시 가능한 꽃 목록 페이지를 조회한다.
+     */
     @Cacheable(
             cacheNames = "flowers",
             key = "'search:'"
@@ -34,9 +37,6 @@ public class FlowerReadCacheService {
                     + " + ':tags:' + #tagIds"
                     + " + ':page:' + #page + ':size:' + #size"
     )
-    /**
-     * 검색 필터를 정규화한 뒤 캐시 가능한 꽃 목록 페이지를 조회한다.
-     */
     public PageResponse<FlowerSummaryResponse> searchFlowers(
             String keyword,
             PriceRange priceRange,

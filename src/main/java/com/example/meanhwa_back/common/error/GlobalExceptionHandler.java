@@ -44,27 +44,27 @@ public class GlobalExceptionHandler {
                 .body(ErrorResponse.of(ErrorCode.INVALID_REQUEST, message));
     }
 
+    /**
+     * 요청 파라미터 누락, 타입 불일치, 잘못된 인자를 400 응답으로 정리한다.
+     */
     @ExceptionHandler({
             MissingServletRequestParameterException.class,
             MethodArgumentTypeMismatchException.class,
             IllegalArgumentException.class
     })
-    /**
-     * 요청 파라미터 누락, 타입 불일치, 잘못된 인자를 400 응답으로 정리한다.
-     */
     public ResponseEntity<ErrorResponse> handleBadRequest(Exception exception) {
         return ResponseEntity
                 .badRequest()
                 .body(ErrorResponse.of(ErrorCode.INVALID_REQUEST, exception.getMessage()));
     }
 
+    /**
+     * 존재하지 않는 경로나 정적 리소스 요청을 공통 404 응답으로 변환한다.
+     */
     @ExceptionHandler({
             NoHandlerFoundException.class,
             NoResourceFoundException.class
     })
-    /**
-     * 존재하지 않는 경로나 정적 리소스 요청을 공통 404 응답으로 변환한다.
-     */
     public ResponseEntity<ErrorResponse> handleNotFound() {
         return ResponseEntity
                 .status(ErrorCode.RESOURCE_NOT_FOUND.getStatus())

@@ -21,28 +21,28 @@ public class AdminTagService {
         this.tagRepository = tagRepository;
     }
 
+    /**
+     * 관리자 요청으로 새 태그를 생성하고 중복 이름을 방지한다.
+     */
     @Transactional
     @Caching(evict = {
             @CacheEvict(cacheNames = "tags", allEntries = true),
             @CacheEvict(cacheNames = "flowers", allEntries = true)
     })
-    /**
-     * 관리자 요청으로 새 태그를 생성하고 중복 이름을 방지한다.
-     */
     public AdminTagResponse createTag(AdminTagRequest request) {
         String name = normalizeName(request.name());
         validateDuplicate(request.category(), name, null);
         return AdminTagResponse.from(tagRepository.save(new Tag(request.category(), name)));
     }
 
+    /**
+     * 기존 태그의 카테고리와 이름을 수정한다.
+     */
     @Transactional
     @Caching(evict = {
             @CacheEvict(cacheNames = "tags", allEntries = true),
             @CacheEvict(cacheNames = "flowers", allEntries = true)
     })
-    /**
-     * 기존 태그의 카테고리와 이름을 수정한다.
-     */
     public AdminTagResponse updateTag(Long tagId, AdminTagRequest request) {
         Tag tag = getActiveTag(tagId);
         String name = normalizeName(request.name());
@@ -51,14 +51,14 @@ public class AdminTagService {
         return AdminTagResponse.from(tag);
     }
 
+    /**
+     * 태그를 soft delete 처리해 공개 API와 큐레이션 대상에서 제외한다.
+     */
     @Transactional
     @Caching(evict = {
             @CacheEvict(cacheNames = "tags", allEntries = true),
             @CacheEvict(cacheNames = "flowers", allEntries = true)
     })
-    /**
-     * 태그를 soft delete 처리해 공개 API와 큐레이션 대상에서 제외한다.
-     */
     public void deleteTag(Long tagId) {
         getActiveTag(tagId).softDelete();
     }

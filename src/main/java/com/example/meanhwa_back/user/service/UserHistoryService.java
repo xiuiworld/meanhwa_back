@@ -50,7 +50,7 @@ public class UserHistoryService {
      */
     @Transactional
     public void deleteHistories() {
-        User user = authenticatedUserProvider.getCurrentUser();
+        User user = authenticatedUserProvider.getCurrentUserForUpdate();
         userHistoryRepository.deleteByUserId(user.getId());
     }
 
@@ -59,7 +59,7 @@ public class UserHistoryService {
      */
     @Transactional
     public void recordViewIfAuthenticated(Long flowerId) {
-        User user = authenticatedUserProvider.getCurrentUserOrNull();
+        User user = authenticatedUserProvider.getCurrentUserOrNullForUpdate();
         if (user == null) {
             return;
         }

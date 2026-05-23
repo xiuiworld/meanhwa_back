@@ -47,7 +47,7 @@ public class UserLikeService {
      */
     @Transactional
     public FlowerSummaryResponse addLike(Long flowerId) {
-        User user = authenticatedUserProvider.getCurrentUser();
+        User user = authenticatedUserProvider.getCurrentUserForUpdate();
         Flower flower = flowerRepository.findActiveById(flowerId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.FLOWER_NOT_FOUND));
         if (!userLikeRepository.existsByUserIdAndFlowerId(user.getId(), flowerId)) {
@@ -61,7 +61,7 @@ public class UserLikeService {
      */
     @Transactional
     public void deleteLike(Long flowerId) {
-        User user = authenticatedUserProvider.getCurrentUser();
+        User user = authenticatedUserProvider.getCurrentUserForUpdate();
         userLikeRepository.deleteByUserIdAndFlowerId(user.getId(), flowerId);
     }
 }
