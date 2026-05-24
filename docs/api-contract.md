@@ -538,17 +538,41 @@ Scoring (same engine as legacy curation):
 | Step 6 `BUDGET_*` | `BUDGET_LOW`→`LOW`, `BUDGET_MEDIUM`→`MEDIUM`, `BUDGET_HIGH`→`HIGH`, `BUDGET_PREMIUM`→`PREMIUM` |
 | Sort | `score` desc, then `name` asc |
 
-Response `data` uses the same page shape as legacy `GET /api/v1/curation` (`CurationFlowerResponse`).
+Response `data` keeps the existing page fields (`content`, `page`, `size`, `totalElements`, `totalPages`, `hasNext`). When a valid Bearer token is included and the snapshot is saved, the response also includes `curationResultId` (the saved row id). Anonymous requests and failed saves omit the field.
 
-Authentication is optional. If a valid Bearer token is included, the backend stores a user-owned curation result snapshot containing `flowVersion`, all six `selections`, and the ranked recommendation list returned at completion. Anonymous requests are not stored and keep the same response shape.
+Example `data` (logged in, saved):
 
-> Future improvement note, not part of the current response contract:
->
-> `POST /api/v1/curation/results` currently keeps the legacy page response shape even when the backend saves the authenticated user's result. The response does not include the newly saved curation result ID. Clients that need the saved result ID, such as the message creation flow, should keep using the current contract: call `GET /api/v1/users/me/curation-results/latest` after completion and use its `data.id`.
->
-> A later backward-compatible improvement can add a saved-result identifier to the completion response, for example `curationResultId` or a metadata field, so the frontend can connect message generation to the just-created result without an extra `latest` request. For anonymous requests, the value would be `null` or omitted because no result is saved.
->
-> If this improvement is implemented, preserve the existing page fields (`content`, `page`, `size`, `totalElements`, `totalPages`, `hasNext`) and add only optional metadata. Because the frontend is currently being built against the existing contract, this should be handled as a coordinated follow-up change with separate frontend/backend rollout notes.
+```json
+{
+  "curationResultId": 12,
+  "content": [
+    {
+      "flowerId": 1,
+      "name": "장미",
+      "imageUrl": "https://cdn.meanhwa.example/flowers/rose.jpg",
+      "coreMeaning": "사랑과 열정",
+      "priceRange": "MEDIUM",
+      "isPetSafe": true,
+      "score": 10,
+      "recommendationReason": "연인 조건과 잘 맞고 5~10만원 예산대에 어울리는 추천입니다.",
+      "matchedTags": [
+        {
+          "id": 5,
+          "category": "RELATION",
+          "name": "연인"
+        }
+      ]
+    }
+  ],
+  "page": 0,
+  "size": 20,
+  "totalElements": 3,
+  "totalPages": 1,
+  "hasNext": false
+}
+```
+
+For message creation after the wizard, clients can pass `data.curationResultId` directly to `POST /api/v1/messages/generate` without calling `GET /api/v1/users/me/curation-results/latest`. The `latest` endpoint remains available for the message tab and other screens that need the most recent saved result on entry.
 
 Wizard-specific errors (in addition to `TAG_NOT_FOUND`, `INVALID_PRICE_RANGE`):
 

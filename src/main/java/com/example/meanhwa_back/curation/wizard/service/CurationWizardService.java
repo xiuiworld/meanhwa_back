@@ -9,6 +9,7 @@ import com.example.meanhwa_back.common.error.BusinessException;
 import com.example.meanhwa_back.common.error.ErrorCode;
 import com.example.meanhwa_back.common.response.PageResponse;
 import com.example.meanhwa_back.curation.dto.CurationFlowerResponse;
+import com.example.meanhwa_back.curation.history.domain.UserCurationResult;
 import com.example.meanhwa_back.curation.history.dto.CurationSelectionSnapshot;
 import com.example.meanhwa_back.curation.history.service.CurationResultHistoryService;
 import com.example.meanhwa_back.curation.service.CurationService;
@@ -20,6 +21,7 @@ import com.example.meanhwa_back.curation.wizard.dto.CurationFlowStepResponse;
 import com.example.meanhwa_back.curation.wizard.dto.CurationStepOptionsResponse;
 import com.example.meanhwa_back.curation.wizard.dto.CurationWizardOptionDto;
 import com.example.meanhwa_back.curation.wizard.dto.CurationWizardResultsRequest;
+import com.example.meanhwa_back.curation.wizard.dto.CurationWizardResultsResponse;
 import com.example.meanhwa_back.flower.domain.PriceRange;
 import com.example.meanhwa_back.log.aop.LogAction;
 import com.example.meanhwa_back.log.aop.extractor.WizardCurationStartPayloadExtractor;
@@ -103,11 +105,16 @@ public class CurationWizardService {
 
     /**
      * 6단계 완료 선택 → 기존 큐레이션 점수 엔진으로 꽃 목록 반환.
+     *
+     * <p>인증은 optional이다. Bearer가 있으면 {@link CurationResultHistoryService#saveIfAuthenticated}
+     * 로 snapshot을 저장하고, 저장된 row id를 {@code curationResultId}로 응답에 실어 준다.
+     * 저장 실패해도 추천 목록(HTTP 200)은 그대로 반환한다.
+     *
      * <p>성공 시 {@link LogAction} AOP가 {@link ActionType#CURATION_START} (source=curation-v2) 를 남긴다.
      */
     @LogAction(value = ActionType.CURATION_START, extractor = WizardCurationStartPayloadExtractor.class)
     @Transactional
-    public PageResponse<CurationFlowerResponse> getResults(CurationWizardResultsRequest request) {
+    public CurationWizardResultsResponse getResults(CurationWizardResultsRequest request) {
         String flowVersion = flowCatalog.resolveFlowVersion(request.flowVersion());
         Map<CurationStepKey, String> selections = flowCatalog.validateCompleteSelections(request.selections());
 
@@ -122,8 +129,14 @@ public class CurationWizardService {
                 request.resolvedPage(),
                 request.resolvedSize()
         );
-        curationResultHistoryService.saveIfAuthenticated(flowVersion, toSelectionSnapshots(selections), response);
-        return response;
+        UserCurationResult saved = curationResultHistoryService.saveIfAuthenticated(
+                flowVersion,
+                toSelectionSnapshots(selections),
+                response
+        );
+        // 비로그인(saved == null)이면 curationResultId 생략 → 기존 page-only 응답과 동일하게 보임
+        Long curationResultId = saved != null ? saved.getId() : null;
+        return CurationWizardResultsResponse.from(response, curationResultId);
     }
 
     private List<CurationSelectionSnapshot> toSelectionSnapshots(Map<CurationStepKey, String> selections) {

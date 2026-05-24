@@ -48,6 +48,11 @@ public class CurationResultHistoryService {
         this.objectMapper = objectMapper;
     }
 
+    /**
+     * Bearer가 있을 때만 큐레이션 이력을 저장한다.
+     *
+     * @return 저장된 row. 비로그인이면 {@code null} ({@code POST /results} 응답에 id 미포함)
+     */
     @Transactional
     public UserCurationResult saveIfAuthenticated(
             String flowVersion,

@@ -1,11 +1,10 @@
 package com.example.meanhwa_back.curation.wizard.controller;
 
 import com.example.meanhwa_back.common.response.ApiResponse;
-import com.example.meanhwa_back.common.response.PageResponse;
-import com.example.meanhwa_back.curation.dto.CurationFlowerResponse;
 import com.example.meanhwa_back.curation.wizard.dto.CurationFlowResponse;
 import com.example.meanhwa_back.curation.wizard.dto.CurationStepOptionsResponse;
 import com.example.meanhwa_back.curation.wizard.dto.CurationWizardResultsRequest;
+import com.example.meanhwa_back.curation.wizard.dto.CurationWizardResultsResponse;
 import com.example.meanhwa_back.curation.wizard.service.CurationWizardService;
 
 import jakarta.validation.Valid;
@@ -49,9 +48,12 @@ public class CurationWizardController {
         return ApiResponse.ok(curationWizardService.getStepOptions(stepKey, flowVersion, selections));
     }
 
-    /** P2: 6단계 선택 → code→tagId 변환 후 점수 합산·정렬. */
+    /**
+     * P2: 6단계 선택 → code→tagId 변환 후 점수 합산·정렬.
+     * <p>로그인 시 응답 {@code data.curationResultId}에 저장 이력 id 포함 (명세: api-additions-mypage-flower §2).
+     */
     @PostMapping("/results")
-    public ApiResponse<PageResponse<CurationFlowerResponse>> getResults(
+    public ApiResponse<CurationWizardResultsResponse> getResults(
             @Valid @RequestBody CurationWizardResultsRequest request
     ) {
         return ApiResponse.ok(curationWizardService.getResults(request));

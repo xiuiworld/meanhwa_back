@@ -20,8 +20,8 @@ Authorization: Bearer {accessToken}
 
 | errorCode | HTTP | 의미 |
 | --- | ---: | --- |
-| `CURATION_RESULT_NOT_FOUND` | 404 | 내 큐레이션 결과가 없거나 접근 권한이 없음 |
-| `INVALID_FLOWER_FILTER` | 400 | 꽃 도감 필터 쿼리 값이 올바르지 않음 |
+| `CURATION_RESULT_NOT_FOUND` | 404 | 내 큐레이션 결과가 없거나 접근 권한이 없습니다 |
+| `INVALID_FLOWER_FILTER` | 400 | 꽃 도감 필터 쿼리 값이 올바르지 않습니다 |
 
 ## Endpoint Summary
 
@@ -63,7 +63,7 @@ Request 변경:
 | --- | --- | --- |
 | `flowerId` | yes | 메시지를 생성할 꽃 ID |
 | `selectedTagIds` | no | 메시지 맥락에 사용할 태그 ID 목록 |
-| `curationResultId` | no | 연결할 내 큐레이션 결과 ID. 전달하면 해당 결과가 로그인 유저 소유여야 함 |
+| `curationResultId` | no | 연결할 내 큐레이션 결과 ID. 전달 시 해당 결과가 로그인 유저 소유여야 합니다 |
 | `senderName` | yes | 보내는 사람 |
 | `receiverName` | yes | 받는 사람 |
 
@@ -159,15 +159,56 @@ Response:
 
 - Bearer 토큰이 없으면 기존처럼 결과만 계산하고 저장하지 않습니다.
 - 유효한 Bearer 토큰이 있으면 결과/선택값/추천 꽃 목록 snapshot을 로그인 유저 이력으로 저장합니다.
-- 응답의 기존 page shape는 유지합니다.
+- 응답은 기존 page shape(`content`, `page`, `size`, `totalElements`, `totalPages`, `hasNext`)를 유지합니다.
+- 로그인 및 저장에 성공하면 응답 `data`에 **`curationResultId`** 를 추가합니다. 비로그인 또는 저장 실패 시 필드는 생략합니다.
 
-> 향후 개선 메모(현재 계약 아님)
->
-> 현재 `POST /api/v1/curation/results`는 큐레이션 결과를 저장하더라도 응답에 저장된 결과 ID를 직접 포함하지 않습니다. 프론트는 현재 명세대로 큐레이션 완료 응답의 `data.content`를 사용해 추천 결과 화면을 렌더링하고, 메시지 작성 등에서 저장된 결과 ID가 필요할 때 `GET /api/v1/users/me/curation-results/latest`를 별도로 호출해 `data.id`를 얻는 흐름을 사용합니다.
->
-> 추후 프론트 호출 수를 줄이고 큐레이션 완료 직후 메시지 생성까지 더 안정적으로 연결하려면, 로그인 사용자에 한해 `POST /api/v1/curation/results` 응답에 `curationResultId` 또는 별도 metadata 필드를 추가하는 확장을 검토할 수 있습니다. 이 경우 익명 요청은 저장되지 않으므로 해당 값은 `null`이거나 생략되어야 합니다.
->
-> 이 개선을 적용할 때는 기존 page shape를 깨지 않는 방식이어야 합니다. 예를 들어 `data.content`, `page`, `size`, `totalElements`, `totalPages`, `hasNext`는 유지하고, 추가 필드만 더하는 하위 호환 확장으로 설계해야 합니다. 또한 프론트가 이미 `latest` 조회 기반으로 구현 중이므로, 실제 계약 변경 전에는 프론트/백엔드 양쪽 일정과 배포 순서를 맞춘 뒤 별도 변경 이슈로 진행합니다.
+Response (로그인 + 저장 성공):
+
+```json
+{
+  "status": 200,
+  "message": "요청이 성공적으로 처리되었습니다.",
+  "data": {
+    "curationResultId": 12,
+    "content": [
+      {
+        "flowerId": 1,
+        "name": "장미",
+        "imageUrl": "https://cdn.meanhwa.example/flowers/rose.jpg",
+        "coreMeaning": "사랑과 열정",
+        "priceRange": "MEDIUM",
+        "isPetSafe": true,
+        "score": 10,
+        "recommendationReason": "연인 조건과 잘 맞고 5~10만원 예산대에 어울리는 추천입니다.",
+        "matchedTags": [
+          {
+            "id": 5,
+            "category": "RELATION",
+            "name": "연인"
+          }
+        ]
+      }
+    ],
+    "page": 0,
+    "size": 20,
+    "totalElements": 3,
+    "totalPages": 1,
+    "hasNext": false
+  }
+}
+```
+
+| Field | Notes |
+| --- | --- |
+| `curationResultId` | 이번 요청으로 저장된 이력 ID입니다. `GET .../{resultId}`·`latest`의 `id`와 동일합니다 |
+| `content`, `page`, … | 기존과 동일합니다 |
+
+프론트 연동 (권장):
+
+1. `POST /api/v1/curation/results` (+ Bearer) → `data.content`로 결과 UI, `data.curationResultId`로 메시지 생성 준비
+2. `POST /api/v1/messages/generate`에 `curationResultId` 전달
+
+`GET .../latest`는 메시지 탭 첫 진입 등 **저장된 최신 추천 조회**에 계속 사용합니다. 위저드 직후 메시지 작성에서는 `curationResultId`로 **`latest` 추가 호출을 생략**할 수 있습니다.
 
 저장 대상:
 
@@ -175,7 +216,7 @@ Response:
 | --- | --- |
 | `flowVersion` | 요청의 flow version |
 | `selections` | 6단계 선택값 전체 |
-| `recommendations` | 응답 시점의 추천 꽃 snapshot. 다시보기 결과가 나중의 꽃/태그 수정으로 바뀌지 않도록 저장 |
+| `recommendations` | 응답 시점의 추천 꽃 snapshot. 다시보기 시 이후 꽃/태그 변경의 영향을 받지 않도록 저장합니다 |
 | `createdAt` | 저장 시각 |
 
 ### GET /api/v1/users/me/curation-results
@@ -279,9 +320,9 @@ Response:
 
 큐레이션 결과 다시보기 상세 조회입니다. 응답 shape는 `latest`와 동일합니다.
 
-Rules:
+규칙:
 
-- `resultId`가 로그인 유저 소유가 아니면 `404 CURATION_RESULT_NOT_FOUND`를 반환합니다.
+- `resultId`가 로그인 유저 소유가 아닐 경우 `404 CURATION_RESULT_NOT_FOUND`를 반환합니다.
 - 상세 응답의 `recommendations`는 저장된 snapshot 기준입니다.
 
 ## 3. 꽃 도감 필터
@@ -327,7 +368,7 @@ Repository/cache 구현 조건:
 
 - 필터는 paging 이전의 전체 결과에 적용합니다.
 - `tagIds`가 있으면 `flower_tag_mappings`/`tags`를 join하고 `distinct` 또는 group by로 중복 꽃을 제거합니다.
-- 여러 `tagIds`는 AND 조건입니다. 즉 요청한 모든 태그가 매핑된 꽃만 반환합니다.
+- 여러 `tagIds`는 AND 조건입니다. 요청한 모든 태그가 매핑된 꽃만 반환합니다.
 - cache key에는 `keyword`, `priceRange`, `isPetSafe`, `managementLevel`, 정렬된 `tagIds`, `page`, `size`를 모두 포함합니다.
 - 관리자 꽃/태그/매핑 변경 시 기존 `flowers` cache를 evict합니다.
 
